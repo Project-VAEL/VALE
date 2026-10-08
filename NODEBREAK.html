@@ -266,6 +266,157 @@ body::after {
 #bn.o { color: var(--ok); text-shadow: 0 0 30px rgba(52, 211, 153, 0.6); }
 #bn.b { color: var(--bad); text-shadow: 0 0 30px rgba(244, 63, 94, 0.6); }
 
+/* ── Mission Briefing Overlay ── */
+#briefing-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(3, 7, 18, 0.82);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 300;
+    animation: brief-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#briefing-overlay.hide {
+    animation: brief-out 0.35s cubic-bezier(0.4, 0, 1, 1) forwards;
+    pointer-events: none;
+}
+
+@keyframes brief-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+@keyframes brief-out {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
+#briefing-box {
+    width: min(640px, 92vw);
+    background: rgba(10, 20, 40, 0.95);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 10px;
+    box-shadow: 0 0 60px rgba(56, 189, 248, 0.12), 0 20px 60px rgba(0,0,0,0.7);
+    padding: 36px 40px 32px;
+    font-family: "JetBrains Mono", monospace;
+    animation: box-in 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes box-in {
+    from { opacity: 0; transform: translateY(18px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+#briefing-box .br-eyebrow {
+    font-family: "Inter", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--acc);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    opacity: 0.75;
+}
+
+#briefing-box .br-title {
+    font-family: "Inter", sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+}
+
+#briefing-box .br-diff {
+    display: inline-block;
+    font-family: "Inter", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-bottom: 22px;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: var(--acc);
+}
+
+#briefing-box .br-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+    margin-bottom: 22px;
+}
+
+#briefing-box .br-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+#briefing-box .br-objective {
+    font-size: 14px;
+    color: #e2e8f0;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    background: rgba(56, 189, 248, 0.05);
+    border-left: 3px solid var(--acc);
+    border-radius: 0 6px 6px 0;
+}
+
+#briefing-box .br-tips {
+    font-size: 12px;
+    color: var(--warn);
+    line-height: 1.7;
+    margin-bottom: 28px;
+    opacity: 0.85;
+}
+
+#briefing-box .br-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: var(--acc);
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+}
+
+#briefing-box .br-btn:hover {
+    background: #7dd3fc;
+    box-shadow: 0 0 30px rgba(56, 189, 248, 0.5);
+    transform: translateY(-1px);
+}
+
+#briefing-box .br-skip {
+    display: block;
+    text-align: center;
+    margin-top: 14px;
+    font-family: "Inter", sans-serif;
+    font-size: 12px;
+    color: var(--dim);
+    cursor: pointer;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    width: 100%;
+}
+#briefing-box .br-skip:hover { color: var(--fg); }
+
 #bg { position: fixed; inset: 0; z-index: 1; opacity: 0.4; pointer-events: none; }
 #out > div { animation: ln 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 @keyframes ln { from { opacity: 0; transform: translateY(8px); } }
@@ -281,6 +432,22 @@ body::after {
 <div id="out" aria-live="polite"></div>
 <div id="quick"></div>
 <div id="line"><span id="pr"></span><input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Command"></div>
+
+<!-- Mission Briefing Overlay -->
+<div id="briefing-overlay" style="display:none;">
+    <div id="briefing-box">
+        <div class="br-eyebrow">Incoming Transmission</div>
+        <div class="br-title" id="br-title"></div>
+        <div class="br-diff" id="br-diff"></div>
+        <div class="br-divider"></div>
+        <div class="br-label">Objective</div>
+        <div class="br-objective" id="br-objective"></div>
+        <div class="br-label">Commands Available</div>
+        <div class="br-tips" id="br-tips"></div>
+        <button class="br-btn" id="br-start">INITIATE SEQUENCE</button>
+        <button class="br-skip" id="br-skip">Skip briefing</button>
+    </div>
+</div>
 <script>
 const L=[
 {t:"Boot Camp",d:"EASY",bg:["rain","#3fd0ff"],story:"NULL (your handler): Welcome, recruit. No mouse here. Learn to move through a machine with only words.",
