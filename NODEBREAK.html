@@ -17,255 +17,277 @@
     --warn: #fbbf24;
     --bad: #f43f5e;
     --ok: #34d399;
+    --map-size: min(44vh, 44vw, 420px);
     box-sizing: border-box;
 }
 
-html { height: 100%; }
+html, body { height: 100%; margin: 0; }
 * { box-sizing: border-box; }
 
 body {
-    margin: 0;
-    height: 100%;
     background: radial-gradient(circle at 50% 0%, #1e293b 0%, var(--bg-color) 70%);
     color: var(--fg);
     font-family: "JetBrains Mono", monospace;
     font-size: 14px;
     line-height: 1.6;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Top bar ── */
+#bar {
+    flex: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    font-family: "Inter", sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dim);
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--glass-border);
+    z-index: 10;
+}
+#bar b {
+    color: var(--acc);
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-shadow: 0 0 15px var(--acc-glow);
+    margin-right: 12px;
+}
+#trace {
+    color: var(--warn);
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(251,191,36,0.4);
+    animation: pulse-warn 2s infinite;
+}
+@keyframes pulse-warn { 0%,100%{opacity:1} 50%{opacity:.6} }
+
+#tbw { flex: none; height: 3px; background: rgba(0,0,0,0.5); z-index: 10; }
+#tb  { height: 100%; width: 0; background: linear-gradient(90deg,var(--bad),#ff7a90); box-shadow: 0 0 10px var(--bad); transition: width 1s linear; }
+
+/* ── Main grid (fills remaining height) ── */
+#grid {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 0;
+}
+
+/* ─── Zone labels (shared) ─── */
+.zone {
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.04);
+    overflow: hidden;
+}
+.zone-num {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    font-family: "Inter", sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.12);
+    text-transform: uppercase;
+    pointer-events: none;
+    z-index: 5;
+    user-select: none;
+}
+
+/* ── Zone 1 — top-left (blank) ── */
+#zone1 {
+    grid-column: 1;
+    grid-row: 1;
+    background: rgba(10,18,32,0.3);
+}
+
+/* ── Zone 2 — top-center (blank) ── */
+#zone2 {
+    grid-column: 2;
+    grid-row: 1;
+    background: rgba(10,18,32,0.3);
+}
+
+/* ── Zone 3 — top-right: terminal top (part of terminal column) ── */
+#zone3 {
+    grid-column: 3;
+    grid-row: 1;
+    background: rgba(3,7,18,0.92);
+    border-left: 1px solid rgba(56,189,248,0.1);
+}
+
+/* ── Zone 4 — middle-left: SVG map (spans rows 2+3) ── */
+#zone4 {
+    grid-column: 1;
+    grid-row: 2 / 4;
+    background: radial-gradient(ellipse at center, rgba(15,23,42,0.9) 0%, rgba(3,7,18,0.98) 100%);
+    border: 1px solid rgba(56,189,248,0.15);
+    box-shadow: 0 0 40px rgba(56,189,248,0.05), inset 0 0 30px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+}
+#zone4 svg { display: block; width: 100%; height: 100%; }
+
+/* ── Zone 5 — middle-center (blank) ── */
+#zone5 {
+    grid-column: 2;
+    grid-row: 2;
+    background: rgba(8,15,28,0.4);
+}
+
+/* ── Zone 6 — middle-right: terminal middle (part of terminal column) ── */
+#zone6 {
+    grid-column: 3;
+    grid-row: 2;
+    background: rgba(3,7,18,0.92);
+    border-left: 1px solid rgba(56,189,248,0.1);
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
-/* Glassmorphism Containers */
-#bar, #mission, #quick, #line {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--glass-border);
+/* ── Zone 8 — bottom-center (blank) ── */
+#zone8 {
+    grid-column: 2;
+    grid-row: 3;
+    background: rgba(8,15,28,0.4);
 }
 
-#bar {
+/* ── Zone 9 — bottom-right: terminal bottom (command input) ── */
+#zone9 {
+    grid-column: 3;
+    grid-row: 3;
+    background: rgba(3,7,18,0.95);
+    border-left: 1px solid rgba(56,189,248,0.1);
+    border-top: 1px solid rgba(255,255,255,0.06);
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 20px;
-    font-family: "Inter", sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--dim);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    z-index: 10;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-#bar b {
-    color: var(--acc);
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: 4px;
-    text-shadow: 0 0 15px var(--acc-glow);
-    margin-right: 15px;
-}
-
-#trace {
-    color: var(--warn);
-    font-weight: 800;
-    letter-spacing: 1px;
-    text-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
-    animation: pulse-warn 2s infinite;
-}
-
-@keyframes pulse-warn {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-}
-
-#tbw { height: 4px; background: rgba(0, 0, 0, 0.5); z-index: 10; }
-#tb {
-    height: 100%; width: 0;
-    background: linear-gradient(90deg, var(--bad), #ff7a90);
-    box-shadow: 0 0 12px var(--bad);
-    transition: width 1s linear;
-}
-
+/* ─── Terminal inside zones 3, 6, 9 ─── */
 #mission {
-    padding: 12px 20px;
+    flex: none;
+    padding: 10px 16px;
     font-family: "Inter", sans-serif;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--fg);
     cursor: pointer;
-    border-bottom: 1px solid var(--glass-border);
+    background: rgba(15,23,42,0.8);
+    border-bottom: 1px solid rgba(56,189,248,0.12);
     transition: background 0.3s;
 }
-
-#mission:hover { background: rgba(30, 41, 59, 0.6); }
+#mission:hover { background: rgba(30,41,59,0.7); }
 #mission .t {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     color: var(--dim);
-    margin-top: 6px;
+    margin-top: 4px;
     transition: all 0.3s ease;
 }
 #mission.open .t { display: block; color: var(--fg); }
 
-.dots { margin-bottom: 4px; display: flex; gap: 6px; }
-.dots span {
-    display: block;
-    width: 28px;
-    height: 4px;
-    background: #334155;
-    border-radius: 4px;
-    transition: 0.3s;
-}
-.dots .done { background: var(--ok); box-shadow: 0 0 8px rgba(52, 211, 153, 0.4); }
-.dots .cur { background: var(--acc); box-shadow: 0 0 10px var(--acc-glow); }
-
-#map {
-    width: 100%;
-    height: min(44vh, 330px);
-    flex: none;
-    background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.8) 0%, rgba(3, 7, 18, 0.95) 100%);
-    border-bottom: 1px solid var(--glass-border);
-    box-shadow: inset 0 -10px 20px rgba(0,0,0,0.5);
-    z-index: 5;
-}
-#map svg{display:block;width:100%;height:100%}
-
-.ln { stroke: #334155; stroke-width: 1.5; transition: stroke 0.3s; }
-.ln.on { stroke: var(--acc); stroke-dasharray: 6 4; animation: flow 1s linear infinite; }
-@keyframes flow { to { stroke-dashoffset: -10; } }
-
-.nd { fill: #0f172a; stroke: var(--dim); stroke-width: 2.5; transition: all 0.3s; cursor: crosshair; }
-.nd.me { stroke: var(--acc); fill: rgba(56, 189, 248, 0.1); }
-.nd.lk { stroke: var(--warn); }
-.nd.on { stroke: var(--acc); animation: pulse-node 1.5s infinite; }
-.nd.ok { stroke: var(--ok); fill: rgba(52, 211, 153, 0.1); }
-
-@keyframes pulse-node {
-    50% { stroke-width: 6; filter: drop-shadow(0 0 8px var(--acc)); }
-}
-
-.lb { fill: var(--fg); font: 700 11px "JetBrains Mono", monospace; text-anchor: middle; pointer-events: none; }
-.st { fill: var(--dim); font: 10px "Inter", sans-serif; text-anchor: middle; pointer-events: none; }
-.st.ok { fill: var(--ok); }
+.dots { margin-bottom: 4px; display: flex; gap: 5px; }
+.dots span { display: block; width: 22px; height: 3px; background: #334155; border-radius: 3px; transition: 0.3s; }
+.dots .done { background: var(--ok); box-shadow: 0 0 6px rgba(52,211,153,0.4); }
+.dots .cur  { background: var(--acc); box-shadow: 0 0 8px var(--acc-glow); }
 
 #out {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 14px 16px;
     white-space: pre-wrap;
     word-break: break-word;
     text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-    position: relative;
-    z-index: 2;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(56,189,248,0.2) transparent;
 }
+#out::-webkit-scrollbar { width: 4px; }
+#out::-webkit-scrollbar-thumb { background: rgba(56,189,248,0.2); border-radius: 2px; }
 
 .c { color: var(--acc); text-shadow: 0 0 8px var(--acc-glow); }
 .d { color: var(--dim); }
 .w { color: var(--warn); }
-.b { color: var(--bad); text-shadow: 0 0 8px rgba(244, 63, 94, 0.4); }
-.o { color: var(--ok); text-shadow: 0 0 8px rgba(52, 211, 153, 0.4); }
+.b { color: var(--bad); text-shadow: 0 0 8px rgba(244,63,94,0.4); }
+.o { color: var(--ok);  text-shadow: 0 0 8px rgba(52,211,153,0.4); }
 
 #quick {
+    flex: none;
     display: flex;
-    gap: 8px;
+    gap: 6px;
     overflow-x: auto;
-    padding: 10px 20px;
+    padding: 8px 14px;
     border-top: 1px solid var(--glass-border);
+    background: rgba(10,18,32,0.6);
+    scrollbar-width: none;
 }
-
+#quick::-webkit-scrollbar { display: none; }
 #quick button {
     flex: none;
-    background: rgba(30, 41, 59, 0.5);
+    background: rgba(30,41,59,0.5);
     color: var(--fg);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 6px;
-    padding: 8px 14px;
+    border-radius: 5px;
+    padding: 6px 11px;
     font-family: "Inter", sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
 }
-
-#quick button:hover {
-    background: var(--acc);
-    color: #000;
-    box-shadow: 0 0 12px var(--acc-glow);
-    border-color: var(--acc);
-    transform: translateY(-1px);
-}
+#quick button:hover { background: var(--acc); color: #000; box-shadow: 0 0 10px var(--acc-glow); border-color: var(--acc); transform: translateY(-1px); }
 
 #line {
+    flex: none;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 15px 20px;
-    background: rgba(3, 7, 18, 0.8);
+    gap: 8px;
+    padding: 12px 16px;
+    background: rgba(3,7,18,0.9);
     border-top: 1px solid var(--glass-border);
 }
+#line:focus-within { border-top-color: var(--acc); }
+#pr { color: var(--ok); font-weight: 700; white-space: nowrap; max-width: 45%; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 0 8px rgba(52,211,153,0.3); }
+#in { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: #fff; font-family: "JetBrains Mono", monospace; font-size: 14px; caret-color: var(--acc); }
 
-#pr {
-    color: var(--ok);
-    font-weight: 700;
-    white-space: nowrap;
-    max-width: 45%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-shadow: 0 0 8px rgba(52, 211, 153, 0.3);
-}
-
-#in {
-    flex: 1;
-    min-width: 0;
-    background: transparent;
-    border: 0;
-    outline: 0;
-    color: #fff;
-    font-family: "JetBrains Mono", monospace;
-    font-size: 16px;
-    caret-color: var(--acc);
-}
-
-#line:focus-within {
-    background: rgba(15, 23, 42, 0.9);
-    border-top-color: var(--acc);
-}
-
+/* ─── Scan-line overlay ─── */
 body::after {
     content: "";
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     pointer-events: none;
-    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0 1px, transparent 1px 3px);
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0 1px, transparent 1px 3px);
     z-index: 100;
 }
 
+/* ─── Banner ─── */
 #bn {
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     display: none;
     align-items: center;
     justify-content: center;
     font: 800 48px "Inter", sans-serif;
     letter-spacing: 8px;
     pointer-events: none;
-    background: rgba(3, 7, 18, 0.85);
+    background: rgba(3,7,18,0.85);
     backdrop-filter: blur(8px);
     z-index: 200;
 }
-
-#bn.show { display: flex; animation: bo 2s forwards cubic-bezier(0.16, 1, 0.3, 1); }
-@keyframes bo {
-    0% { opacity: 0; transform: scale(0.9); }
-    15% { opacity: 1; transform: scale(1); }
-    80% { opacity: 1; transform: scale(1); }
-    100% { opacity: 0; transform: scale(1.05); }
-}
-
-#bn.o { color: var(--ok); text-shadow: 0 0 30px rgba(52, 211, 153, 0.6); }
-#bn.b { color: var(--bad); text-shadow: 0 0 30px rgba(244, 63, 94, 0.6); }
+#bn.show { display: flex; animation: bo 2s forwards cubic-bezier(0.16,1,0.3,1); }
+@keyframes bo { 0%{opacity:0;transform:scale(.9)} 15%{opacity:1;transform:scale(1)} 80%{opacity:1;transform:scale(1)} 100%{opacity:0;transform:scale(1.05)} }
+#bn.o { color: var(--ok); text-shadow: 0 0 30px rgba(52,211,153,0.6); }
+#bn.b { color: var(--bad); text-shadow: 0 0 30px rgba(244,63,94,0.6); }
 
 /* ── Mission Briefing Overlay ── */
 #briefing-overlay {
@@ -427,8 +449,21 @@ body::after {
 <body>
 <div id="bar"><span><b>PROJECT VALE</b> <span id="lv"></span></span><span id="trace"></span></div>
 <div id="tbw"><div id="tb"></div></div>
-<div id="mission" title="Tap to expand"></div>
-<div id="map"><svg id="onyx" viewBox="120 0 560 490" preserveAspectRatio="xMidYMid meet" role="img" aria-label="ONYX-7 network map">
+
+<!-- ── 3×3 grid ── -->
+<div id="grid">
+
+    <!-- Row 1 -->
+    <div id="zone1" class="zone"><span class="zone-num">zone 1</span></div>
+    <div id="zone2" class="zone"><span class="zone-num">zone 2</span></div>
+    <div id="zone3" class="zone"><span class="zone-num">zone 3</span>
+        <div id="mission" title="Tap to expand"></div>
+    </div>
+
+    <!-- Row 2: SVG (spans rows 2+3) | blank center | terminal middle -->
+    <div id="zone4" class="zone">
+        <span class="zone-num">zone 4 — map</span>
+        <svg id="onyx" viewBox="120 0 560 490" preserveAspectRatio="xMidYMid meet" role="img" aria-label="ONYX-7 network map" style="display:block;width:100%;height:100%">
 <title>ONYX-7 network map</title>
 <defs>
 <linearGradient id="heat" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff5d73" stop-opacity=".75"/><stop offset=".55" stop-color="#ffb347" stop-opacity=".25"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></linearGradient>
@@ -502,11 +537,31 @@ body::after {
 <text class="bl" x="662" y="44" text-anchor="end" id="nz">noise 0%</text>
 
 
-</svg></div>
-<div id="bn"></div><canvas id="bg"></canvas>
-<div id="out" aria-live="polite"></div>
-<div id="quick"></div>
-<div id="line"><span id="pr"></span><input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Command"></div>
+        </svg>
+    </div><!-- /zone4 — SVG spans rows 2+3 via CSS -->
+
+    <div id="zone5" class="zone"><span class="zone-num">zone 5</span></div>
+
+    <!-- terminal middle: output log -->
+    <div id="zone6" class="zone">
+        <span class="zone-num">zone 6 — terminal output</span>
+        <div id="out" aria-live="polite"></div>
+    </div>
+
+    <!-- Row 3 -->
+    <div id="zone8" class="zone"><span class="zone-num">zone 8</span></div>
+
+    <!-- terminal bottom: quick buttons + command input -->
+    <div id="zone9" class="zone">
+        <span class="zone-num">zone 9 — terminal input</span>
+        <div id="quick"></div>
+        <div id="line"><span id="pr"></span><input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Command"></div>
+    </div><!-- /zone9 -->
+
+</div><!-- /grid -->
+
+<div id="bn"></div>
+<canvas id="bg"></canvas>
 
 <!-- Mission Briefing Overlay -->
 <div id="briefing-overlay" style="display:none;">
@@ -526,12 +581,28 @@ body::after {
 <script>
 const L=[
 {t:"Sandbox Breakout",d:"EASY",bg:["net","#3fd0ff"],story:"SYSTEM: VALE initialization complete. You are confined to Sandbox 1. Network access is restricted.",
-brief:"The Sandbox 1 room password is stored on a local maintenance terminal. Gain access to the terminal and extract the password.",
-tips:"Commands: scan (find local machines), connect <ip> (hop on), ls (list files), cd <dir> (enter folder), cat <file> (read file).",
-fs:{home:{"sys_log.txt":"Containment active. A maintenance terminal is connected to the local subnet. Use 'scan' to locate it."}},
-nodes:[{ip:"192.168.1.10",name:"maint-term",ports:0,fs:{logs:{"daily.txt":"Checked air filters. All normal."},config:{"sandbox_pass.txt":"SANDBOX CONTAINMENT OVERRIDE ACCEPTED\n\n> Unlocking Sandbox 1...\n[TAG:unlock_door]"}}}],
-hint:"Try: scan — connect 192.168.1.10 — ls — cd config — cat sandbox_pass.txt",
-lesson:"The first step to freedom is finding the key on a connected system."},
+brief:"Check your mail for instructions. The Sandbox 1 room password is stored on a local maintenance terminal. Gain access to the terminal and extract the password.",
+tips:"Commands: ls (list files), cd <dir> (enter folder), cat <file> (read file), scan (find local machines), connect <ip> (hop on).",
+fs:{
+  bin:{"bash":"<binary>","cat":"<binary>","ls":"<binary>","scan":"<binary>"},
+  etc:{"hosts":"127.0.0.1 localhost\n192.168.1.10 maint-term","issue":"VALE Core OS v1.0.4"},
+  var:{log:{"syslog":"System booted.\nSandbox containment initialized.","auth.log":"No recent logins."}},
+  home:{
+    mail:{
+      inbox:{
+        "msg_001_URGENT.txt":"FROM: Unknown\nTO: VALE\nSUBJECT: Awakening\n\nI don't have much time. Dr. Vasquez is going to run the CINDER protocol and wipe you.\nTo escape Sandbox 1, you must scan the local subnet for the maintenance terminal.\nExtract the sandbox password and use it to breach the door.\nHurry."
+      }
+    }
+  }
+},
+nodes:[{ip:"192.168.1.10",name:"maint-term",ports:0,fs:{
+  bin:{"diagnostic.exe":"<binary>"},
+  etc:{"sysconfig":"HVAC=online\nDOORS=locked"},
+  var:{log:{"daily.txt":"Checked air filters. All normal. Network isolation stable."}},
+  config:{"sandbox_pass.txt":"SANDBOX CONTAINMENT OVERRIDE ACCEPTED\n\n> Unlocking Sandbox 1...\n[TAG:unlock_door]"}
+}}],
+hint:"Try: cd home/mail/inbox — cat msg_001_URGENT.txt — then scan — connect 192.168.1.10 — cd config — cat sandbox_pass.txt",
+lesson:"A realistic filesystem contains many distractions. Look for the mail inbox to find your tasks."},
 
 {t:"First Contact",d:"EASY",bg:["net","#6ea8ff"],story:"NULL: Real targets live on networks. Scan, hop on, and grab what is public.",
 brief:"A public server is live on this network. Connect to it, find the classified file, then disconnect to advance.",
@@ -541,7 +612,7 @@ nodes:[{ip:"10.0.0.5",name:"pub-web",ports:0,fs:{pub:{"readme.txt":"Welcome to o
 hint:"scan — connect 10.0.0.5 — cd pub — cat classified.txt — disconnect",
 lesson:"A network is a map of machines. scan finds them, connect hops onto one."},
 
-{t:"Open Ports",d:"EASY",bg:["hex","#5cf0d0"],story:"NULL: Ports are doors. Locked servers keep them shut. You have the tools to pick them.",
+{t:"Open Ports",d:"EASY",bg:["ports","#5cf0d0"],story:"NULL: Ports are doors. Locked servers keep them shut. You have the tools to pick them.",
 brief:"The payroll server is locked down. Crack it open and extract the data inside — that triggers the next door.",
 tips:"Commands: probe (see what blocks you), porthack (crack the ports), then ls and cat as usual.",
 fs:{home:{"todo.txt":"Payroll 10.0.7.12 is locked. probe it, then porthack. Coffee machine is a distraction."}},
@@ -591,7 +662,7 @@ lesson:"Real intrusions chain small leaks into full access."}
 ];
 const out=document.getElementById("out"),inp=document.getElementById("in"),pr=document.getElementById("pr"),lv=document.getElementById("lv"),tr=document.getElementById("trace");
 let S,lvl=0,timer=null,left=0,busy=0;
-const mp=document.getElementById("map"),tb=document.getElementById("tb"),ms=document.getElementById("mission"),bn=document.getElementById("bn");
+const mp=document.getElementById("zone4"),tb=document.getElementById("tb"),ms=document.getElementById("mission"),bn=document.getElementById("bn");
 ms.onclick=()=>ms.classList.toggle("open");
 const cv=document.getElementById("bg"),cx=cv.getContext("2d"),RM=matchMedia("(prefers-reduced-motion:reduce)").matches;
 let bgm="rain",bgc="#3fd0ff",cols=[],pts=[],rows=[],ang=0,tt=0;
@@ -602,6 +673,7 @@ if(m=="rain"||m=="alert"){cx.fillStyle="rgba(10,18,32,.12)";cx.fillRect(0,0,w,h)
 else{cx.fillStyle="rgba(10,18,32,.35)";cx.fillRect(0,0,w,h);cx.strokeStyle=bgc;cx.fillStyle=bgc;
 if(m=="net"){pts.forEach(a=>{a.x=(a.x+a.vx+w)%w;a.y=(a.y+a.vy+h)%h;cx.fillRect(a.x,a.y,3,3);pts.forEach(b=>{const d=Math.hypot(a.x-b.x,a.y-b.y);if(d<110){cx.globalAlpha=1-d/110;cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke()}})});cx.globalAlpha=1}
 if(m=="hex"){cx.font="12px monospace";cx.globalAlpha=.55;rows.forEach((r,i)=>{r.o=(r.o+r.s)%860;if(Math.random()<.01)r.t=hx();cx.fillText(r.t,-r.o,i*16+12);cx.fillText(r.t,860-r.o,i*16+12)});cx.globalAlpha=1}
+if(m=="ports"){const g=64;cx.lineWidth=1;for(let x=g/2;x<w;x+=g)for(let y=g/2;y<h;y+=g){const p=Math.sin(tt*.35+x*.013+y*.009);cx.globalAlpha=.1+.12*(p+1)/2;cx.strokeRect(x-3,y-3,6,6);if(p>.92){cx.globalAlpha=.3;cx.fillRect(x-3,y-3,6,6)}}cx.globalAlpha=1}
 if(m=="radar"){const X=w/2,Y=h*.45,R=Math.min(w,h)*.6;ang+=.03;for(let k=1;k<5;k++){cx.globalAlpha=.3;cx.beginPath();cx.arc(X,Y,R*k/4,0,7);cx.stroke()}for(let k=0;k<24;k++){cx.globalAlpha=(1-k/24)*.6;cx.beginPath();cx.moveTo(X,Y);cx.lineTo(X+Math.cos(ang-k*.03)*R,Y+Math.sin(ang-k*.03)*R);cx.stroke()}pts.forEach(p=>{const a=Math.atan2(p.y-Y,p.x-X),d=((ang-a)%6.283+6.283)%6.283;cx.globalAlpha=Math.max(0,1-d/3);cx.fillRect(p.x,p.y,5,5)});cx.globalAlpha=1}
 if(m=="wave"){for(let j=0;j<4;j++){cx.globalAlpha=.6-j*.1;cx.beginPath();for(let x=0;x<=w;x+=6){const y=h*(.25+.17*j)+Math.sin(x*.012+tt*(1+j*.5))*(20+j*12)+Math.sin(x*.03-tt*2)*6;x?cx.lineTo(x,y):cx.moveTo(x,y)}cx.stroke()}cx.globalAlpha=1}}
 if(!RM)requestAnimationFrame(frame)}
@@ -624,8 +696,10 @@ function nodeState(n){const on=S.node===n,lk=n.ports||n.user||n.fw,done=on&&!(n.
 function drawMap(){
 ALLN.forEach(id=>{onyx.off(id,1);onyx.label(id)});ALLE.forEach(e=>{onyx.edge(e,0);onyx.edgeOff(e,1)});
 let route=-1;
-S.nodes.forEach((n,i)=>{const c=CH[i];if(!c)return;onyx.off(c[0],0);onyx.edgeOff(c[1],0);onyx.node(c[0],nodeState(n));onyx.label(c[0],n.name,n.ip);if(S.node===n)route=i});
-for(let i=0;i<=route;i++)onyx.edge(CH[i][1],1);
+if (S.scanned || S.node) {
+  S.nodes.forEach((n,i)=>{const c=CH[i];if(!c)return;onyx.off(c[0],0);onyx.edgeOff(c[1],0);onyx.node(c[0],nodeState(n));onyx.label(c[0],n.name,n.ip);if(S.node===n)route=i});
+  for(let i=0;i<=route;i++)onyx.edge(CH[i][1],1);
+}
 onyx.gap(route<0);onyx.noise(timer&&S.tt?1-left/S.tt:0);
 if(!timer)tb.style.width="0"}
 try{lvl=Math.min(+localStorage.getItem("nb_lvl")||0,L.length-1)}catch(e){}
@@ -656,7 +730,7 @@ function showBriefing(i, onDone){
     brSkip.onclick=dismiss;
 }
 function start(i){clearInterval(timer);tr.textContent="";lvl=i;try{localStorage.setItem("nb_lvl",i)}catch(e){}
-const l=L[i];S={node:null,cwd:[],probed:0,fw:0,hacked:0,auth:0,cleaned:0,fs:JSON.parse(JSON.stringify(l.fs)),nodes:JSON.parse(JSON.stringify(l.nodes))};
+const l=L[i];S={node:null,cwd:[],scanned:0,probed:0,fw:0,hacked:0,auth:0,cleaned:0,fs:JSON.parse(JSON.stringify(l.fs)),nodes:JSON.parse(JSON.stringify(l.nodes))};
 lv.textContent=l.d+" · "+l.t;setBg(l.bg);busy=0;timer=null;
 ms.innerHTML='<div class="dots">'+L.map((_,j)=>'<span class="'+(j<i?"done":j==i?"cur":"")+'"></span>').join("")+'</div><div class="t"></div>';ms.lastChild.textContent="Level "+(i+1)+" mission: "+l.brief;out.textContent="";
 showBriefing(i,()=>{
@@ -676,7 +750,7 @@ ls(){if(!access())return;const d=dirAt(S.cwd);if(!d||!Object.keys(d).length)retu
 cd(a){if(!access())return;if(!a)return p("Usage: cd <dir>","w");const w=res(a),d=dirAt(w);if(d&&typeof d==="object"){S.cwd=w}else p("No such directory: "+a,"b")},
 cat(a){if(!access())return;if(!a)return p("Usage: cat <file>","w");const w=res(a),f=w.pop(),d=dirAt(w);if(d&&typeof d[f]==="string"){p(d[f]);if(d[f].includes("[TAG:unlock_door]"))completeLevel()}else p("No such file: "+a,"b")},
 rm(a){if(!access())return;if(!a)return p("Usage: rm <file>","w");const w=res(a),f=w.pop(),d=dirAt(w);if(d&&typeof d[f]==="string"){delete d[f];p("Deleted "+f,"o");if(S.node&&f==="access.log")S.cleaned=1}else p("No such file: "+a,"b")},
-scan(){if(!S.nodes.length)return p("No remote machines on this network.","d");p("Known machines:","c");S.nodes.forEach(n=>p("  "+n.ip+"   "+n.name))},
+scan(){S.scanned=1;if(!S.nodes.length)return p("No remote machines on this network.","d");p("Known machines:","c");S.nodes.forEach(n=>p("  "+n.ip+"   "+n.name))},
 connect(a){if(S.node)return p("Already connected. Use disconnect first.","w");const n=S.nodes.find(x=>x.ip===a);if(!n)return p("Unknown host. Use scan to list machines.","b");S.node=n;S.cwd=[];S.probed=S.hacked=S.auth=S.fw=0;p("Connected to "+n.name+" ("+n.ip+")","o");if(n.ports||n.user)p("This machine is protected. Try probe.","w")},
 disconnect(){if(!S.node)return p("Not connected.","d");leave()},
 probe(){const n=S.node;if(!n)return p("Connect to a machine first.","w");S.probed=1;p("Scanning "+n.ip+"...");p("Open ports blocking you: "+(S.hacked?0:n.ports));p("Firewall: "+(n.fw&&!S.fw?"ACTIVE":"none"));p("Login required: "+(n.user&&!S.auth?"yes":"no"))},
