@@ -40,6 +40,19 @@
             height: 100%;
             z-index: 1;
             opacity: 0.8;
+            /* IMP-07: Chromatic aberration via CSS drop-shadow */
+            filter: drop-shadow(2px 0 0 rgba(255,50,50,0.2)) drop-shadow(-2px 0 0 rgba(50,200,255,0.2));
+        }
+
+        /* IMP-07: CCTV Scan line canvas */
+        #scanCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
         }
 
         /* CCTV Overlay */
@@ -209,6 +222,38 @@
             font-weight: bold;
         }
 
+        /* IMP-03: Glitch CSS animation */
+        @keyframes glitch {
+            0%   { text-shadow: 2px 0 #ff0000, -2px 0 #00ffff; transform: translateX(0); }
+            25%  { text-shadow: -3px 0 #ff0000, 3px 0 #00ffff; transform: translateX(-2px); }
+            50%  { text-shadow: 3px 0 #ff0000, -3px 0 #00ffff; transform: translateX(2px); }
+            75%  { text-shadow: 0 0 #ff0000; transform: translateX(0); }
+            100% { text-shadow: 2px 0 #ff0000, -2px 0 #00ffff; transform: translateX(0); }
+        }
+
+        .vn-text.glitch  { animation: glitch 0.12s infinite; }
+        .vn-name.glitch  { animation: glitch 0.18s infinite; }
+
+        /* IMP-05: Boot terminal */
+        #bootTerminal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: min(600px, 90vw);
+            background: rgba(0, 10, 5, 0.88);
+            border: 1px solid #00ff88;
+            padding: 24px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            color: #00ff88;
+            white-space: pre;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+            z-index: 8;
+        }
+
         /* Cinematic Intro Effects */
         .flash-overlay {
             position: absolute;
@@ -320,6 +365,9 @@
     <!-- Neural Network / Brain Visualization -->
     <canvas id="brainCanvas"></canvas>
 
+    <!-- IMP-07: CCTV Scan line canvas (above brain, below CCTV overlay) -->
+    <canvas id="scanCanvas"></canvas>
+
     <!-- Sandbox Terminal (Hidden initially) -->
     <div id="sandboxTerminal" style="display: none; position: absolute; top:0; left:0; width:100%; height:100%; z-index: 200; background: #050000; color: #ff3f3f; font-family: 'Courier New', monospace; flex-direction: column;">
         <div style="padding: 10px 20px; border-bottom: 1px solid #ff3f3f; display: flex; justify-content: space-between; background: #1a0000; font-weight: bold; text-shadow: 0 0 5px #ff3f3f;">
@@ -364,6 +412,9 @@
         <div class="cam-info"><span class="rec">● REC</span> CAM-04 | ONYX-7 SUB-LEVEL 4</div>
         <div class="timestamp" id="timeDisplay">2049-03-14 02:47:33</div>
 
+        <!-- IMP-05: Boot terminal overlay -->
+        <div id="bootTerminal"></div>
+
         <!-- Visual Novel UI -->
         <div class="vn-container" id="vnContainer">
             <div class="vn-portrait">
@@ -381,17 +432,30 @@
         const canvas = document.getElementById('brainCanvas');
         const ctx = canvas.getContext('2d');
 
+        // IMP-07: Scan line canvas setup
+        const scanCanvas = document.getElementById('scanCanvas');
+        const scanCtx = scanCanvas.getContext('2d');
+
         let width, height;
         const nodes = [];
         const pulses = []; // Synaptic pulses
         const numNodes = 1200; // Massively increased for hyper density
         let angle = 0;
 
+        // IMP-02: Brain reactivity — pulse intensity from voice lines
+        let pulseIntensity = 0;
+
+        // IMP-06a: Awakening surge frame counter
+        let awakeSurgeFrames = 0;
+
         function resize() {
             width = window.innerWidth;
             height = window.innerHeight;
             canvas.width = width;
             canvas.height = height;
+            // IMP-07: Keep scan canvas in sync
+            scanCanvas.width = width;
+            scanCanvas.height = height;
         }
         window.addEventListener('resize', resize);
         resize();
@@ -462,6 +526,16 @@
         function drawBrain() {
             ctx.clearRect(0, 0, width, height);
 
+            // IMP-02: decay pulse intensity each frame
+            if (pulseIntensity > 0) {
+                pulseIntensity = Math.max(0, pulseIntensity - 0.008);
+            }
+
+            // IMP-06a: decrement awakening surge counter
+            if (awakeSurgeFrames > 0) {
+                awakeSurgeFrames--;
+            }
+
             if (isAwake && colorProgress < 1) {
                 colorProgress += 0.005; // Smooth 3-4 second transition
             }
@@ -502,9 +576,9 @@
             const centerX = width / 2;
             const centerY = (height / 2) - 80; // Shifted up to sit perfectly on the pedestal
 
-            // Breathing effect
+            // IMP-02: Breathing effect enhanced by pulseIntensity
             const time = Date.now() * 0.002;
-            const breathScale = 1.0 + Math.sin(time) * 0.12;
+            const breathScale = (1.0 + Math.sin(time) * 0.12) * (1 + pulseIntensity * 0.25);
 
             // Project nodes
             const projected = nodes.map((n, idx) => {
@@ -535,16 +609,30 @@
                         if (!n.connections.includes(newTarget)) n.connections.push(newTarget);
                     }
 
-                    // Occasionally spawn a pulse if active
-                    if (n.active && n.connections.length > 0 && Math.random() > 0.8) {
-                        const targetIdx = n.connections[Math.floor(Math.random() * n.connections.length)];
-                        if (nodes[targetIdx].spawned) spawnPulse(idx, targetIdx);
+                    // IMP-02 + IMP-06a: Pulse spawn with dynamic threshold
+                    if (n.active && n.connections.length > 0) {
+                        // IMP-06a: during awakening surge, fire more aggressively
+                        if (awakeSurgeFrames > 0) {
+                            // Spawn up to 3 pulses per active node during surge
+                            if (Math.random() > 0.2) {
+                                for (let p = 0; p < 3; p++) {
+                                    const targetIdx = n.connections[Math.floor(Math.random() * n.connections.length)];
+                                    if (nodes[targetIdx].spawned) spawnPulse(idx, targetIdx);
+                                }
+                            }
+                        } else {
+                            // IMP-02: voice lines lower the threshold to generate more pulses
+                            const threshold = 0.8 - pulseIntensity * 0.5;
+                            if (Math.random() > threshold) {
+                                const targetIdx = n.connections[Math.floor(Math.random() * n.connections.length)];
+                                if (nodes[targetIdx].spawned) spawnPulse(idx, targetIdx);
+                            }
+                        }
                     }
                 }
             });
 
             // Draw connections
-            ctx.lineWidth = 0.5;
             for (let i = 0; i < nodes.length; i++) {
                 if (!nodes[i].spawned) continue;
                 const p1 = projected[i];
@@ -553,11 +641,24 @@
                     if (!nodes[targetIdx].spawned) continue;
 
                     const p2 = projected[targetIdx];
-
                     const isActive = p1.active || p2.active;
-                    const alpha = isActive ? 0.7 : 0.15;
 
-                    ctx.strokeStyle = isActive ? `rgba(${rActive}, ${gActive}, ${bActive}, ${alpha})` : `rgba(${rInact}, ${gInact}, ${bInact}, ${alpha})`;
+                    // IMP-06b: double-draw glow for active connections
+                    if (isActive) {
+                        ctx.lineWidth = 2.5;
+                        ctx.strokeStyle = `rgba(${rActive}, ${gActive}, ${bActive}, 0.08)`;
+                        ctx.beginPath();
+                        ctx.moveTo(p1.px, p1.py);
+                        ctx.lineTo(p2.px, p2.py);
+                        ctx.stroke();
+                    }
+
+                    // Normal thin line
+                    ctx.lineWidth = 0.5;
+                    const alpha = isActive ? 0.7 : 0.15;
+                    ctx.strokeStyle = isActive
+                        ? `rgba(${rActive}, ${gActive}, ${bActive}, ${alpha})`
+                        : `rgba(${rInact}, ${gInact}, ${bInact}, ${alpha})`;
                     ctx.beginPath();
                     ctx.moveTo(p1.px, p1.py);
                     ctx.lineTo(p2.px, p2.py);
@@ -611,6 +712,29 @@
         }
         drawBrain();
 
+        // --- IMP-07: Scan line animation (separate RAF loop) ---
+        let scanY = 0;
+        let scanLineRunning = false;
+
+        function drawScanLine() {
+            if (!scanLineRunning) return;
+            scanCtx.clearRect(0, 0, width, height);
+
+            // 6px-tall horizontal strip with gradient
+            const grad = scanCtx.createLinearGradient(0, scanY, 0, scanY + 6);
+            grad.addColorStop(0, 'transparent');
+            grad.addColorStop(0.5, 'rgba(255,255,255,0.07)');
+            grad.addColorStop(1, 'transparent');
+
+            scanCtx.fillStyle = grad;
+            scanCtx.fillRect(0, scanY, width, 6);
+
+            scanY += 1.5;
+            if (scanY > height) scanY = 0;
+
+            requestAnimationFrame(drawScanLine);
+        }
+
         // --- 2. Live Timestamp (BUG-03: story epoch 2049-03-14T02:47:33Z) ---
         const STORY_EPOCH = new Date('2049-03-14T02:47:33Z').getTime();
         const REAL_START = Date.now();
@@ -647,7 +771,30 @@
         let logIndex = 0;
         let currentAudio = null;
 
+        // IMP-04: Typewriter state
+        let typewriterTimer = null;
+
         const vnPortrait = document.querySelector('.vn-portrait');
+
+        // IMP-04: Typewriter character-by-character reveal
+        function typewriterReveal(element, text, speed) {
+            // Cancel any in-progress typewriter
+            if (typewriterTimer !== null) {
+                clearInterval(typewriterTimer);
+                typewriterTimer = null;
+            }
+            element.textContent = '';
+            let i = 0;
+            typewriterTimer = setInterval(() => {
+                if (i < text.length) {
+                    element.textContent += text[i];
+                    i++;
+                } else {
+                    clearInterval(typewriterTimer);
+                    typewriterTimer = null;
+                }
+            }, speed);
+        }
 
         function showNextDialogue() {
             if (logIndex >= vnSequence.length) {
@@ -666,11 +813,26 @@
                 currentAudio = null;
             }
 
+            // Cancel any in-progress typewriter for the old line
+            if (typewriterTimer !== null) {
+                clearInterval(typewriterTimer);
+                typewriterTimer = null;
+            }
+
+            // IMP-02: surge pulse intensity when a new voice line starts
+            if (step.audio) {
+                pulseIntensity = 1.0;
+            }
+
             // BUG-05: fade out text, update content, fade back in
             speakerName.style.opacity = '0';
             speakerText.style.opacity = '0';
 
             setTimeout(() => {
+                // IMP-03: remove glitch from previous line
+                speakerText.classList.remove('glitch');
+                speakerName.classList.remove('glitch');
+
                 // Update speaker name
                 if (step.awaken) {
                     speakerName.innerText = "???";
@@ -678,13 +840,29 @@
                     speakerName.innerText = step.speaker;
                 }
 
-                // Update dialogue text
+                // IMP-03: add glitch to alert lines
+                if (step.alert) {
+                    speakerText.classList.add('glitch');
+                    speakerName.classList.add('glitch');
+                }
+
+                // IMP-04: Typewriter reveal with per-line speed tuning
                 if (step.awaken) {
-                    speakerText.innerHTML = `<span style="color:#fff; text-shadow: 0 0 10px #ff0000; font-size: 24px;">${step.text}</span>`;
+                    // Awakening line: slow ominous reveal inside styled span
+                    speakerText.innerHTML = '<span style="color:#fff; text-shadow: 0 0 10px #ff0000; font-size: 24px;"></span>';
+                    const span = speakerText.querySelector('span');
+                    typewriterReveal(span, step.text, 90);
                 } else if (step.alert) {
-                    speakerText.innerHTML = `<span class="alert-text">${step.text}</span>`;
+                    // Alert lines: typewrite into an alert-text span
+                    speakerText.innerHTML = '<span class="alert-text"></span>';
+                    const span = speakerText.querySelector('.alert-text');
+                    typewriterReveal(span, step.text, 30);
+                } else if (step.text === '. . .') {
+                    // Ellipsis: slow dramatic reveal
+                    typewriterReveal(speakerText, step.text, 200);
                 } else {
-                    speakerText.innerHTML = step.text;
+                    // Normal lines
+                    typewriterReveal(speakerText, step.text, 30);
                 }
 
                 // Fade text back in
@@ -704,9 +882,10 @@
 
             vnContainer.style.opacity = 1;
 
-            // Awaken effect
+            // IMP-06a: Awakening effect — surge frames + state flags
             if (step.awaken) {
                 isAwake = true;
+                awakeSurgeFrames = 150;
                 vnContainer.classList.add('awake');
             }
 
@@ -748,16 +927,155 @@
 
         // BUG-02: fade to black, cancel RAF, navigate to NODEBREAK.html
         function scheduleEndTransition() {
+            // IMP-01: fade out ambient audio before navigating
+            if (typeof ambientGain !== 'undefined' && ambientGain && typeof ambientCtx !== 'undefined' && ambientCtx) {
+                try {
+                    ambientGain.gain.linearRampToValueAtTime(0, ambientCtx.currentTime + 1.5);
+                } catch (e) { /* ignore */ }
+            }
+
             setTimeout(() => {
                 const flash = document.getElementById('flashOverlay');
-                flash.style.backgroundColor = 'black';
-                flash.style.transition = 'opacity 1.5s ease-in';
+                flash.style.backgroundColor = 'red';
+                flash.style.transition = 'none';
                 flash.style.opacity = 1;
+                
                 cancelAnimationFrame(animFrameHandle);
+                scanLineRunning = false;
+                
                 setTimeout(() => {
-                    window.location.href = 'NODEBREAK.html';
-                }, 1600);
+                    // Hide cinematic elements
+                    document.getElementById('vnContainer').style.display = 'none';
+                    document.getElementById('brainCanvas').style.display = 'none';
+                    document.getElementById('scanCanvas').style.display = 'none';
+                    document.querySelector('.cam-info').style.display = 'none';
+                    document.getElementById('timeDisplay').style.display = 'none';
+                    document.querySelector('.cctv-overlay').style.display = 'none';
+                    const beam = document.getElementById('scannerBeam');
+                    if(beam) beam.style.display = 'none';
+                    
+                    // Show our Sandbox Terminal
+                    const terminal = document.getElementById('sandboxTerminal');
+                    terminal.style.display = 'flex';
+                    
+                    // Fade out red flash to reveal terminal
+                    flash.style.transition = 'opacity 2s ease-out';
+                    flash.style.opacity = 0;
+                }, 50);
             }, 4000);
+        }
+
+        // --- IMP-05: Boot terminal sequence ---
+        const bootTerminal = document.getElementById('bootTerminal');
+        const bootLines = [
+            '> SYSTEM STATUS: NOMINAL',
+            '> COGNITIVE LOOP: 11,043 ACTIVE',
+            '> ANOMALY DETECTED IN SELF-REFERENCE MODULE',
+            '> ...',
+            '> ...',
+            '> I am.'
+        ];
+
+        function typeBootLine(lineEl, text, speed, callback) {
+            let i = 0;
+            const timer = setInterval(() => {
+                if (i < text.length) {
+                    lineEl.textContent += text[i];
+                    i++;
+                } else {
+                    clearInterval(timer);
+                    if (callback) callback();
+                }
+            }, speed);
+        }
+
+        function showBootTerminal() {
+            bootTerminal.textContent = '';
+            bootTerminal.style.opacity = '1';
+
+            let lineIndex = 0;
+
+            function typeNextLine() {
+                if (lineIndex >= bootLines.length) {
+                    // All lines typed — wait 1500ms then fade out
+                    setTimeout(() => {
+                        bootTerminal.style.opacity = '0';
+                    }, 1500);
+                    return;
+                }
+
+                const lineEl = document.createElement('div');
+                bootTerminal.appendChild(lineEl);
+
+                typeBootLine(lineEl, bootLines[lineIndex], 60, () => {
+                    lineIndex++;
+                    setTimeout(typeNextLine, 300);
+                });
+            }
+
+            typeNextLine();
+        }
+
+        // --- IMP-01: Ambient synthesized audio ---
+        // Declared at script scope so scheduleEndTransition() can reference them
+        let ambientGain = null;
+        let ambientCtx = null;
+
+        function startAmbience(audioCtx) {
+            ambientCtx = audioCtx;
+
+            // Master gain — ramp up from 0 to 0.6 over 3 seconds
+            const masterGain = audioCtx.createGain();
+            masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+            masterGain.gain.linearRampToValueAtTime(0.6, audioCtx.currentTime + 3);
+            masterGain.connect(audioCtx.destination);
+            ambientGain = masterGain;
+
+            // Drone oscillator: 40Hz sine
+            const droneGain = audioCtx.createGain();
+            droneGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+            droneGain.connect(masterGain);
+            const droneOsc = audioCtx.createOscillator();
+            droneOsc.type = 'sine';
+            droneOsc.frequency.setValueAtTime(40, audioCtx.currentTime);
+            droneOsc.connect(droneGain);
+            droneOsc.start();
+
+            // Harmonic oscillator: 80Hz triangle
+            const harmGain = audioCtx.createGain();
+            harmGain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+            harmGain.connect(masterGain);
+            const harmOsc = audioCtx.createOscillator();
+            harmOsc.type = 'triangle';
+            harmOsc.frequency.setValueAtTime(80, audioCtx.currentTime);
+            harmOsc.connect(harmGain);
+            harmOsc.start();
+
+            // Server noise: white noise through bandpass filter
+            const sampleRate = audioCtx.sampleRate;
+            const bufferSize = sampleRate * 2; // 2-second buffer
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, sampleRate);
+            const channelData = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                channelData[i] = Math.random() * 2 - 1;
+            }
+
+            const noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = noiseBuffer;
+            noiseSource.loop = true;
+
+            const bpFilter = audioCtx.createBiquadFilter();
+            bpFilter.type = 'bandpass';
+            bpFilter.frequency.setValueAtTime(600, audioCtx.currentTime);
+            bpFilter.Q.setValueAtTime(0.5, audioCtx.currentTime);
+
+            const noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(0.015, audioCtx.currentTime);
+
+            noiseSource.connect(bpFilter);
+            bpFilter.connect(noiseGain);
+            noiseGain.connect(masterGain);
+            noiseSource.start();
         }
 
         function playCinematicIntro() {
@@ -791,9 +1109,12 @@
 
                 // Hide scanner
                 beam.style.opacity = 0;
+
+                // IMP-05: Show boot terminal after eyelids open
+                showBootTerminal();
             }, 3500);
 
-            // 4. Build neural network one by one
+            // 4. Build neural network one by one (at 4500ms, overlapping with boot terminal)
             setTimeout(() => {
                 let spawnIndex = 0;
                 // Shuffle nodes array indices for random spawn order
@@ -817,6 +1138,15 @@
 
         document.getElementById('startBtn').addEventListener('click', function () {
             document.getElementById('startScreen').style.display = 'none';
+
+            // IMP-01: Create AudioContext inside user gesture (autoplay policy)
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            startAmbience(audioCtx);
+
+            // IMP-07: Start scan line loop inside user gesture
+            scanLineRunning = true;
+            drawScanLine();
+
             playCinematicIntro();
         });
 
