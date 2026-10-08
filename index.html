@@ -960,8 +960,8 @@
                 audio.preload = 'auto'; // preload so playback starts immediately without buffering delay
                 currentAudio = audio;
 
-                // Safety timeout: 20 seconds max per line
-                const safetyTimer = setTimeout(() => advance(0), 20000);
+                // Safety timeout: 15 seconds max per line
+                const safetyTimer = setTimeout(() => advance(0), 15000);
 
                 audio.addEventListener('ended', () => {
                     clearTimeout(safetyTimer);
@@ -1000,20 +1000,20 @@
                 } catch (e) { /* ignore */ }
             }
 
-            // 3s delay — ambience is silent, then hard flash
+            // 3s delay — ambience is silent, then smooth black fade → navigate
             setTimeout(() => {
                 const flash = document.getElementById('flashOverlay');
-                flash.style.backgroundColor = 'red';
-                flash.style.transition = 'none';
+                flash.style.backgroundColor = 'black';
+                flash.style.transition = 'opacity 1.5s ease';
                 flash.style.opacity = 1;
 
                 cancelAnimationFrame(animFrameHandle);
                 scanLineRunning = false;
 
+                // Wait for the fade to finish, then navigate
                 setTimeout(() => {
-                    // Navigate to NODEBREAK.html (FEAT-001 acceptance criterion)
                     window.location.href = 'NODEBREAK.html';
-                }, 50);
+                }, 1600);
             }, 3000);
         }
 
@@ -1250,10 +1250,6 @@
             const terminal = document.getElementById('sandboxTerminal');
             terminal.style.display = 'flex';
         });
-
-        // --- Terminal Interaction Logic ---
-        const termInput = document.getElementById('termInput');
-        const sandboxLog = document.getElementById('sandboxLog');
 
         // --- GAME LOGIC & TERMINAL INTERACTION ---
         const termInput = document.getElementById('termInput');

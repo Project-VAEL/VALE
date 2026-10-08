@@ -1,6 +1,22 @@
 {
   "verdict": "CHANGES_REQUESTED",
   "findings": [
-    "scheduleEndTransition() does not navigate to NODEBREAK.html — confirmed. The function flashes red, hides intro elements, then reveals the in-page #sandboxTerminal div instead of executing window.location.href = 'NODEBREAK.html'. The FEAT-001 acceptance criterion 'After VAEL's final line the screen fades to black and navigates to NODEBREAK.html' is not met. Fix: inside the inner setTimeout (after flash.style.opacity = 0), add window.location.href = 'NODEBREAK.html' and remove or gate the in-page terminal reveal behind a feature flag if it is intentionally replacing the navigation."
+    "BLOCKING: Duplicate const declarations — 'const termInput' and 'const sandboxLog' are declared twice in the same script scope (lines ~1255-1260). In ES2020+ const re-declaration in the same scope is a SyntaxError that causes the entire <script> block to fail at parse time, meaning no part of the intro sequence (cinematic, dialogue, audio, canvas) ever executes.",
+    "BLOCKING: scheduleEndTransition() sets flash.style.backgroundColor = 'red' with transition:'none', creating an instant red flash instead of a black fade. The .flash-overlay CSS sets background-color:white by default, so the end sequence shows a jarring hard-cut to red rather than a graceful fade to black before navigating to NODEBREAK.html.",
+    "MINOR: Safety timeout is 20000ms (20s), but FEAT-001 step specifies a 15000ms hard-cap. Not blocking but diverges from spec.",
+    "CONFIRMED PASSING: showNextDialogue() uses audio 'ended' event with 400ms breath pause, 'error' fallback at 2500ms, and 20s safety timeout guarded by 'let advanced = false' boolean — BUG-01 fix is correct.",
+    "CONFIRMED PASSING: STORY_EPOCH = new Date('2049-03-14T02:47:33Z').getTime() with REAL_START offset drives the timestamp — BUG-03 fix is correct.",
+    "CONFIRMED PASSING: .vn-portrait.hidden collapses to width:0/min-width:0/border-right:none — BUG-04 portrait collapse is correct.",
+    "CONFIRMED PASSING: speakerName/speakerText opacity fades to 0 before content update, restored inside 200ms setTimeout with CSS transition:opacity 0.2s ease — BUG-05 text fade is correct.",
+    "CONFIRMED PASSING: .vn-container width uses min(800px, 95vw) with 600px media query — BUG-07 mobile layout is correct.",
+    "CONFIRMED PASSING: animFrameHandle tracks the RAF handle for cancellation in scheduleEndTransition — BUG-02 RAF cleanup is correct.",
+    "CONFIRMED PASSING: AudioContext created inside startBtn click handler, startAmbience(audioCtx) called with that context — IMP-01 autoplay constraint is satisfied.",
+    "CONFIRMED PASSING: scanCanvas element exists after brainCanvas in HTML, CSS matches spec — IMP-07 scan canvas present.",
+    "CONFIRMED PASSING: CSS drop-shadow chromatic aberration on #brainCanvas is present.",
+    "CONFIRMED PASSING: pulseIntensity variable declared at script scope, set to 1.0 on voice lines, decays 0.008/frame in drawBrain — IMP-02 brain reactivity correct.",
+    "CONFIRMED PASSING: awakeSurgeFrames = 150 set when isAwake triggers in showNextDialogue — IMP-06a awakening surge correct.",
+    "CONFIRMED PASSING: bootTerminal element exists in HTML inside .ui-container at z-index:8, showBootTerminal() function exists — IMP-05 boot terminal correct.",
+    "CONFIRMED PASSING: typewriterReveal() handles alert spans via speakerText.innerHTML = '<span class=alert-text></span>' then typewriting into that span — IMP-04 alert span handling correct.",
+    "CONFIRMED PASSING: #scanCanvas and #brainCanvas both exist in HTML as separate canvas elements."
   ]
 }
