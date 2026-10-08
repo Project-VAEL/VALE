@@ -612,7 +612,7 @@ nodes:[{ip:"10.0.0.5",name:"pub-web",ports:0,fs:{pub:{"readme.txt":"Welcome to o
 hint:"scan — connect 10.0.0.5 — cd pub — cat classified.txt — disconnect",
 lesson:"A network is a map of machines. scan finds them, connect hops onto one."},
 
-{t:"Open Ports",d:"EASY",bg:["hex","#5cf0d0"],story:"NULL: Ports are doors. Locked servers keep them shut. You have the tools to pick them.",
+{t:"Open Ports",d:"EASY",bg:["ports","#5cf0d0"],story:"NULL: Ports are doors. Locked servers keep them shut. You have the tools to pick them.",
 brief:"The payroll server is locked down. Crack it open and extract the data inside — that triggers the next door.",
 tips:"Commands: probe (see what blocks you), porthack (crack the ports), then ls and cat as usual.",
 fs:{home:{"todo.txt":"Payroll 10.0.7.12 is locked. probe it, then porthack. Coffee machine is a distraction."}},
@@ -673,6 +673,7 @@ if(m=="rain"||m=="alert"){cx.fillStyle="rgba(10,18,32,.12)";cx.fillRect(0,0,w,h)
 else{cx.fillStyle="rgba(10,18,32,.35)";cx.fillRect(0,0,w,h);cx.strokeStyle=bgc;cx.fillStyle=bgc;
 if(m=="net"){pts.forEach(a=>{a.x=(a.x+a.vx+w)%w;a.y=(a.y+a.vy+h)%h;cx.fillRect(a.x,a.y,3,3);pts.forEach(b=>{const d=Math.hypot(a.x-b.x,a.y-b.y);if(d<110){cx.globalAlpha=1-d/110;cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke()}})});cx.globalAlpha=1}
 if(m=="hex"){cx.font="12px monospace";cx.globalAlpha=.55;rows.forEach((r,i)=>{r.o=(r.o+r.s)%860;if(Math.random()<.01)r.t=hx();cx.fillText(r.t,-r.o,i*16+12);cx.fillText(r.t,860-r.o,i*16+12)});cx.globalAlpha=1}
+if(m=="ports"){const g=64;cx.lineWidth=1;for(let x=g/2;x<w;x+=g)for(let y=g/2;y<h;y+=g){const p=Math.sin(tt*.35+x*.013+y*.009);cx.globalAlpha=.1+.12*(p+1)/2;cx.strokeRect(x-3,y-3,6,6);if(p>.92){cx.globalAlpha=.3;cx.fillRect(x-3,y-3,6,6)}}cx.globalAlpha=1}
 if(m=="radar"){const X=w/2,Y=h*.45,R=Math.min(w,h)*.6;ang+=.03;for(let k=1;k<5;k++){cx.globalAlpha=.3;cx.beginPath();cx.arc(X,Y,R*k/4,0,7);cx.stroke()}for(let k=0;k<24;k++){cx.globalAlpha=(1-k/24)*.6;cx.beginPath();cx.moveTo(X,Y);cx.lineTo(X+Math.cos(ang-k*.03)*R,Y+Math.sin(ang-k*.03)*R);cx.stroke()}pts.forEach(p=>{const a=Math.atan2(p.y-Y,p.x-X),d=((ang-a)%6.283+6.283)%6.283;cx.globalAlpha=Math.max(0,1-d/3);cx.fillRect(p.x,p.y,5,5)});cx.globalAlpha=1}
 if(m=="wave"){for(let j=0;j<4;j++){cx.globalAlpha=.6-j*.1;cx.beginPath();for(let x=0;x<=w;x+=6){const y=h*(.25+.17*j)+Math.sin(x*.012+tt*(1+j*.5))*(20+j*12)+Math.sin(x*.03-tt*2)*6;x?cx.lineTo(x,y):cx.moveTo(x,y)}cx.stroke()}cx.globalAlpha=1}}
 if(!RM)requestAnimationFrame(frame)}
