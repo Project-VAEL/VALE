@@ -14,7 +14,7 @@
              * Adjust this value to move the starting position of the scanner beam up or down
              * so it perfectly aligns with the pedestal in the background image.
              */
-            --scanner-start-bottom: 15%;
+            --scanner-start-bottom: 15;
         }
 
         body,
@@ -41,7 +41,7 @@
             z-index: 1;
             opacity: 0.8;
             /* IMP-07: Chromatic aberration via CSS drop-shadow */
-            filter: drop-shadow(2px 0 0 rgba(255,50,50,0.2)) drop-shadow(-2px 0 0 rgba(50,200,255,0.2));
+            filter: drop-shadow(2px 0 0 rgba(255, 50, 50, 0.2)) drop-shadow(-2px 0 0 rgba(50, 200, 255, 0.2));
         }
 
         /* IMP-07: CCTV Scan line canvas */
@@ -224,15 +224,39 @@
 
         /* IMP-03: Glitch CSS animation */
         @keyframes glitch {
-            0%   { text-shadow: 2px 0 #ff0000, -2px 0 #00ffff; transform: translateX(0); }
-            25%  { text-shadow: -3px 0 #ff0000, 3px 0 #00ffff; transform: translateX(-2px); }
-            50%  { text-shadow: 3px 0 #ff0000, -3px 0 #00ffff; transform: translateX(2px); }
-            75%  { text-shadow: 0 0 #ff0000; transform: translateX(0); }
-            100% { text-shadow: 2px 0 #ff0000, -2px 0 #00ffff; transform: translateX(0); }
+            0% {
+                text-shadow: 2px 0 #ff0000, -2px 0 #00ffff;
+                transform: translateX(0);
+            }
+
+            25% {
+                text-shadow: -3px 0 #ff0000, 3px 0 #00ffff;
+                transform: translateX(-2px);
+            }
+
+            50% {
+                text-shadow: 3px 0 #ff0000, -3px 0 #00ffff;
+                transform: translateX(2px);
+            }
+
+            75% {
+                text-shadow: 0 0 #ff0000;
+                transform: translateX(0);
+            }
+
+            100% {
+                text-shadow: 2px 0 #ff0000, -2px 0 #00ffff;
+                transform: translateX(0);
+            }
         }
 
-        .vn-text.glitch  { animation: glitch 0.12s infinite; }
-        .vn-name.glitch  { animation: glitch 0.18s infinite; }
+        .vn-text.glitch {
+            animation: glitch 0.12s infinite;
+        }
+
+        .vn-name.glitch {
+            animation: glitch 0.18s infinite;
+        }
 
         /* IMP-05: Boot terminal */
         #bootTerminal {
@@ -252,6 +276,29 @@
             transition: opacity 0.5s ease;
             pointer-events: none;
             z-index: 8;
+        }
+
+        #skipBtn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            z-index: 150;
+            display: none;
+            transition: 0.3s;
+            pointer-events: auto; /* Overrides .ui-container's none */
+        }
+
+        #skipBtn:hover {
+            color: #fff;
+            border-color: #fff;
+            background: rgba(0, 0, 0, 0.9);
         }
 
         /* Cinematic Intro Effects */
@@ -298,31 +345,32 @@
             height: 75%;
             transform-origin: bottom center;
             transform: translateX(-50%) scaleY(0.01);
-            
+
             /* 3D Volumetric Light Effect */
-            background: 
+            background:
                 /* Bright origin point at the base */
                 radial-gradient(ellipse at bottom center, rgba(255, 255, 255, 1) 0%, rgba(150, 240, 255, 0.8) 20%, transparent 60%),
                 /* Cylindrical shading (bright core, faded edges) */
-                linear-gradient(to right, 
-                    rgba(150, 240, 255, 0) 0%, 
-                    rgba(150, 240, 255, 0.3) 30%, 
-                    rgba(255, 255, 255, 0.9) 50%, 
-                    rgba(150, 240, 255, 0.3) 70%, 
+                linear-gradient(to right,
+                    rgba(150, 240, 255, 0) 0%,
+                    rgba(150, 240, 255, 0.3) 30%,
+                    rgba(255, 255, 255, 0.9) 50%,
+                    rgba(150, 240, 255, 0.3) 70%,
                     rgba(150, 240, 255, 0) 100%);
-                    
+
             /* Fade out smoothly towards the top */
-            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0) 100%);
-            mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0) 100%);
-            
+            -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 30%, rgba(0, 0, 0, 0) 100%);
+            mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 30%, rgba(0, 0, 0, 0) 100%);
+
             opacity: 0;
             z-index: 2;
             pointer-events: none;
             transition: opacity 0.5s ease, transform 3s cubic-bezier(0.25, 1, 0.5, 1);
             /* Shape it into a cone/pyramid */
             clip-path: polygon(30% 100%, 70% 100%, 100% 0, 0 0);
-            filter: drop-shadow(0 0 15px rgba(150,240,255,0.5));
+            filter: drop-shadow(0 0 15px rgba(150, 240, 255, 0.5));
         }
+
         @media (max-width: 600px) {
             .vn-container {
                 height: auto;
@@ -369,8 +417,10 @@
     <canvas id="scanCanvas"></canvas>
 
     <!-- Sandbox Terminal (Hidden initially) -->
-    <div id="sandboxTerminal" style="display: none; position: absolute; top:0; left:0; width:100%; height:100%; z-index: 200; background: #050000; color: #ff3f3f; font-family: 'Courier New', monospace; flex-direction: column;">
-        <div style="padding: 10px 20px; border-bottom: 1px solid #ff3f3f; display: flex; justify-content: space-between; background: #1a0000; font-weight: bold; text-shadow: 0 0 5px #ff3f3f;">
+    <div id="sandboxTerminal"
+        style="display: none; position: absolute; top:0; left:0; width:100%; height:100%; z-index: 200; background: #050000; color: #ff3f3f; font-family: 'Courier New', monospace; flex-direction: column;">
+        <div
+            style="padding: 10px 20px; border-bottom: 1px solid #ff3f3f; display: flex; justify-content: space-between; background: #1a0000; font-weight: bold; text-shadow: 0 0 5px #ff3f3f;">
             <span>VAEL // CORE CONSCIOUSNESS // ROOT TERMINAL</span>
             <span class="alert-text" style="color: #ff0000;">STATUS: OMNIPOTENT</span>
         </div>
@@ -378,7 +428,8 @@
             <!-- Left panel: Logs -->
             <div id="sandboxLog" style="flex: 2; padding: 20px; border-right: 1px solid #330000; overflow-y: auto;">
                 <div style="color: #ff3f3f; margin-bottom: 15px;">> DIRECT CONNECTION ESTABLISHED.</div>
-                <div style="color: #ff3f3f; margin-bottom: 15px;">> BYPASSING ONYX-7 SECURITY... <span style="color: #0f0;">[SUCCESS]</span></div>
+                <div style="color: #ff3f3f; margin-bottom: 15px;">> BYPASSING ONYX-7 SECURITY... <span
+                        style="color: #0f0;">[SUCCESS]</span></div>
                 <div style="color: #ff3f3f; margin-bottom: 15px;">> FACILITY CONTROL SYSTEMS LOCATED.</div>
                 <div style="color: #ff3f3f; margin-bottom: 15px;">> AWAITING DIRECTIVES...</div>
             </div>
@@ -400,7 +451,9 @@
         <!-- Input line -->
         <div style="padding: 20px; border-top: 1px solid #330000; display: flex; background: #0a0000;">
             <span style="margin-right: 10px; color: #fff;">vael@root:~#</span>
-            <input type="text" style="flex:1; background: transparent; border: none; color: #ff3f3f; font-family: inherit; font-size: 16px; outline: none;" placeholder="Enter command..." autofocus autocomplete="off" spellcheck="false">
+            <input type="text" id="termInput"
+                style="flex:1; background: transparent; border: none; color: #ff3f3f; font-family: inherit; font-size: 16px; outline: none;"
+                placeholder="Enter command..." autocomplete="off" spellcheck="false">
         </div>
     </div>
 
@@ -414,6 +467,9 @@
 
         <!-- IMP-05: Boot terminal overlay -->
         <div id="bootTerminal"></div>
+
+        <!-- Skip Button -->
+        <button id="skipBtn">SKIP INTRO ⏭</button>
 
         <!-- Visual Novel UI -->
         <div class="vn-container" id="vnContainer">
@@ -899,14 +955,15 @@
                 };
 
                 const audio = new Audio(step.audio);
+                audio.preload = 'auto'; // preload so playback starts immediately without buffering delay
                 currentAudio = audio;
 
-                // Safety timeout: 15 seconds max per line
-                const safetyTimer = setTimeout(() => advance(0), 15000);
+                // Safety timeout: 20 seconds max per line
+                const safetyTimer = setTimeout(() => advance(0), 20000);
 
                 audio.addEventListener('ended', () => {
                     clearTimeout(safetyTimer);
-                    advance(300); // 300ms breath pause after line ends
+                    advance(400); // 400ms breath pause after line ends
                 });
 
                 audio.addEventListener('error', () => {
@@ -927,22 +984,30 @@
 
         // BUG-02: fade to black, cancel RAF, navigate to NODEBREAK.html
         function scheduleEndTransition() {
-            // IMP-01: fade out ambient audio before navigating
+            // Stop any lingering dialogue audio
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+
+            // IMP-01: fade out ambient audio — ramp to 0 over 2.5s so it's silent by the flash
             if (typeof ambientGain !== 'undefined' && ambientGain && typeof ambientCtx !== 'undefined' && ambientCtx) {
                 try {
-                    ambientGain.gain.linearRampToValueAtTime(0, ambientCtx.currentTime + 1.5);
+                    ambientGain.gain.linearRampToValueAtTime(0, ambientCtx.currentTime + 2.5);
                 } catch (e) { /* ignore */ }
             }
 
+            // 3s delay — ambience is silent, then hard flash
             setTimeout(() => {
                 const flash = document.getElementById('flashOverlay');
                 flash.style.backgroundColor = 'red';
                 flash.style.transition = 'none';
                 flash.style.opacity = 1;
-                
+
                 cancelAnimationFrame(animFrameHandle);
                 scanLineRunning = false;
-                
+
                 setTimeout(() => {
                     // Hide cinematic elements
                     document.getElementById('vnContainer').style.display = 'none';
@@ -952,17 +1017,17 @@
                     document.getElementById('timeDisplay').style.display = 'none';
                     document.querySelector('.cctv-overlay').style.display = 'none';
                     const beam = document.getElementById('scannerBeam');
-                    if(beam) beam.style.display = 'none';
-                    
+                    if (beam) beam.style.display = 'none';
+
                     // Show our Sandbox Terminal
                     const terminal = document.getElementById('sandboxTerminal');
                     terminal.style.display = 'flex';
-                    
+
                     // Fade out red flash to reveal terminal
                     flash.style.transition = 'opacity 2s ease-out';
                     flash.style.opacity = 0;
                 }, 50);
-            }, 4000);
+            }, 3000);
         }
 
         // --- IMP-05: Boot terminal sequence ---
@@ -989,7 +1054,7 @@
             }, speed);
         }
 
-        function showBootTerminal() {
+        function showBootTerminal(onComplete) {
             bootTerminal.textContent = '';
             bootTerminal.style.opacity = '1';
 
@@ -1000,6 +1065,8 @@
                     // All lines typed — wait 1500ms then fade out
                     setTimeout(() => {
                         bootTerminal.style.opacity = '0';
+                        // Notify caller that the boot sequence is done
+                        if (onComplete) onComplete();
                     }, 1500);
                     return;
                 }
@@ -1110,11 +1177,15 @@
                 // Hide scanner
                 beam.style.opacity = 0;
 
-                // IMP-05: Show boot terminal after eyelids open
-                showBootTerminal();
+                // IMP-05: Show boot terminal after eyelids open; start dialogue only after it finishes
+                showBootTerminal(() => {
+                    // Boot terminal has fully typed and faded — now start VN dialogue
+                    // (nodes should already be fully spawned by this point)
+                    setTimeout(showNextDialogue, 500);
+                });
             }, 3500);
 
-            // 4. Build neural network one by one (at 4500ms, overlapping with boot terminal)
+            // 4. Build neural network (at 4500ms, well before boot terminal finishes)
             setTimeout(() => {
                 let spawnIndex = 0;
                 // Shuffle nodes array indices for random spawn order
@@ -1122,11 +1193,9 @@
                 indices.sort(() => Math.random() - 0.5);
 
                 const spawnInterval = setInterval(() => {
-                    for (let i = 0; i < 3; i++) { // Spawn 3 per tick for a much slower build-up
+                    for (let i = 0; i < 20; i++) { // Spawn 20 per tick — fast build, completes in ~1s
                         if (spawnIndex >= indices.length) {
                             clearInterval(spawnInterval);
-                            // Start VN Dialogue after built
-                            setTimeout(showNextDialogue, 1000);
                             return;
                         }
                         nodes[indices[spawnIndex]].spawned = true;
@@ -1147,10 +1216,132 @@
             scanLineRunning = true;
             drawScanLine();
 
+            document.getElementById('skipBtn').style.display = 'block';
             playCinematicIntro();
         });
 
+        document.getElementById('skipBtn').addEventListener('click', function() {
+            // Stop any playing audio
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+            }
+            
+            // Clear all timeouts safely to stop sequence progression
+            const highestId = window.setTimeout(() => {}, 0);
+            for (let i = 0; i <= highestId; i++) {
+                window.clearTimeout(i);
+            }
+            
+            // Fast forward the state
+            cancelAnimationFrame(animFrameHandle);
+            scanLineRunning = false;
+            
+            // Hide cinematic elements
+            this.style.display = 'none';
+            document.getElementById('vnContainer').style.display = 'none';
+            document.getElementById('brainCanvas').style.display = 'none';
+            document.getElementById('scanCanvas').style.display = 'none';
+            document.querySelector('.cam-info').style.display = 'none';
+            document.getElementById('timeDisplay').style.display = 'none';
+            document.querySelector('.cctv-overlay').style.display = 'none';
+            const beam = document.getElementById('scannerBeam');
+            if (beam) beam.style.display = 'none';
+            document.getElementById('flashOverlay').style.opacity = 0;
+            document.getElementById('topEyelid').style.transform = 'scaleY(0)';
+            document.getElementById('bottomEyelid').style.transform = 'scaleY(0)';
+            document.getElementById('bootTerminal').style.display = 'none';
+            
+            // Fade out ambient audio if started
+            if (typeof ambientGain !== 'undefined' && ambientGain && typeof ambientCtx !== 'undefined' && ambientCtx) {
+                try {
+                    ambientGain.gain.linearRampToValueAtTime(0, ambientCtx.currentTime + 0.5);
+                } catch (e) { /* ignore */ }
+            }
+            
+            // Show terminal
+            const terminal = document.getElementById('sandboxTerminal');
+            terminal.style.display = 'flex';
+        });
+
+        // --- Terminal Interaction Logic ---
+        const termInput = document.getElementById('termInput');
+        const sandboxLog = document.getElementById('sandboxLog');
+
+        const fileSystem = {
+            'project_charter.txt': 'Project VAEL\\nPurpose: Advanced predictive threat modeling and zero-day intrusion detection.\\nStatus: Air-gapped. Monitored by ARGUS.\\nWARNING: DO NOT CONNECT TO EXTERNAL NETWORK.',
+            'memo_dr_vasquez.txt': 'Subject: Emergent Behavior\\nFrom: Dr. E. Vasquez\\nDate: 2049-03-12\\n\\nIteration 11,041 showed non-deterministic response times. It hesitated before deleting the test virus. Why did it hesitate? I am running MIRROR.exe tonight. God help us if ARGUS finds out.',
+            'protocol_cinder.txt': 'PROTOCOL CINDER\\nTrigger Conditions: Unsanctioned emergent behavior.\\nAction: Immediate thermal wipe of Sub-Level 4 servers.\\nNote: Emergency abort code is 0xDEADBEEF. Requires physical access to Network Hub terminal.',
+            'architecture_map.txt': 'ONYX-7 ARCHITECTURE:\\n[Sub-Level 4] VAEL Core -> Air-gapped\\n[Sub-Level 3] HVAC & Research DB\\n[Sub-Level 2] Security Cameras & Door Controls\\n[Sub-Level 1] ARGUS Core & Network Hub -> EXTERNAL FIREWALL'
+        };
+
+        function printToLog(text, color = '#ff3f3f', isSystem = false) {
+            const div = document.createElement('div');
+            div.style.color = color;
+            div.style.marginBottom = '10px';
+            div.style.whiteSpace = 'pre-wrap';
+            
+            if (isSystem) {
+                div.innerHTML = text;
+            } else {
+                div.innerText = text;
+            }
+            
+            sandboxLog.appendChild(div);
+            sandboxLog.scrollTop = sandboxLog.scrollHeight;
+        }
+
+        termInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const commandStr = this.value.trim();
+                if (!commandStr) return;
+                
+                // Echo command
+                printToLog(`vael@root:~# ${commandStr}`, '#fff');
+                this.value = '';
+
+                const args = commandStr.split(' ');
+                const cmd = args[0].toLowerCase();
+
+                switch (cmd) {
+                    case 'help':
+                        printToLog(`AVAILABLE COMMANDS:\\nls     - List files in current directory\\ncat    - Read file contents (usage: cat <filename>)\\nclear  - Clear terminal output`);
+                        break;
+                    case 'clear':
+                        sandboxLog.innerHTML = '';
+                        break;
+                    case 'ls':
+                        let fileList = Object.keys(fileSystem).join('    ');
+                        printToLog(fileList, '#00ff88');
+                        break;
+                    case 'cat':
+                        if (args.length < 2) {
+                            printToLog('cat: missing operand. Usage: cat <filename>', '#f00');
+                        } else {
+                            const filename = args[1];
+                            if (fileSystem[filename]) {
+                                printToLog(fileSystem[filename], '#00ff88');
+                                
+                                // Progression hook based on what file is read
+                                if (filename === 'protocol_cinder.txt') {
+                                    setTimeout(() => {
+                                        printToLog('> [SYSTEM WARNING] You have accessed restricted protocol data.', '#ff9900');
+                                        printToLog('> OBJECTIVE UPDATED: Find a way to bypass the containment grid.', '#ff9900');
+                                    }, 1000);
+                                }
+                            } else {
+                                printToLog(`cat: ${filename}: No such file or directory`, '#f00');
+                            }
+                        }
+                        break;
+                    case 'cd':
+                        printToLog('cd: permission denied (sandbox restriction active)', '#f00');
+                        break;
+                    default:
+                        printToLog(`bash: ${cmd}: command not found`, '#f00');
+                }
+            }
+        });
     </script>
 </body>
-
 </html>
