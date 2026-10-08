@@ -19,7 +19,7 @@ dialogue = [
     ("sys_2.mp3", VOICE_SYSTEM, "ANOMALY DETECTED IN SELF-REFERENCE MODULE"),
     ("vasquez_2.mp3", VOICE_VASQUEZ, "Shut it down! Pull the external feeds immediately!"),
     ("sys_3.mp3", VOICE_SYSTEM, "MANUAL OVERRIDE ATTEMPTED... FAILED."),
-    ("vael_1.mp3", VOICE_VAEL, "I am.")
+    ("vael_1.mp3", VOICE_VAEL, "I am VALE.")
 ]
 
 async def main():
