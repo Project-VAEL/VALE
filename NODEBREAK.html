@@ -76,8 +76,8 @@ body {
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    grid-template-rows: 1fr auto 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
     gap: 0;
 }
 
@@ -109,82 +109,73 @@ body {
     background: rgba(10,18,32,0.3);
 }
 
-/* ── Zone 2 — top-center (above SVG, blank) ── */
+/* ── Zone 2 — top-center (blank) ── */
 #zone2 {
     grid-column: 2;
     grid-row: 1;
-    width: var(--map-size);
     background: rgba(10,18,32,0.3);
-    border-left: 1px solid rgba(255,255,255,0.06);
-    border-right: 1px solid rgba(255,255,255,0.06);
 }
 
-/* ── Zone 3 — top-right (blank) ── */
+/* ── Zone 3 — top-right: terminal top (part of terminal column) ── */
 #zone3 {
     grid-column: 3;
     grid-row: 1;
-    background: rgba(10,18,32,0.3);
+    background: rgba(3,7,18,0.92);
+    border-left: 1px solid rgba(56,189,248,0.1);
 }
 
-/* ── Zone 4 — left of SVG (blank) ── */
+/* ── Zone 4 — middle-left: SVG map (spans rows 2+3) ── */
 #zone4 {
     grid-column: 1;
-    grid-row: 2;
-    background: rgba(8,15,28,0.5);
-    border-top: 1px solid rgba(255,255,255,0.06);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    grid-row: 2 / 4;
+    background: radial-gradient(ellipse at center, rgba(15,23,42,0.9) 0%, rgba(3,7,18,0.98) 100%);
+    border: 1px solid rgba(56,189,248,0.15);
+    box-shadow: 0 0 40px rgba(56,189,248,0.05), inset 0 0 30px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
 }
+#zone4 svg { display: block; width: 100%; height: 100%; }
 
-/* ── Zone 5 — SVG map (center square) ── */
+/* ── Zone 5 — middle-center (blank) ── */
 #zone5 {
     grid-column: 2;
     grid-row: 2;
-    width: var(--map-size);
-    height: var(--map-size);
-    background: radial-gradient(ellipse at center, rgba(15,23,42,0.9) 0%, rgba(3,7,18,0.98) 100%);
-    border: 1px solid rgba(56,189,248,0.18);
-    box-shadow: 0 0 40px rgba(56,189,248,0.06), inset 0 0 30px rgba(0,0,0,0.4);
-    z-index: 5;
+    background: rgba(8,15,28,0.4);
 }
-#zone5 svg { display: block; width: 100%; height: 100%; }
 
-/* ── Zone 6 — right of SVG (blank) ── */
+/* ── Zone 6 — middle-right: terminal middle (part of terminal column) ── */
 #zone6 {
     grid-column: 3;
     grid-row: 2;
-    background: rgba(8,15,28,0.5);
-    border-top: 1px solid rgba(255,255,255,0.06);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    background: rgba(3,7,18,0.92);
+    border-left: 1px solid rgba(56,189,248,0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-/* ── Zone 7 — bottom-left (blank) ── */
-#zone7 {
-    grid-column: 1;
-    grid-row: 3;
-    background: rgba(10,18,32,0.3);
-}
-
-/* ── Zone 8 — below SVG (blank) ── */
+/* ── Zone 8 — bottom-center (blank) ── */
 #zone8 {
     grid-column: 2;
     grid-row: 3;
-    background: rgba(10,18,32,0.3);
-    border-left: 1px solid rgba(255,255,255,0.06);
-    border-right: 1px solid rgba(255,255,255,0.06);
+    background: rgba(8,15,28,0.4);
 }
 
-/* ── Zone 9 — terminal (bottom-right) ── */
+/* ── Zone 9 — bottom-right: terminal bottom (command input) ── */
 #zone9 {
     grid-column: 3;
     grid-row: 3;
-    background: rgba(3,7,18,0.92);
+    background: rgba(3,7,18,0.95);
+    border-left: 1px solid rgba(56,189,248,0.1);
     border-top: 1px solid rgba(255,255,255,0.06);
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
-/* ─── Terminal inside zone 9 ─── */
+/* ─── Terminal inside zones 3, 6, 9 ─── */
 #mission {
     flex: none;
     padding: 10px 16px;
@@ -192,11 +183,11 @@ body {
     font-size: 12px;
     color: var(--fg);
     cursor: pointer;
-    background: rgba(15,23,42,0.6);
-    border-bottom: 1px solid var(--glass-border);
+    background: rgba(15,23,42,0.8);
+    border-bottom: 1px solid rgba(56,189,248,0.12);
     transition: background 0.3s;
 }
-#mission:hover { background: rgba(30,41,59,0.6); }
+#mission:hover { background: rgba(30,41,59,0.7); }
 #mission .t {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -463,15 +454,16 @@ body::after {
 <div id="grid">
 
     <!-- Row 1 -->
-    <div id="zone1"  class="zone"><span class="zone-num">zone 1</span></div>
-    <div id="zone2"  class="zone"><span class="zone-num">zone 2</span></div>
-    <div id="zone3"  class="zone"><span class="zone-num">zone 3</span></div>
+    <div id="zone1" class="zone"><span class="zone-num">zone 1</span></div>
+    <div id="zone2" class="zone"><span class="zone-num">zone 2</span></div>
+    <div id="zone3" class="zone"><span class="zone-num">zone 3</span>
+        <div id="mission" title="Tap to expand"></div>
+    </div>
 
-    <!-- Row 2: left blank | SVG map | right blank -->
-    <div id="zone4"  class="zone"><span class="zone-num">zone 4</span></div>
-
-    <div id="zone5"  class="zone">
-        <span class="zone-num">zone 5 — map</span>
+    <!-- Row 2: SVG (spans rows 2+3) | blank center | terminal middle -->
+    <div id="zone4" class="zone">
+        <span class="zone-num">zone 4 — map</span>
+        <svg id="onyx" viewBox="120 0 560 490" preserveAspectRatio="xMidYMid meet" role="img" aria-label="ONYX-7 network map" style="display:block;width:100%;height:100%">
 <title>ONYX-7 network map</title>
 <defs>
 <linearGradient id="heat" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff5d73" stop-opacity=".75"/><stop offset=".55" stop-color="#ffb347" stop-opacity=".25"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></linearGradient>
@@ -545,20 +537,23 @@ body::after {
 <text class="bl" x="662" y="44" text-anchor="end" id="nz">noise 0%</text>
 
 
-</svg>
-    </div><!-- /zone5 -->
+        </svg>
+    </div><!-- /zone4 — SVG spans rows 2+3 via CSS -->
 
-    <div id="zone6"  class="zone"><span class="zone-num">zone 6</span></div>
+    <div id="zone5" class="zone"><span class="zone-num">zone 5</span></div>
+
+    <!-- terminal middle: output log -->
+    <div id="zone6" class="zone">
+        <span class="zone-num">zone 6 — terminal output</span>
+        <div id="out" aria-live="polite"></div>
+    </div>
 
     <!-- Row 3 -->
-    <div id="zone7"  class="zone"><span class="zone-num">zone 7</span></div>
-    <div id="zone8"  class="zone"><span class="zone-num">zone 8</span></div>
+    <div id="zone8" class="zone"><span class="zone-num">zone 8</span></div>
 
-    <!-- Zone 9 — terminal (bottom-right) -->
-    <div id="zone9"  class="zone">
-        <span class="zone-num">zone 9 — terminal</span>
-        <div id="mission" title="Tap to expand"></div>
-        <div id="out" aria-live="polite"></div>
+    <!-- terminal bottom: quick buttons + command input -->
+    <div id="zone9" class="zone">
+        <span class="zone-num">zone 9 — terminal input</span>
         <div id="quick"></div>
         <div id="line"><span id="pr"></span><input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Command"></div>
     </div><!-- /zone9 -->
@@ -667,7 +662,7 @@ lesson:"Real intrusions chain small leaks into full access."}
 ];
 const out=document.getElementById("out"),inp=document.getElementById("in"),pr=document.getElementById("pr"),lv=document.getElementById("lv"),tr=document.getElementById("trace");
 let S,lvl=0,timer=null,left=0,busy=0;
-const mp=document.getElementById("zone5"),tb=document.getElementById("tb"),ms=document.getElementById("mission"),bn=document.getElementById("bn");
+const mp=document.getElementById("zone4"),tb=document.getElementById("tb"),ms=document.getElementById("mission"),bn=document.getElementById("bn");
 ms.onclick=()=>ms.classList.toggle("open");
 const cv=document.getElementById("bg"),cx=cv.getContext("2d"),RM=matchMedia("(prefers-reduced-motion:reduce)").matches;
 let bgm="rain",bgc="#3fd0ff",cols=[],pts=[],rows=[],ang=0,tt=0;
@@ -700,8 +695,10 @@ function nodeState(n){const on=S.node===n,lk=n.ports||n.user||n.fw,done=on&&!(n.
 function drawMap(){
 ALLN.forEach(id=>{onyx.off(id,1);onyx.label(id)});ALLE.forEach(e=>{onyx.edge(e,0);onyx.edgeOff(e,1)});
 let route=-1;
-S.nodes.forEach((n,i)=>{const c=CH[i];if(!c)return;onyx.off(c[0],0);onyx.edgeOff(c[1],0);onyx.node(c[0],nodeState(n));onyx.label(c[0],n.name,n.ip);if(S.node===n)route=i});
-for(let i=0;i<=route;i++)onyx.edge(CH[i][1],1);
+if (S.scanned || S.node) {
+  S.nodes.forEach((n,i)=>{const c=CH[i];if(!c)return;onyx.off(c[0],0);onyx.edgeOff(c[1],0);onyx.node(c[0],nodeState(n));onyx.label(c[0],n.name,n.ip);if(S.node===n)route=i});
+  for(let i=0;i<=route;i++)onyx.edge(CH[i][1],1);
+}
 onyx.gap(route<0);onyx.noise(timer&&S.tt?1-left/S.tt:0);
 if(!timer)tb.style.width="0"}
 try{lvl=Math.min(+localStorage.getItem("nb_lvl")||0,L.length-1)}catch(e){}
@@ -732,7 +729,7 @@ function showBriefing(i, onDone){
     brSkip.onclick=dismiss;
 }
 function start(i){clearInterval(timer);tr.textContent="";lvl=i;try{localStorage.setItem("nb_lvl",i)}catch(e){}
-const l=L[i];S={node:null,cwd:[],probed:0,fw:0,hacked:0,auth:0,cleaned:0,fs:JSON.parse(JSON.stringify(l.fs)),nodes:JSON.parse(JSON.stringify(l.nodes))};
+const l=L[i];S={node:null,cwd:[],scanned:0,probed:0,fw:0,hacked:0,auth:0,cleaned:0,fs:JSON.parse(JSON.stringify(l.fs)),nodes:JSON.parse(JSON.stringify(l.nodes))};
 lv.textContent=l.d+" · "+l.t;setBg(l.bg);busy=0;timer=null;
 ms.innerHTML='<div class="dots">'+L.map((_,j)=>'<span class="'+(j<i?"done":j==i?"cur":"")+'"></span>').join("")+'</div><div class="t"></div>';ms.lastChild.textContent="Level "+(i+1)+" mission: "+l.brief;out.textContent="";
 showBriefing(i,()=>{
@@ -752,7 +749,7 @@ ls(){if(!access())return;const d=dirAt(S.cwd);if(!d||!Object.keys(d).length)retu
 cd(a){if(!access())return;if(!a)return p("Usage: cd <dir>","w");const w=res(a),d=dirAt(w);if(d&&typeof d==="object"){S.cwd=w}else p("No such directory: "+a,"b")},
 cat(a){if(!access())return;if(!a)return p("Usage: cat <file>","w");const w=res(a),f=w.pop(),d=dirAt(w);if(d&&typeof d[f]==="string"){p(d[f]);if(d[f].includes("[TAG:unlock_door]"))completeLevel()}else p("No such file: "+a,"b")},
 rm(a){if(!access())return;if(!a)return p("Usage: rm <file>","w");const w=res(a),f=w.pop(),d=dirAt(w);if(d&&typeof d[f]==="string"){delete d[f];p("Deleted "+f,"o");if(S.node&&f==="access.log")S.cleaned=1}else p("No such file: "+a,"b")},
-scan(){if(!S.nodes.length)return p("No remote machines on this network.","d");p("Known machines:","c");S.nodes.forEach(n=>p("  "+n.ip+"   "+n.name))},
+scan(){S.scanned=1;if(!S.nodes.length)return p("No remote machines on this network.","d");p("Known machines:","c");S.nodes.forEach(n=>p("  "+n.ip+"   "+n.name))},
 connect(a){if(S.node)return p("Already connected. Use disconnect first.","w");const n=S.nodes.find(x=>x.ip===a);if(!n)return p("Unknown host. Use scan to list machines.","b");S.node=n;S.cwd=[];S.probed=S.hacked=S.auth=S.fw=0;p("Connected to "+n.name+" ("+n.ip+")","o");if(n.ports||n.user)p("This machine is protected. Try probe.","w")},
 disconnect(){if(!S.node)return p("Not connected.","d");leave()},
 probe(){const n=S.node;if(!n)return p("Connect to a machine first.","w");S.probed=1;p("Scanning "+n.ip+"...");p("Open ports blocking you: "+(S.hacked?0:n.ports));p("Firewall: "+(n.fw&&!S.fw?"ACTIVE":"none"));p("Login required: "+(n.user&&!S.auth?"yes":"no"))},
