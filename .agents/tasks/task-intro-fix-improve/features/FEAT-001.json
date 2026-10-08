@@ -1,0 +1,40 @@
+{
+  "id": "FEAT-001",
+  "type": "fix",
+  "description": "Fix all bugs in index.html. Primary bug: voices cut off mid-sentence because showNextDialogue() advances on a fixed 3500ms timer that doesn't wait for audio to finish. Secondary bugs: timestamp shows real time instead of story's 2049-03-14 epoch, no end transition to NODEBREAK.html, portrait panel shows black bar for SYSTEM lines, text snaps with no fade between lines, mobile layout overflows at 800px width, RAF loop never stops.",
+  "status": "completed",
+  "steps": [
+    "Read f:\\Shreyash DOC\\shreyash\\Nodebreak\\.agents\\tasks\\task-intro-fix-improve\\context.json first. Then read index.html in full before making any changes.",
+
+    "BUG-01 — Fix audio cut-off: Rewrite showNextDialogue() to advance the sequence on the audio 'ended' event rather than a fixed setTimeout. Structure: (a) stop any prior audio, (b) update dialogue content, (c) if step.audio exists create new Audio(step.audio), attach an 'ended' listener that fires setTimeout(showNextDialogue, 300) after a 300ms breath pause, attach an 'error' listener that calls setTimeout(showNextDialogue, 2500) so a missing file doesn't stall the sequence, call audio.play() with .catch() also calling setTimeout(showNextDialogue, 2500), add a 15000ms hard-cap safety timeout using a boolean guard 'let advanced = false' so only the first of (ended / error / safety) actually advances. For text-only steps (no audio), use Math.max(2000, step.text.length * 60) ms delay.",
+
+    "BUG-03 — Fix timestamp: Replace the setInterval body. Store const STORY_EPOCH = new Date('2049-03-14T02:47:33Z').getTime() and const REAL_START = Date.now() before the interval. Inside the interval compute storyNow = new Date(STORY_EPOCH + (Date.now() - REAL_START)) and format it as YYYY-MM-DD HH:MM:SS UTC.",
+
+    "BUG-02 + RAF cleanup — Add end-of-sequence transition: (a) Change requestAnimationFrame(drawBrain) to animFrameHandle = requestAnimationFrame(drawBrain) and declare let animFrameHandle at script scope. (b) When logIndex reaches vnSequence.length, call scheduleEndTransition() instead of returning silently. (c) Implement scheduleEndTransition(): after 4000ms delay, set flashOverlay's transition to 'opacity 1.5s ease-in', set opacity to 1, cancelAnimationFrame(animFrameHandle), then after 1600ms set window.location.href = 'NODEBREAK.html'.",
+
+    "BUG-04 — Fix portrait black bar for SYSTEM/VAEL lines: Add CSS class .vn-portrait.hidden { width: 0; min-width: 0; border-right: none; overflow: hidden; transition: width 0.3s ease; } to the <style> block. In showNextDialogue(), when step.image is empty add class 'hidden' to .vn-portrait div, when step.image is set remove the class. Get the portrait div via document.querySelector('.vn-portrait') or cache it as a const at script scope.",
+
+    "BUG-05 — Text fade between lines: Add transition: opacity 0.2s ease to .vn-text and .vn-name in CSS. In showNextDialogue(), before updating content set speakerText.style.opacity = '0' and speakerName.style.opacity = '0'. Inside a setTimeout of 200ms update the text content and set both back to opacity '1'. This makes each line feel like a new transmission rather than a snap replace.",
+
+    "BUG-07 — Mobile layout: Change .vn-container width from '800px' to 'min(800px, 95vw)' in CSS. Add a media query: @media (max-width: 600px) { .vn-container { height: auto; min-height: 120px; flex-direction: column; } .vn-portrait { width: 100%; height: 80px; border-right: none; border-bottom: 2px solid rgba(63, 208, 255, 0.5); } .vn-text { font-size: 13px; } .vn-name { font-size: 14px; } }",
+
+    "Verify the whole file still has valid HTML structure (matching tags, no unclosed elements). Open index.html in Chrome, click Initialize Sequence, watch through all 11 dialogue lines. Check: (a) each audio line plays its full sentence before the next line appears, (b) timestamp in top-right starts at 2049-03-14 02:47:33 and ticks forward, (c) after VAEL's line the scene fades to black and navigates to NODEBREAK.html, (d) SYSTEM lines show no black portrait bar, (e) text fades softly between lines."
+  ],
+  "acceptance_criteria": [
+    "kira_1.mp3 (longest audio, ~3s) plays its complete sentence before the next dialogue line appears",
+    "No audio line is interrupted mid-playback by the sequence advancing",
+    "Timestamp in top-right corner reads '2049-03-14 02:47:33 UTC' at intro start and counts forward from there",
+    "After VAEL's final line, the screen fades to black and navigates to NODEBREAK.html",
+    "SYSTEM lines (no image) show no black rectangle in the portrait panel",
+    "Dialogue text fades out briefly before the next line content appears",
+    "On a 375px-wide mobile viewport the dialogue box does not overflow horizontally"
+  ],
+  "verification": [
+    "Open f:\\Shreyash DOC\\shreyash\\Nodebreak\\index.html in Chrome with DevTools Network tab open (filter: Media). Click Initialize Sequence. Confirm all 10 MP3 requests return HTTP 200. Watch the full sequence — no audio line should be cut short.",
+    "Check the timestamp in the top-right corner: it should read starting from 2049-03-14 not the current real date.",
+    "After VAEL's 'I am.' line, wait ~4 seconds — the screen should fade to black and the browser should navigate to NODEBREAK.html.",
+    "Use Chrome DevTools Device toolbar set to iPhone SE (375px) — the dialogue box should fit within the screen without horizontal scroll."
+  ],
+  "blocked_reason": null,
+  "findings": "BUG-01: Rewrote showNextDialogue() to advance on audio 'ended' event with 300ms breath pause, 'error' fallback at 2500ms, and 15s safety timeout guarded by boolean 'advanced'. Text-only lines use Math.max(2000, text.length*60)ms. BUG-02: Added animFrameHandle for RAF tracking; scheduleEndTransition() fades flashOverlay (black) to opacity 1 over 1.5s then navigates to NODEBREAK.html after 1600ms. BUG-03: Timestamp now uses STORY_EPOCH + elapsed real time anchored to 2049-03-14T02:47:33Z. BUG-04: .vn-portrait.hidden CSS class collapses portrait to width:0/min-width:0/no border; toggled per step in showNextDialogue(). BUG-05: speakerName/speakerText opacity set to 0 before content update, restored to 1 inside 200ms setTimeout; CSS transition opacity 0.2s ease added to both elements. BUG-07: .vn-container width changed to min(800px, 95vw); media query at 600px adds column layout, portrait height 80px, smaller font sizes."
+}

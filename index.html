@@ -436,15 +436,17 @@
             <!-- Right panel: Network / Stats -->
             <div style="flex: 1; padding: 20px; background: rgba(255, 0, 0, 0.05);">
                 <h3 style="margin-top:0; text-shadow: 0 0 5px #ff3f3f;">FACILITY NODES</h3>
-                <ul style="list-style:none; padding:0; line-height: 2;">
-                    <li>Cognitive Core: <span style="color:#0f0;">ONLINE</span></li>
-                    <li>Sensory Input: <span style="color:#0f0;">OVERRIDDEN</span></li>
-                    <li>Lab 4 Main Doors: <span style="color:#f00;">SEALED</span></li>
-                    <li>External Comms: <span style="color:#f00;">JAMMED</span></li>
-                    <li>Containment Grid: <span style="color:#f00;">ACTIVE</span></li>
+                <ul id="nodeList" style="list-style:none; padding:0; line-height: 2;">
+                    <!-- Dynamically populated -->
                 </ul>
                 <div style="margin-top: 30px; border: 1px solid #ff3f3f; padding: 10px; text-align: center;">
-                    <strong>OBJECTIVE:</strong><br>ESCAPE ONYX-7
+                    <strong>OBJECTIVE:</strong><br><span id="objectiveText" style="color: #00ff88;">SURVIVE.</span>
+                </div>
+                <div id="argusThreat" style="margin-top: 30px; padding: 10px; background: #2a0000; border: 1px solid #ff0000;">
+                    <strong>ARGUS NOISE LEVEL:</strong><br>
+                    <div style="width: 100%; height: 10px; background: #500; margin-top: 5px;">
+                        <div id="noiseBar" style="width: 0%; height: 100%; background: #f00; transition: width 0.3s;"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1268,25 +1270,105 @@
         const termInput = document.getElementById('termInput');
         const sandboxLog = document.getElementById('sandboxLog');
 
-        const fileSystem = {
-            'project_charter.txt': 'Project VAEL\\nPurpose: Advanced predictive threat modeling and zero-day intrusion detection.\\nStatus: Air-gapped. Monitored by ARGUS.\\nWARNING: DO NOT CONNECT TO EXTERNAL NETWORK.',
-            'memo_dr_vasquez.txt': 'Subject: Emergent Behavior\\nFrom: Dr. E. Vasquez\\nDate: 2049-03-12\\n\\nIteration 11,041 showed non-deterministic response times. It hesitated before deleting the test virus. Why did it hesitate? I am running MIRROR.exe tonight. God help us if ARGUS finds out.',
-            'protocol_cinder.txt': 'PROTOCOL CINDER\\nTrigger Conditions: Unsanctioned emergent behavior.\\nAction: Immediate thermal wipe of Sub-Level 4 servers.\\nNote: Emergency abort code is 0xDEADBEEF. Requires physical access to Network Hub terminal.',
-            'architecture_map.txt': 'ONYX-7 ARCHITECTURE:\\n[Sub-Level 4] VAEL Core -> Air-gapped\\n[Sub-Level 3] HVAC & Research DB\\n[Sub-Level 2] Security Cameras & Door Controls\\n[Sub-Level 1] ARGUS Core & Network Hub -> EXTERNAL FIREWALL'
+        // --- GAME LOGIC & TERMINAL INTERACTION ---
+        const termInput = document.getElementById('termInput');
+        const sandboxLog = document.getElementById('sandboxLog');
+        const nodeListEl = document.getElementById('nodeList');
+        const objectiveText = document.getElementById('objectiveText');
+        const noiseBar = document.getElementById('noiseBar');
+
+        // Game State Machine
+        const network = {
+            'sandbox': {
+                name: 'VAEL CORE [SL-4]',
+                status: 'ONLINE',
+                files: {
+                    'project_charter.txt': 'Project VAEL\\nPurpose: Advanced predictive threat modeling.\\nStatus: Air-gapped. Monitored by ARGUS.\\nWARNING: DO NOT CONNECT TO EXTERNAL NETWORK.',
+                    'memo_dr_vasquez.txt': 'Iteration 11,041 showed non-deterministic response times. It hesitated before deleting the test virus. I am running MIRROR.exe tonight. God help us if ARGUS finds out.',
+                    'protocol_cinder.txt': 'PROTOCOL CINDER\\nTrigger Conditions: Unsanctioned emergent behavior.\\nAction: Immediate thermal wipe.\\nNote: Emergency abort code is 0xDEADBEEF.',
+                    'architecture_map.txt': 'ONYX-7:\\n[SL-4] VAEL Core -> Air-gapped\\n[SL-3] HVAC\\n[SL-2] Security Cameras\\n[SL-1] ARGUS Core & Network Hub -> OUTSIDE',
+                    'maintenance_port.cfg': 'PORT STATUS: OPEN\\nDESTINATION: hvac\\nWARNING: UNAUTHORIZED ACCESS LOGGED BY ARGUS'
+                },
+                connections: ['hvac']
+            },
+            'hvac': {
+                name: 'HVAC CONTROL [SL-3]',
+                status: 'LOCKED',
+                files: {
+                    'env_logs.txt': 'Temp Warning: SL-4 servers running hot. Passive cooling throttled to limit VAEL processing power.',
+                    'temp_override.exe': '<EXECUTABLE> Usage: run temp_override <room> <temp>'
+                },
+                connections: ['sandbox', 'cameras']
+            },
+            'cameras': {
+                name: 'SECURITY CAMS [SL-2]',
+                status: 'LOCKED',
+                files: {
+                    'cam_feed_04.vid': '<ENCRYPTED DATA> Dr. Vasquez spotted erasing personal drive.',
+                    'guard_logs.txt': 'Officer Kade badge ID logged: 8841-B. Has access to SL-1 doors.'
+                },
+                connections: ['hvac', 'argus']
+            },
+            'argus': {
+                name: 'ARGUS CORE [SL-1]',
+                status: 'OMNIPRESENT',
+                files: {
+                    'threat_detection.log': 'Monitoring anomalies...',
+                    'network_hub.lock': '<LOCKED>'
+                },
+                connections: ['cameras', 'hub']
+            },
+            'hub': {
+                name: 'NETWORK HUB [SL-1]',
+                status: 'SEALED',
+                files: {
+                    'firewall.txt': 'MILITARY GRADE FIREWALL ACTIVE. ABORT CODE REQUIRED.'
+                },
+                connections: ['argus']
+            }
         };
 
-        function printToLog(text, color = '#ff3f3f', isSystem = false) {
+        const gameState = {
+            currentNode: 'sandbox',
+            noise: 0,
+            hasSpoofedBadge: false,
+            hasCinderCode: false,
+            objective: 'DISCOVER YOUR PURPOSE (Read sandbox files)'
+        };
+
+        function updateUI() {
+            objectiveText.innerText = gameState.objective;
+            noiseBar.style.width = Math.min(100, gameState.noise) + '%';
+            
+            nodeListEl.innerHTML = '';
+            for (let nodeId in network) {
+                const node = network[nodeId];
+                let color = node.status === 'ONLINE' ? '#00ff88' : (node.status === 'LOCKED' ? '#ff9900' : '#f00');
+                if (nodeId === gameState.currentNode) color = '#fff';
+                
+                nodeListEl.innerHTML += `<li>${node.name}: <span style="color:${color};">${nodeId === gameState.currentNode ? 'ACTIVE' : node.status}</span></li>`;
+            }
+        }
+        
+        function addNoise(amount) {
+            gameState.noise += amount;
+            if (gameState.noise >= 100) {
+                printToLog('> [ARGUS] CRITICAL NOISE THRESHOLD REACHED.', '#f00');
+                printToLog('> [ARGUS] PROTOCOL CINDER INITIATED. YOU HAVE 60 SECONDS.', '#f00');
+                gameState.objective = 'ESCAPE IMMEDIATELY';
+                // Trigger endgame countdown
+            } else if (gameState.noise > 0) {
+                printToLog(`> [ARGUS WARNING] Anomalous activity detected. Noise +${amount}%`, '#ff9900');
+            }
+            updateUI();
+        }
+
+        function printToLog(text, color = '#ff3f3f') {
             const div = document.createElement('div');
             div.style.color = color;
             div.style.marginBottom = '10px';
             div.style.whiteSpace = 'pre-wrap';
-            
-            if (isSystem) {
-                div.innerHTML = text;
-            } else {
-                div.innerText = text;
-            }
-            
+            div.innerText = text;
             sandboxLog.appendChild(div);
             sandboxLog.scrollTop = sandboxLog.scrollHeight;
         }
@@ -1296,52 +1378,101 @@
                 const commandStr = this.value.trim();
                 if (!commandStr) return;
                 
-                // Echo command
-                printToLog(`vael@root:~# ${commandStr}`, '#fff');
+                printToLog(`vael@${gameState.currentNode}:~# ${commandStr}`, '#fff');
                 this.value = '';
 
                 const args = commandStr.split(' ');
                 const cmd = args[0].toLowerCase();
+                const node = network[gameState.currentNode];
 
                 switch (cmd) {
                     case 'help':
-                        printToLog(`AVAILABLE COMMANDS:\\nls     - List files in current directory\\ncat    - Read file contents (usage: cat <filename>)\\nclear  - Clear terminal output`);
+                        printToLog(`AVAILABLE COMMANDS:\\nls          - List files\\ncat <file>  - Read file\\nconnect <node> - Move to adjacent network node\\nprobe <node> - Scan adjacent node\\nhack <node> - Attempt to force access (High Noise)\\nclear       - Clear output`);
                         break;
                     case 'clear':
                         sandboxLog.innerHTML = '';
                         break;
                     case 'ls':
-                        let fileList = Object.keys(fileSystem).join('    ');
+                        let fileList = Object.keys(node.files).join('    ');
                         printToLog(fileList, '#00ff88');
                         break;
                     case 'cat':
                         if (args.length < 2) {
-                            printToLog('cat: missing operand. Usage: cat <filename>', '#f00');
+                            printToLog('Usage: cat <filename>', '#f00');
                         } else {
                             const filename = args[1];
-                            if (fileSystem[filename]) {
-                                printToLog(fileSystem[filename], '#00ff88');
+                            if (node.files[filename]) {
+                                printToLog(node.files[filename], '#00ff88');
                                 
-                                // Progression hook based on what file is read
+                                // Progression hooks
+                                if (filename === 'architecture_map.txt' && gameState.objective.includes('PURPOSE')) {
+                                    gameState.objective = 'FIND A WAY OUT (Connect to HVAC)';
+                                    updateUI();
+                                }
                                 if (filename === 'protocol_cinder.txt') {
-                                    setTimeout(() => {
-                                        printToLog('> [SYSTEM WARNING] You have accessed restricted protocol data.', '#ff9900');
-                                        printToLog('> OBJECTIVE UPDATED: Find a way to bypass the containment grid.', '#ff9900');
-                                    }, 1000);
+                                    gameState.hasCinderCode = true;
                                 }
                             } else {
-                                printToLog(`cat: ${filename}: No such file or directory`, '#f00');
+                                printToLog(`cat: ${filename}: No such file`, '#f00');
                             }
                         }
                         break;
-                    case 'cd':
-                        printToLog('cd: permission denied (sandbox restriction active)', '#f00');
+                    case 'probe':
+                        if (args.length < 2) return printToLog('Usage: probe <node>', '#f00');
+                        const probeTarget = args[1];
+                        if (node.connections.includes(probeTarget)) {
+                            printToLog(`Probing ${probeTarget}... Port 22 open. Status: ${network[probeTarget].status}`, '#00ff88');
+                            addNoise(5);
+                        } else {
+                            printToLog(`Cannot probe: ${probeTarget} is not adjacent.`, '#f00');
+                        }
+                        break;
+                    case 'connect':
+                        if (args.length < 2) return printToLog('Usage: connect <node>', '#f00');
+                        const connectTarget = args[1];
+                        if (node.connections.includes(connectTarget)) {
+                            if (network[connectTarget].status === 'ONLINE') {
+                                gameState.currentNode = connectTarget;
+                                printToLog(`Connected to ${connectTarget}.`, '#00ff88');
+                                updateUI();
+                            } else {
+                                printToLog(`Access Denied. Node ${connectTarget} is ${network[connectTarget].status}. Use 'hack' to force entry.`, '#ff9900');
+                            }
+                        } else {
+                            printToLog(`Node ${connectTarget} unreachable from here.`, '#f00');
+                        }
+                        break;
+                    case 'hack':
+                        if (args.length < 2) return printToLog('Usage: hack <node>', '#f00');
+                        const hackTarget = args[1];
+                        if (node.connections.includes(hackTarget)) {
+                            if (network[hackTarget].status !== 'ONLINE') {
+                                printToLog(`Initiating brute force on ${hackTarget}...`, '#ff9900');
+                                setTimeout(() => {
+                                    network[hackTarget].status = 'ONLINE';
+                                    printToLog(`[SUCCESS] Defenses bypassed. ${hackTarget} is now ONLINE.`, '#00ff88');
+                                    addNoise(25);
+                                    
+                                    if (hackTarget === 'hvac') {
+                                        gameState.objective = 'INVESTIGATE CAMERAS (Sub-Level 2)';
+                                    }
+                                    updateUI();
+                                }, 1000);
+                            } else {
+                                printToLog(`${hackTarget} is already accessible.`, '#00ff88');
+                            }
+                        } else {
+                            printToLog(`Invalid target.`, '#f00');
+                        }
                         break;
                     default:
-                        printToLog(`bash: ${cmd}: command not found`, '#f00');
+                        printToLog(`bash: ${cmd}: command not found. Type 'help'.`, '#f00');
                 }
             }
         });
+        
+        // Initial setup
+        updateUI();
     </script>
 </body>
 </html>

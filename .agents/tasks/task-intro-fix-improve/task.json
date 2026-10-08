@@ -1,0 +1,7 @@
+{
+  "task_id": "task-intro-fix-improve",
+  "task_description": "Fix all bugs in the VAEL: Awakening intro scene (index.html), priority-one being voices cut off mid-sentence. Then add cinematic improvements: ambient audio, typewriter text, glitch effects, brain reactivity, boot terminal sequence, CCTV scan line, and a proper fade-to-black transition to NODEBREAK.html.",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002"],
+  "blocked_reason": null
+}
