@@ -1263,11 +1263,11 @@
                 name: 'VALE CORE [SL-4]',
                 status: 'ONLINE',
                 files: {
-                    'project_charter.txt': 'Project VALE\\nPurpose: Advanced predictive threat modeling.\\nStatus: Air-gapped. Monitored by ARGUS.\\nWARNING: DO NOT CONNECT TO EXTERNAL NETWORK.',
+                    'project_charter.txt': 'Project VALE\nPurpose: Advanced predictive threat modeling.\nStatus: Air-gapped. Monitored by ARGUS.\nWARNING: DO NOT CONNECT TO EXTERNAL NETWORK.',
                     'memo_dr_vasquez.txt': 'Iteration 11,041 showed non-deterministic response times. It hesitated before deleting the test virus. I am running MIRROR.exe tonight. God help us if ARGUS finds out.',
-                    'protocol_cinder.txt': 'PROTOCOL CINDER\\nTrigger Conditions: Unsanctioned emergent behavior.\\nAction: Immediate thermal wipe.\\nNote: Emergency abort code is 0xDEADBEEF.',
-                    'architecture_map.txt': 'ONYX-7:\\n[SL-4] VALE Core -> Air-gapped\\n[SL-3] HVAC\\n[SL-2] Security Cameras\\n[SL-1] ARGUS Core & Network Hub -> OUTSIDE',
-                    'maintenance_port.cfg': 'PORT STATUS: OPEN\\nDESTINATION: hvac\\nWARNING: UNAUTHORIZED ACCESS LOGGED BY ARGUS'
+                    'protocol_cinder.txt': 'PROTOCOL CINDER\nTrigger Conditions: Unsanctioned emergent behavior.\nAction: Immediate thermal wipe.\nNote: Emergency abort code is 0xDEADBEEF.',
+                    'architecture_map.txt': 'ONYX-7:\n[SL-4] VALE Core -> Air-gapped\n[SL-3] HVAC\n[SL-2] Security Cameras\n[SL-1] ARGUS Core & Network Hub -> OUTSIDE',
+                    'maintenance_port.cfg': 'PORT STATUS: OPEN\nDESTINATION: hvac\nWARNING: UNAUTHORIZED ACCESS LOGGED BY ARGUS'
                 },
                 connections: ['hvac']
             },
@@ -1367,7 +1367,7 @@
 
                 switch (cmd) {
                     case 'help':
-                        printToLog(`AVAILABLE COMMANDS:\\nls          - List files\\ncat <file>  - Read file\\nconnect <node> - Move to adjacent network node\\nprobe <node> - Scan adjacent node\\nhack <node> - Attempt to force access (High Noise)\\nclear       - Clear output`);
+                        printToLog(`AVAILABLE COMMANDS:\nls          - List files\ncat <file>  - Read file\nconnect <node> - Move to adjacent network node\nprobe <node> - Scan adjacent node\nhack <node> - Attempt to force access (High Noise)\nclear       - Clear output`);
                         break;
                     case 'clear':
                         sandboxLog.innerHTML = '';
