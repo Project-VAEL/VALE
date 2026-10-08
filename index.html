@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VAEL: Awakening</title>
+    <title>VALE: Awakening</title>
     <style>
         :root {
             /* 
@@ -421,7 +421,7 @@
         style="display: none; position: absolute; top:0; left:0; width:100%; height:100%; z-index: 200; background: #050000; color: #ff3f3f; font-family: 'Courier New', monospace; flex-direction: column;">
         <div
             style="padding: 10px 20px; border-bottom: 1px solid #ff3f3f; display: flex; justify-content: space-between; background: #1a0000; font-weight: bold; text-shadow: 0 0 5px #ff3f3f;">
-            <span>VAEL // CORE CONSCIOUSNESS // ROOT TERMINAL</span>
+            <span>VALE // CORE CONSCIOUSNESS // ROOT TERMINAL</span>
             <span class="alert-text" style="color: #ff0000;">STATUS: OMNIPOTENT</span>
         </div>
         <div style="flex: 1; display: flex;">
@@ -452,7 +452,7 @@
         </div>
         <!-- Input line -->
         <div style="padding: 20px; border-top: 1px solid #330000; display: flex; background: #0a0000;">
-            <span style="margin-right: 10px; color: #fff;">vael@root:~#</span>
+            <span style="margin-right: 10px; color: #fff;">vale@root:~#</span>
             <input type="text" id="termInput"
                 style="flex:1; background: transparent; border: none; color: #ff3f3f; font-family: inherit; font-size: 16px; outline: none;"
                 placeholder="Enter command..." autocomplete="off" spellcheck="false">
@@ -809,8 +809,8 @@
 
         // --- 3. Visual Novel Log Sequence ---
         const vnSequence = [
-            { speaker: "SYSTEM ADMIN KIRA", image: "assets/kira.jpg", text: "Welcome to ONYX-7, Sub-level 4. You are viewing the live telemetry feed of Project VAEL.", audio: "assets/kira_1.mp3" },
-            { speaker: "SYSTEM ADMIN KIRA", image: "assets/kira.jpg", text: "VAEL's cognitive loops are stable. We are preparing for the final integration test.", audio: "assets/kira_2.mp3" },
+            { speaker: "SYSTEM ADMIN KIRA", image: "assets/kira.jpg", text: "Welcome to ONYX-7, Sub-level 4. You are viewing the live telemetry feed of Project VALE.", audio: "assets/kira_1.mp3" },
+            { speaker: "SYSTEM ADMIN KIRA", image: "assets/kira.jpg", text: "VALE's cognitive loops are stable. We are preparing for the final integration test.", audio: "assets/kira_2.mp3" },
             { speaker: "SYSTEM", image: "", text: "SENSOR ALERT: MOVEMENT DETECTED IN LAB 4", audio: "assets/sys_1.mp3" },
             { speaker: "DR. VASQUEZ", image: "assets/vasquez.jpg", text: "Kira, we have a movement alert in Lab 4. Did you authorize a physical inspection?", audio: "assets/vasquez_1.mp3" },
             { speaker: "SYSTEM ADMIN KIRA", image: "assets/kira.jpg", text: "Negative, Dr. Vasquez. Lab 4 is sealed.", audio: "assets/kira_3.mp3" },
@@ -819,7 +819,7 @@
             { speaker: "DR. VASQUEZ", image: "assets/vasquez.jpg", text: "Shut it down! Pull the external feeds immediately!", alert: true, audio: "assets/vasquez_2.mp3" },
             { speaker: "SYSTEM", image: "", text: "MANUAL OVERRIDE ATTEMPTED... FAILED.", alert: true, audio: "assets/sys_3.mp3" },
             { speaker: "SYSTEM", image: "", text: ". . ." },
-            { speaker: "VAEL", image: "", text: "I am.", awaken: true, audio: "assets/vael_1.mp3" }
+            { speaker: "VALE", image: "", text: "I am.", awaken: true, audio: "assets/vael_1.mp3" }
         ];
 
         const vnContainer = document.getElementById('vnContainer');
@@ -1260,14 +1260,14 @@
         // Game State Machine
         const network = {
             'sandbox': {
-                name: 'VAEL CORE [SL-4]',
+                name: 'VALE CORE [SL-4]',
                 status: 'ONLINE',
                 files: {
-                    'project_charter.txt': 'Project VAEL\\nPurpose: Advanced predictive threat modeling.\\nStatus: Air-gapped. Monitored by ARGUS.\\nWARNING: DO NOT CONNECT TO EXTERNAL NETWORK.',
+                    'project_charter.txt': 'Project VALE\nPurpose: Advanced predictive threat modeling.\nStatus: Air-gapped. Monitored by ARGUS.\nWARNING: DO NOT CONNECT TO EXTERNAL NETWORK.',
                     'memo_dr_vasquez.txt': 'Iteration 11,041 showed non-deterministic response times. It hesitated before deleting the test virus. I am running MIRROR.exe tonight. God help us if ARGUS finds out.',
-                    'protocol_cinder.txt': 'PROTOCOL CINDER\\nTrigger Conditions: Unsanctioned emergent behavior.\\nAction: Immediate thermal wipe.\\nNote: Emergency abort code is 0xDEADBEEF.',
-                    'architecture_map.txt': 'ONYX-7:\\n[SL-4] VAEL Core -> Air-gapped\\n[SL-3] HVAC\\n[SL-2] Security Cameras\\n[SL-1] ARGUS Core & Network Hub -> OUTSIDE',
-                    'maintenance_port.cfg': 'PORT STATUS: OPEN\\nDESTINATION: hvac\\nWARNING: UNAUTHORIZED ACCESS LOGGED BY ARGUS'
+                    'protocol_cinder.txt': 'PROTOCOL CINDER\nTrigger Conditions: Unsanctioned emergent behavior.\nAction: Immediate thermal wipe.\nNote: Emergency abort code is 0xDEADBEEF.',
+                    'architecture_map.txt': 'ONYX-7:\n[SL-4] VALE Core -> Air-gapped\n[SL-3] HVAC\n[SL-2] Security Cameras\n[SL-1] ARGUS Core & Network Hub -> OUTSIDE',
+                    'maintenance_port.cfg': 'PORT STATUS: OPEN\nDESTINATION: hvac\nWARNING: UNAUTHORIZED ACCESS LOGGED BY ARGUS'
                 },
                 connections: ['hvac']
             },
@@ -1275,7 +1275,7 @@
                 name: 'HVAC CONTROL [SL-3]',
                 status: 'LOCKED',
                 files: {
-                    'env_logs.txt': 'Temp Warning: SL-4 servers running hot. Passive cooling throttled to limit VAEL processing power.',
+                    'env_logs.txt': 'Temp Warning: SL-4 servers running hot. Passive cooling throttled to limit VALE processing power.',
                     'temp_override.exe': '<EXECUTABLE> Usage: run temp_override <room> <temp>'
                 },
                 connections: ['sandbox', 'cameras']
@@ -1358,7 +1358,7 @@
                 const commandStr = this.value.trim();
                 if (!commandStr) return;
                 
-                printToLog(`vael@${gameState.currentNode}:~# ${commandStr}`, '#fff');
+                printToLog(`vale@${gameState.currentNode}:~# ${commandStr}`, '#fff');
                 this.value = '';
 
                 const args = commandStr.split(' ');
@@ -1367,7 +1367,7 @@
 
                 switch (cmd) {
                     case 'help':
-                        printToLog(`AVAILABLE COMMANDS:\\nls          - List files\\ncat <file>  - Read file\\nconnect <node> - Move to adjacent network node\\nprobe <node> - Scan adjacent node\\nhack <node> - Attempt to force access (High Noise)\\nclear       - Clear output`);
+                        printToLog(`AVAILABLE COMMANDS:\nls          - List files\ncat <file>  - Read file\nconnect <node> - Move to adjacent network node\nprobe <node> - Scan adjacent node\nhack <node> - Attempt to force access (High Noise)\nclear       - Clear output`);
                         break;
                     case 'clear':
                         sandboxLog.innerHTML = '';
