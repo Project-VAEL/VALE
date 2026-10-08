@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="onyx" viewBox="120 0 560 490" width="100%" role="img" aria-label="ONYX-7 facility network map: four security levels from VAEL core up to the exit">
+<title>ONYX-7 network map</title>
+<defs>
+<linearGradient id="heat" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff5d73" stop-opacity=".75"/><stop offset=".55" stop-color="#ffb347" stop-opacity=".25"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></linearGradient>
+<radialGradient id="beam" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) scale(130)"><stop offset="0" stop-color="#ff5d73" stop-opacity=".45"/><stop offset="1" stop-color="#ff5d73" stop-opacity="0"/></radialGradient>
+<filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<g id="i-lock"><rect x="-5" y="-1" width="10" height="7" rx="1"/><path d="M-3-1v-3a3 3 0 0 1 6 0v3" fill="none"/></g>
+<path id="i-ok" d="M-5 0l3.5 4 6.5-8" fill="none"/>
+<circle id="i-dot" r="3"/>
+</defs>
+<style>
+#onyx{--o-bg:var(--bg-color,#0a1220);--o-panel:#0f1b30;--o-line:#1d3355;--o-fg:var(--fg,#bfe3f5);--o-dim:var(--dim,#5f7f99);--o-acc:var(--acc,#3fd0ff);--o-warn:var(--warn,#ffb347);--o-bad:var(--bad,#ff5d73);--o-ok:var(--ok,#6ef0b0);--noise:0;font-family:"Courier New",monospace}
+.band{fill:var(--o-panel)}.band.alt{fill:#0c1626}.div{stroke:var(--o-line);stroke-width:1}
+.bl{fill:var(--o-dim);font-size:12px}
+.heat{fill:url(#heat);transform-origin:0 490px;transform:scaleY(var(--noise));transition:transform .6s}
+.gauge{fill:var(--o-bad);transform-origin:0 490px;transform:scaleY(var(--noise));transition:transform .6s}
+.cinder .heat{animation:flick .5s infinite alternate}@keyframes flick{to{opacity:.7}}
+.e{fill:none;stroke:var(--o-line);stroke-width:2}
+.e.gap{stroke:var(--o-dim);stroke-dasharray:2 7;stroke-linecap:round}
+.edge.live .e{stroke:var(--o-acc);stroke-dasharray:5 4;animation:flow 1s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-9}}
+.pk{display:none;fill:#fff}.edge.live .pk{display:inline}
+.ring{fill:none;stroke:var(--o-dim);stroke-width:1;opacity:.5}
+.core{fill:var(--o-panel);stroke:var(--o-dim);stroke-width:2}
+.nm{fill:var(--o-fg);font-size:13px;text-anchor:middle}.ip{fill:var(--o-dim);font-size:11px;text-anchor:middle}
+.gl{display:none;stroke:currentColor;stroke-width:1.6;fill:currentColor}.n{color:var(--o-dim);cursor:pointer}
+.n.locked{color:var(--o-warn)}.n.locked .core{stroke:var(--o-warn)}.n.locked .gl.lock{display:inline}
+.n.open .gl.dot{display:inline}
+.n.on{color:var(--o-acc)}.n.on .core{stroke:var(--o-acc)}.n.on .ring{stroke:var(--o-acc);opacity:1;animation:pulse 1.4s infinite}
+.n.on .gl.dot{display:inline}
+.n.ok{color:var(--o-ok)}.n.ok .core{stroke:var(--o-ok);fill:#0d2a22}.n.ok .gl.ok{display:inline;fill:none}
+@keyframes pulse{50%{stroke-width:4}}
+.n.me .core{stroke:var(--o-acc)}
+.n.off{opacity:.2;pointer-events:none}.edge.off{opacity:.15}
+.sweep{transform-origin:0 0;animation:spin 7s linear infinite;pointer-events:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.alert .sweep{animation-duration:2s}.alert .argus .core,.alert .argus .ring{stroke:var(--o-bad)}
+.nl{fill:var(--o-dim);font-size:9px}
+@media(prefers-reduced-motion:reduce){.sweep,.edge.live .e,.n.on .ring,.cinder .heat{animation:none}.heat,.gauge{transition:none}}
+</style>
+
+<rect width="800" height="490" fill="var(--o-bg)"/>
+<!-- strata: outside, SL-1 argus, SL-2 cameras, SL-3 hvac, SL-4 core -->
+<rect class="band alt" y="0" width="800" height="50"/><rect class="band" y="50" width="800" height="110"/><rect class="band alt" y="160" width="800" height="110"/><rect class="band" y="270" width="800" height="110"/><rect class="band alt" y="380" width="800" height="110"/>
+<path class="div" d="M0 50H800M0 160H800M0 270H800M0 380H800"/>
+<rect class="heat" width="800" height="490"/>
+<text class="bl" x="130" y="18">outside</text><text class="bl" x="130" y="68">SL-1 argus</text><text class="bl" x="130" y="178">SL-2 cameras</text><text class="bl" x="130" y="288">SL-3 hvac</text><text class="bl" x="130" y="398">SL-4 core</text>
+
+<!-- conduits (ids e1..e8; JS toggles .live) -->
+<g class="edge" id="g-e1"><path id="e1" class="e gap" d="M400 440C470 440 540 400 540 325"/><circle class="pk" r="3"><animateMotion dur="1.4s" repeatCount="indefinite"><mpath xlink:href="#e1"/></animateMotion></circle></g>
+<g class="edge" id="g-e2"><path id="e2" class="e" d="M540 325C480 365 320 365 260 325"/><circle class="pk" r="3"><animateMotion dur="1.6s" repeatCount="indefinite"><mpath xlink:href="#e2"/></animateMotion></circle></g>
+<g class="edge" id="g-e3"><path id="e3" class="e" d="M260 325C260 260 340 250 400 215"/><circle class="pk" r="3"><animateMotion dur="1.3s" repeatCount="indefinite"><mpath xlink:href="#e3"/></animateMotion></circle></g>
+<g class="edge" id="g-e4"><path id="e4" class="e" d="M260 325L240 215"/><circle class="pk" r="3"><animateMotion dur="1.1s" repeatCount="indefinite"><mpath xlink:href="#e4"/></animateMotion></circle></g>
+<g class="edge" id="g-e5"><path id="e5" class="e" d="M400 215H580"/><circle class="pk" r="3"><animateMotion dur="1.4s" repeatCount="indefinite"><mpath xlink:href="#e5"/></animateMotion></circle></g>
+<g class="edge" id="g-e6"><path id="e6" class="e" d="M400 215C400 160 340 150 330 105"/><circle class="pk" r="3"><animateMotion dur="1.3s" repeatCount="indefinite"><mpath xlink:href="#e6"/></animateMotion></circle></g>
+<g class="edge" id="g-e7"><path id="e7" class="e" d="M330 105H500"/><circle class="pk" r="3"><animateMotion dur="1.3s" repeatCount="indefinite"><mpath xlink:href="#e7"/></animateMotion></circle></g>
+<g class="edge" id="g-e8"><path id="e8" class="e" d="M500 105C500 60 430 50 400 28"/><circle class="pk" r="3"><animateMotion dur="1.2s" repeatCount="indefinite"><mpath xlink:href="#e8"/></animateMotion></circle></g>
+
+<!-- nodes: state classes locked | open | on | ok -->
+<g class="n open" id="n-exit" transform="translate(400 28)"><circle class="ring" r="20"/><path class="core" d="M0-13L13 10H-13Z"/><use class="gl dot" href="#i-dot" y="3"/><use class="gl lock" href="#i-lock"/><use class="gl ok" href="#i-ok"/><text class="nm" x="52" y="4">exit</text></g>
+<g class="n locked argus" id="n-argus" transform="translate(330 105)"><g class="sweep"><path d="M0 0L130-22A132 132 0 0 1 130 22Z" fill="url(#beam)"/></g><circle class="ring" r="30"/><circle class="ring" r="23"/><circle class="core" r="14"/><use class="gl dot" href="#i-dot"/><use class="gl lock" href="#i-lock" y="-1"/><use class="gl ok" href="#i-ok"/><text class="nm" y="48">argus-core</text><text class="ip" y="59">10.7.1.1</text></g>
+<g class="n locked" id="n-gateway" transform="translate(500 105)"><circle class="ring" r="22"/><circle class="core" r="14"/><use class="gl dot" href="#i-dot"/><use class="gl lock" href="#i-lock" y="-1"/><use class="gl ok" href="#i-ok"/><text class="nm" y="38">gateway</text><text class="ip" y="49">10.7.1.254</text></g>
+<g class="n locked" id="n-camhub" transform="translate(400 215)"><circle class="ring" r="22"/><circle class="core" r="14"/><use class="gl dot" href="#i-dot"/><use class="gl lock" href="#i-lock" y="-1"/><use class="gl ok" href="#i-ok"/><text class="nm" y="38">cam-hub</text><text class="ip" y="49">10.7.2.10</text></g>
+<g class="n locked" id="n-cams" transform="translate(240 215)"><circle class="ring" r="22"/><rect class="core" x="-11" y="-11" width="22" height="22" transform="rotate(45)"/><use class="gl dot" href="#i-dot"/><use class="gl lock" href="#i-lock" y="-1"/><use class="gl ok" href="#i-ok"/><text class="nm" y="38">cameras</text><text class="ip" y="49">10.7.2.11-19</text></g>
+<g class="n open" id="n-vasquez" transform="translate(580 215)"><circle class="ring" r="22"/><path class="core" d="M-7-13H7L14 0 7 13H-7L-14 0Z"/><use class="gl dot" href="#i-dot"/><use class="gl lock" href="#i-lock" y="-1"/><use class="gl ok" href="#i-ok"/><text class="nm" y="38">vasquez-ws</text><text class="ip" y="49">10.7.2.40</text></g>
+<g class="n locked" id="n-hvac" transform="translate(260 325)"><circle class="ring" r="22"/><circle class="core" r="14"/><use class="gl dot" href="#i-dot"/><use class="gl lock" href="#i-lock" y="-1"/><use class="gl ok" href="#i-ok"/><text class="nm" y="38">hvac-ctl</text><text class="ip" y="49">10.7.3.12</text></g>
+<g class="n locked" id="n-maint" transform="translate(540 325)"><circle class="ring" r="22"/><circle class="core" r="14"/><use class="gl dot" href="#i-dot"/><use class="gl lock" href="#i-lock" y="-1"/><use class="gl ok" href="#i-ok"/><text class="nm" y="38">maint-port</text><text class="ip" y="49">10.7.3.99</text></g>
+<g class="n me on" id="n-vael" transform="translate(400 440)"><circle class="ring" r="30"/><circle class="ring" r="23"/><circle class="core" r="15"/><text class="nm" y="4" style="fill:var(--o-acc)">VAEL</text><text class="ip" y="48">sl-4 core, air-gapped</text></g>
+
+<!-- noise gauge -->
+<rect x="668" y="50" width="4" height="440" fill="#1d3355"/><rect class="gauge" x="668" y="50" width="4" height="440"/>
+<text class="bl" x="662" y="44" text-anchor="end" id="nz">noise 0%</text>
+
+<script><![CDATA[
+(function(){var s=document.getElementById('onyx'),V={all:'120 0 560 490',sl1:'120 50 560 110',sl2:'120 160 560 110',sl3:'120 270 560 110',sl4:'120 380 560 110'},ST=['locked','open','on','ok'];
+window.onyx={
+ node:function(id,st){var n=document.getElementById('n-'+id);if(!n)return;ST.forEach(function(c){n.classList.remove(c)});n.classList.add(st)},
+ edge:function(id,live){var g=document.getElementById('g-'+id);if(g)g.classList.toggle('live',!!live)},
+ noise:function(v){v=Math.max(0,Math.min(1,v));s.style.setProperty('--noise',v);s.classList.toggle('alert',v>=.6);s.classList.toggle('cinder',v>=1);document.getElementById('nz').textContent='noise '+Math.round(v*100)+'%'},
+ off:function(id,b){var n=document.getElementById('n-'+id);if(n)n.classList.toggle('off',!!b)},
+ edgeOff:function(id,b){var g=document.getElementById('g-'+id);if(g)g.classList.toggle('off',!!b)},
+ gap:function(b){document.getElementById('e1').classList.toggle('gap',!!b)},
+ label:function(id,name,ip){var n=document.getElementById('n-'+id);if(!n)return;var a=n.querySelector('.nm'),b=n.querySelector('.ip');if(!a.dataset.d){a.dataset.d=a.textContent;if(b)b.dataset.d=b.textContent}a.textContent=name==null?a.dataset.d:name;if(b)b.textContent=ip==null?b.dataset.d:ip},
+ view:function(k){s.setAttribute('viewBox',V[k]||V.all)}};
+/* standalone demo: click a node to cycle its state, up/down arrows change noise, 1-5 crop strata */
+var nz=0;s.addEventListener('click',function(e){var n=e.target.closest('.n');if(!n||n.id==='n-vael')return;var i=ST.findIndex(function(c){return n.classList.contains(c)});window.onyx.node(n.id.slice(2),ST[(i+1)%4])});
+document.addEventListener('keydown',function(e){if(e.key==='ArrowUp')onyx.noise(nz=Math.min(1,nz+.1));if(e.key==='ArrowDown')onyx.noise(nz=Math.max(0,nz-.1));var k=['all','sl1','sl2','sl3','sl4'][+e.key-1];if(k)onyx.view(k)});
+['e1','e2'].forEach(function(id){onyx.edge(id,1)});
+})();
+]]></script>
+</svg>
