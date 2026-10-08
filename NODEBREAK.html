@@ -526,45 +526,68 @@ body::after {
 <script>
 const L=[
 {t:"Boot Camp",d:"EASY",bg:["rain","#3fd0ff"],story:"NULL (your handler): Welcome, recruit. No mouse here. Learn to move through a machine with only words.",
-brief:"Find the 4-digit code in the real vault.txt (there are two) and send it with: submit <code>",
-tips:"Learn: ls (list files), cd <dir> (enter a folder, cd .. goes back), cat <file> (read a file), pwd (where am I).",
-fs:{home:{docs:{"mission.txt":"The code is in a file called vault.txt. There are two. Only one is real.","vault.txt":"Not here. Try another folder.","todo.txt":"buy milk, rotate passwords, hide the real vault"},pics:{"cat.txt":"=^.^=","party.txt":"Office party photos. Nothing useful."},vault:{"vault.txt":"CODE: 4471","readme.txt":"Authorised staff only."}},tmp:{"cache.tmp":"junk"}},
-nodes:[],code:"4471",hint:"Try: ls, cd home, ls. The real vault.txt is in a folder named vault.",lesson:"Paths are a map. ls looks, cd moves, cat reads."},
+brief:"Analyze the system. Read every file you can find — the access key is buried somewhere in this filesystem. Find it and the door opens.",
+tips:"Commands: ls (list files), cd <dir> (enter folder), cd .. (go back), cat <file> (read file), pwd (where am I).",
+fs:{home:{docs:{"mission.txt":"The access key is buried in this machine. Explore every directory.","todo.txt":"buy milk, rotate passwords, do NOT leave vault unlocked"},pics:{"cat.txt":"=^.^=","party.txt":"Office party photos. Nothing useful."},vault:{"vault.txt":"LEVEL 1 CLEARANCE GRANTED\n\n> Unlocking door to sector 2...\n[TAG:unlock_door]","readme.txt":"Authorised staff only."}},tmp:{"cache.tmp":"junk data — nothing here"}}},
+nodes:[],
+hint:"Try: ls  then  cd home  then  ls  then  cd vault  then  cat vault.txt",
+lesson:"Paths are a map. ls looks, cd moves, cat reads."},
+
 {t:"First Contact",d:"EASY",bg:["net","#6ea8ff"],story:"NULL: Real targets live on networks. Scan, hop on, and grab what is public.",
-brief:"Find the code on the public web server, then disconnect and submit it.",
-tips:"Learn: scan (list machines), connect <ip> (jump onto one), disconnect (return home). Then ls and cat on the remote machine.",
-fs:{home:{"notes.txt":"Target is 10.0.0.5. Public server, no password. Ignore the printer."}},
-nodes:[{ip:"10.0.0.5",name:"pub-web",ports:0,fs:{pub:{"readme.txt":"Welcome to our site.","news.txt":"Maintenance on Friday.","code.txt":"CODE: 2208"}}},{ip:"10.0.0.9",name:"printer",ports:0,fs:{print:{"queue.txt":"3 jobs waiting. No code here."}}}],code:"2208",hint:"scan, connect 10.0.0.5, cd pub, cat code.txt, disconnect, submit.",lesson:"A network is a map of machines. scan finds them, connect hops onto one."},
+brief:"A public server is live on this network. Connect to it, find the classified file, then disconnect to advance.",
+tips:"Commands: scan (find machines), connect <ip> (hop on), disconnect (return home).",
+fs:{home:{"notes.txt":"Target is 10.0.0.5. No password needed. Ignore the printer at 10.0.0.9."}},
+nodes:[{ip:"10.0.0.5",name:"pub-web",ports:0,fs:{pub:{"readme.txt":"Welcome to our site.","news.txt":"Maintenance on Friday.","classified.txt":"CLASSIFIED FILE ACCESSED\n\n> Transmitting unlock signal to next door...\n[TAG:unlock_door]"}}},{ip:"10.0.0.9",name:"printer",ports:0,fs:{print:{"queue.txt":"3 jobs waiting. Nothing useful here."}}}],
+hint:"scan — connect 10.0.0.5 — cd pub — cat classified.txt — disconnect",
+lesson:"A network is a map of machines. scan finds them, connect hops onto one."},
+
 {t:"Open Ports",d:"EASY",bg:["hex","#5cf0d0"],story:"NULL: Ports are doors. Locked servers keep them shut. You have the tools to pick them.",
-brief:"The payroll server is locked. Open its ports, then find the code.",
-tips:"Learn: probe (see what blocks you), porthack (crack the ports). Then ls and cd as usual.",
-fs:{home:{"todo.txt":"Payroll 10.0.7.12 is locked. probe it, then porthack. The coffee machine is a distraction."}},
-nodes:[{ip:"10.0.7.12",name:"payroll-srv",ports:1,fs:{data:{"payroll.txt":"CODE: 9135","staff.txt":"142 employees"},notice:{"memo.txt":"Payroll runs on the 25th."}}},{ip:"10.0.7.20",name:"coffee-iot",ports:0,fs:{machine:{"status.txt":"Beans low. No code."}}}],code:"9135",hint:"connect 10.0.7.12, probe, porthack, then cd data.",lesson:"Closed ports guard a machine. probe finds the lock, porthack picks it."},
+brief:"The payroll server is locked down. Crack it open and extract the data inside — that triggers the next door.",
+tips:"Commands: probe (see what blocks you), porthack (crack the ports), then ls and cat as usual.",
+fs:{home:{"todo.txt":"Payroll 10.0.7.12 is locked. probe it, then porthack. Coffee machine is a distraction."}},
+nodes:[{ip:"10.0.7.12",name:"payroll-srv",ports:1,fs:{data:{"payroll.txt":"PAYROLL DATABASE BREACHED\n\n> Access verified. Unlocking sector 4...\n[TAG:unlock_door]","staff.txt":"142 employees on record."},notice:{"memo.txt":"Payroll runs on the 25th."}}},{ip:"10.0.7.20",name:"coffee-iot",ports:0,fs:{machine:{"status.txt":"Beans low. No useful data here."}}}],
+hint:"connect 10.0.7.12 — probe — porthack — cd data — cat payroll.txt",
+lesson:"Closed ports guard a machine. probe finds the lock, porthack picks it."},
+
 {t:"Credentials",d:"MEDIUM",bg:["radar","#c58bff"],story:"NULL: People reuse passwords and leave notes everywhere. Follow the paper trail.",
-brief:"The vault needs a login. Someone left it on another machine. Find it, get in, grab the code.",
-tips:"Learn: login <user> <pass>. Read files on the other servers to find credentials.",
-fs:{home:{"todo.txt":"Vault server 10.0.9.3 needs a login. Check the intranet box 10.0.9.2 first."}},
-nodes:[{ip:"10.0.9.2",name:"intranet",ports:0,fs:{wiki:{"it-notes.txt":"Vault login for the team: admin / sunshine99 (do not share!)","lunch.txt":"Pizza Friday."}}},{ip:"10.0.9.4",name:"hr-portal",ports:0,fs:{hr:{"policy.txt":"Passwords must be 12 characters. (Nobody follows this.)"}}},{ip:"10.0.9.3",name:"vault-srv",ports:1,user:"admin",pass:"sunshine99",fs:{vault:{"code.txt":"CODE: 3317","audit.txt":"Last login: 3 days ago."}}}],code:"3317",hint:"Read the intranet wiki, then on the vault: probe, porthack, login admin sunshine99.",lesson:"Credentials leak through notes and wikis. Always read everything."},
+brief:"The vault server needs a login. Someone left the credentials on the intranet. Find them, log in, get the data.",
+tips:"Commands: login <user> <pass>. Read files on other servers to find credentials first.",
+fs:{home:{"todo.txt":"Vault server 10.0.9.3 needs a login. Check the intranet at 10.0.9.2 first."}},
+nodes:[{ip:"10.0.9.2",name:"intranet",ports:0,fs:{wiki:{"it-notes.txt":"Vault login for the team: admin / sunshine99 (do not share!)","lunch.txt":"Pizza Friday."}}},{ip:"10.0.9.4",name:"hr-portal",ports:0,fs:{hr:{"policy.txt":"Passwords must be 12 characters. (Nobody follows this.)"}}},{ip:"10.0.9.3",name:"vault-srv",ports:1,user:"admin",pass:"sunshine99",fs:{vault:{"access_granted.txt":"VAULT BREACH SUCCESSFUL\n\n> Door to sector 5 unlocking now...\n[TAG:unlock_door]","audit.txt":"Last login: 3 days ago."}}}],
+hint:"connect 10.0.9.2 — cd wiki — cat it-notes.txt — disconnect — connect 10.0.9.3 — probe — porthack — login admin sunshine99",
+lesson:"Credentials leak through notes and wikis. Always read everything."},
+
 {t:"Cover Your Tracks",d:"MEDIUM",bg:["wave","#ff8ad8"],story:"NULL: Servers remember every visit. Real operators leave no fingerprints.",
-brief:"Get the code, delete the access log, disconnect, then submit. Leave without cleaning and you fail.",
-tips:"Learn: rm <file>. Delete logs/access.log before you disconnect.",
+brief:"Extract the data, then delete the access log before you disconnect. Leave evidence behind and you fail.",
+tips:"Commands: rm <file> — delete logs/access.log before you disconnect.",
 fs:{home:{"leaked.txt":"Backup server 10.1.1.8, login root / toor42"}},
-nodes:[{ip:"10.1.1.8",name:"backup-srv",ports:1,user:"root",pass:"toor42",clean:1,fs:{logs:{"access.log":"[10.1.1.8] visitor session recorded","audit.log":"nightly audit ok"},secrets:{"code.txt":"CODE: 6620","keys.txt":"(encrypted)"}}}],code:"6620",hint:"connect, probe, porthack, login root toor42, read secrets, rm logs/access.log, disconnect.",lesson:"Logs are evidence. rm the trail before leaving."},
+nodes:[{ip:"10.1.1.8",name:"backup-srv",ports:1,user:"root",pass:"toor42",clean:1,fs:{logs:{"access.log":"[10.1.1.8] visitor session recorded","audit.log":"nightly audit ok"},secrets:{"intel.txt":"EXFILTRATION COMPLETE\n\n> Erasing your trail... door unlocking...\n[TAG:unlock_door]","keys.txt":"(encrypted)"}}}],
+hint:"connect — probe — porthack — login root toor42 — cd secrets — cat intel.txt — cd ../logs — rm access.log — disconnect",
+lesson:"Logs are evidence. rm the trail before leaving."},
+
 {t:"Race the Trace",d:"HARD",bg:["alert","#ff5d73"],story:"NULL: A hardened core. Once you start cracking, a trace starts counting. Be quick and clean.",
-brief:"Break the firewall, crack the ports, log in, grab the code, clean the logs. 90 seconds once you crack.",
-tips:"Learn: analyze (study the firewall), solve <word> (break it). Order: probe, analyze, solve, porthack, login, grab, clean, disconnect.",
-fs:{home:{"intel.txt":"Gateway 10.2.0.1 is open. Core 10.2.4.4 needs ops / n1ghtshift."}},
-nodes:[{ip:"10.2.0.1",name:"gateway",ports:0,fs:{pub:{"info.txt":"Core: ops account. Password is in your local intel file."}}},{ip:"10.2.4.4",name:"core-srv",ports:1,fw:"FIREWALL",user:"ops",pass:"n1ghtshift",clean:1,trace:90,fs:{logs:{"access.log":"[10.2.4.4] intrusion attempt recorded"},core:{"code.txt":"CODE: 8842"}}}],code:"8842",hint:"analyze shows the firewall key backwards. Reverse it for solve.",lesson:"Firewalls and timers punish hesitation. Plan the order of attack."},
+brief:"Break the firewall, crack the ports, log in, extract the data, wipe the logs — before the trace locks you out.",
+tips:"Commands: analyze (study the firewall), solve <word> (break it). Order matters: probe → analyze → solve → porthack → login → cat → rm → disconnect.",
+fs:{home:{"intel.txt":"Gateway 10.2.0.1 is open. Core 10.2.4.4 — login: ops / n1ghtshift."}},
+nodes:[{ip:"10.2.0.1",name:"gateway",ports:0,fs:{pub:{"info.txt":"Core is at 10.2.4.4. Credentials are in your local intel file."}}},{ip:"10.2.4.4",name:"core-srv",ports:1,fw:"FIREWALL",user:"ops",pass:"n1ghtshift",clean:1,trace:90,fs:{logs:{"access.log":"[10.2.4.4] intrusion attempt recorded"},core:{"core_data.txt":"FIREWALL BREACHED\n\n> Sector 7 door opening...\n[TAG:unlock_door]"}}}],
+hint:"analyze shows the key backwards — reverse it and use solve. Then porthack, login, cat core/core_data.txt, rm logs/access.log, disconnect.",
+lesson:"Firewalls and timers punish hesitation. Plan your sequence before you start."},
+
 {t:"Ghost in the Wire",d:"HARD",bg:["hex","#9aa7ff"],story:"NULL: The database sends its admin login over the wire in plain text. Listen in.",
-brief:"You do not know the DB password. Crack the ports, capture network traffic, then use what you capture. 100 seconds.",
-tips:"Learn: sniff (capture traffic on a cracked machine to read credentials that fly past).",
-fs:{home:{"brief.txt":"Target: 10.5.2.2 database. Credentials unknown. Capture them."}},
-nodes:[{ip:"10.5.0.1",name:"gateway",ports:0,fs:{pub:{"hint.txt":"DB admin traffic is unencrypted. Try sniff after cracking ports."}}},{ip:"10.5.2.2",name:"db-srv",ports:1,user:"dba",pass:"Tr0ub4dor",sniff:"POST /login  user=dba&pass=Tr0ub4dor",clean:1,trace:100,fs:{logs:{"access.log":"[db] session recorded"},db:{"customers.txt":"12,480 rows","code.txt":"CODE: 5156"}}}],code:"5156",hint:"connect, probe, porthack, sniff, login with what you saw, grab, clean.",lesson:"Unencrypted traffic leaks secrets. Sniffing reads them off the wire."},
+brief:"No password given. Crack the ports, capture live network traffic, use what you intercept to log in.",
+tips:"Commands: sniff (capture packets after cracking ports — credentials fly past in plaintext).",
+fs:{home:{"brief.txt":"Target: 10.5.2.2 database. Credentials unknown — capture them from the wire."}},
+nodes:[{ip:"10.5.0.1",name:"gateway",ports:0,fs:{pub:{"hint.txt":"DB admin traffic is unencrypted. sniff after cracking ports."}}},{ip:"10.5.2.2",name:"db-srv",ports:1,user:"dba",pass:"Tr0ub4dor",sniff:"POST /login  user=dba&pass=Tr0ub4dor",clean:1,trace:100,fs:{logs:{"access.log":"[db] session recorded"},db:{"customers.txt":"12,480 rows","manifest.txt":"DATABASE COMPROMISED\n\n> Final sector door opening...\n[TAG:unlock_door]"}}}],
+hint:"connect 10.5.2.2 — probe — porthack — sniff (read the captured credentials) — login dba Tr0ub4dor — cat db/manifest.txt — rm logs/access.log — disconnect",
+lesson:"Unencrypted traffic leaks secrets. Sniffing reads them off the wire."},
+
 {t:"Blackout",d:"EXPERT",bg:["alert","#ff3b3b"],story:"NULL: Last job. Three hops, two firewalls, one clock. Do it clean and you are a ghost.",
-brief:"Chain through the gateway and relay to reach the core. Every secret you need is on the way.",
-tips:"Use everything: scan, connect, probe, analyze, solve, porthack, sniff, login, rm, disconnect. The trace only starts on the core.",
+brief:"Chain through gateway and relay to reach the core. Every secret you need is on the path. Leave no trace.",
+tips:"Use everything: scan, connect, probe, analyze, solve, porthack, sniff, login, rm, disconnect. Trace starts only on the core.",
 fs:{home:{"start.txt":"Begin at 10.9.0.1. It leaks the relay login. The relay leaks the rest."}},
-nodes:[{ip:"10.9.0.1",name:"gateway",ports:0,fs:{pub:{"ops.txt":"Relay login: relay / bridge77"}}},{ip:"10.9.3.7",name:"relay",ports:1,fw:"GATEKEEPER",user:"relay",pass:"bridge77",sniff:"SSH-AUTH root@10.9.9.9  pass=zer0day",fs:{etc:{"routes.txt":"core lives at 10.9.9.9"}}},{ip:"10.9.9.9",name:"core",ports:1,fw:"BLACKOUT",user:"root",pass:"zer0day",clean:1,trace:75,fs:{logs:{"access.log":"[core] root session"},vault:{"code.txt":"CODE: 1337"}}}],code:"1337",hint:"Gateway -> relay creds. Relay: solve GATEKEEPER, porthack, sniff for the core root password. Core: solve BLACKOUT, then be fast.",lesson:"Real intrusions chain small leaks into full access."}
+nodes:[{ip:"10.9.0.1",name:"gateway",ports:0,fs:{pub:{"ops.txt":"Relay login: relay / bridge77"}}},{ip:"10.9.3.7",name:"relay",ports:1,fw:"GATEKEEPER",user:"relay",pass:"bridge77",sniff:"SSH-AUTH root@10.9.9.9  pass=zer0day",fs:{etc:{"routes.txt":"Core is at 10.9.9.9"}}},{ip:"10.9.9.9",name:"core",ports:1,fw:"BLACKOUT",user:"root",pass:"zer0day",clean:1,trace:75,fs:{logs:{"access.log":"[core] root session"},vault:{"final.txt":"BLACKOUT PROTOCOL DEFEATED\n\nYou are a ghost. No trace. No record.\n[TAG:unlock_door]"}}}],
+hint:"Gateway → relay creds → solve GATEKEEPER → porthack → sniff for core password → solve BLACKOUT → porthack → login root zer0day → cat final.txt → rm logs/access.log → disconnect",
+lesson:"Real intrusions chain small leaks into full access."}
 ];
 const out=document.getElementById("out"),inp=document.getElementById("in"),pr=document.getElementById("pr"),lv=document.getElementById("lv"),tr=document.getElementById("trace");
 let S,lvl=0,timer=null,left=0,busy=0;
@@ -647,11 +670,11 @@ function access(){if(!S.node)return true;const n=S.node;if(n.ports&&!S.hacked){p
 function fail(m){clearInterval(timer);timer=null;tr.textContent="";banner("TRACED","b");p(m,"b");p("Mission failed. Restarting level...","w");setTimeout(()=>start(lvl),1800)}
 function leave(){const n=S.node;if(n&&n.clean&&S.auth&&!S.cleaned){S.node=null;return fail("The admin found your fingerprints in the logs. You were traced.")}clearInterval(timer);timer=null;tr.textContent="";S.node=null;S.cwd=[];S.probed=S.hacked=S.auth=S.fw=0;p("Disconnected.","d")}
 const C={
-help(){p("ls  cd <dir>  cat <file>  pwd  clear\nscan  connect <ip>  disconnect\nprobe  analyze  solve <word>  porthack\nlogin <user> <pass>  rm <file>  sniff\nsubmit <code>  hint  skip\n(Only unlocked commands are needed for each level.)","d")},
+help(){p("ls  cd <dir>  cat <file>  pwd  clear\nscan  connect <ip>  disconnect\nprobe  analyze  solve <word>  porthack\nlogin <user> <pass>  rm <file>  sniff\nhint  skip  restart\n(Find the right file and the door opens automatically.)","d")},
 pwd(){p("/"+S.cwd.join("/"))},
 ls(){if(!access())return;const d=dirAt(S.cwd);if(!d||!Object.keys(d).length)return p("(empty)","d");p(Object.keys(d).map(k=>typeof d[k]==="object"?k+"/":k).join("   "),"c")},
 cd(a){if(!access())return;if(!a)return p("Usage: cd <dir>","w");const w=res(a),d=dirAt(w);if(d&&typeof d==="object"){S.cwd=w}else p("No such directory: "+a,"b")},
-cat(a){if(!access())return;if(!a)return p("Usage: cat <file>","w");const w=res(a),f=w.pop(),d=dirAt(w);if(d&&typeof d[f]==="string")p(d[f]);else p("No such file: "+a,"b")},
+cat(a){if(!access())return;if(!a)return p("Usage: cat <file>","w");const w=res(a),f=w.pop(),d=dirAt(w);if(d&&typeof d[f]==="string"){p(d[f]);if(d[f].includes("[TAG:unlock_door]"))completeLevel()}else p("No such file: "+a,"b")},
 rm(a){if(!access())return;if(!a)return p("Usage: rm <file>","w");const w=res(a),f=w.pop(),d=dirAt(w);if(d&&typeof d[f]==="string"){delete d[f];p("Deleted "+f,"o");if(S.node&&f==="access.log")S.cleaned=1}else p("No such file: "+a,"b")},
 scan(){if(!S.nodes.length)return p("No remote machines on this network.","d");p("Known machines:","c");S.nodes.forEach(n=>p("  "+n.ip+"   "+n.name))},
 connect(a){if(S.node)return p("Already connected. Use disconnect first.","w");const n=S.nodes.find(x=>x.ip===a);if(!n)return p("Unknown host. Use scan to list machines.","b");S.node=n;S.cwd=[];S.probed=S.hacked=S.auth=S.fw=0;p("Connected to "+n.name+" ("+n.ip+")","o");if(n.ports||n.user)p("This machine is protected. Try probe.","w")},
@@ -662,10 +685,11 @@ solve(a){const n=S.node;if(!n||!n.fw)return p("No firewall here.","w");if((a||""
 sniff(){const n=S.node;if(!n||!n.sniff)return p("Nothing worth sniffing here.","w");if(n.ports&&!S.hacked)return p("Open the ports first.","b");p("Capturing packets...","d");p("CAPTURED: "+n.sniff,"o")},
 porthack(){const n=S.node;if(!n)return p("Connect to a machine first.","w");if(!S.probed)return p("Probe the target first so you know what blocks you.","w");if(!n.ports||S.hacked)return p("No closed ports to crack.","d");if(n.fw&&!S.fw)return p("Blocked by firewall. Use analyze and solve first.","b");busy=1;const d=document.createElement("div");d.className="c";out.appendChild(d);let k=0;const t=setInterval(()=>{k++;d.textContent="Cracking ports ["+"#".repeat(k)+".".repeat(10-k)+"] "+k*10+"%";out.scrollTop=out.scrollHeight;if(k>=10){clearInterval(t);if(!busy)return;busy=0;S.hacked=1;p("Ports open.","o");if(n.trace&&!timer){left=S.tt=n.trace;tick();timer=setInterval(tick,1000)}prompt_()}},130)},
 login(a,b){const n=S.node;if(!n||!n.user)return p("No login needed here.","d");if(n.ports&&!S.hacked)return p("Open the ports first.","b");if(a===n.user&&b===n.pass){S.auth=1;p("Welcome, "+a+".","o")}else p("Invalid credentials.","b")},
-submit(a){const l=L[lvl];if(S.node)return p("Disconnect first, then submit.","w");if(a!==l.code)return p("Incorrect code.","b");clearInterval(timer);p("CODE ACCEPTED. Level complete!","o");p("LESSON: "+L[lvl].lesson,"c");banner("ACCESS GRANTED","o");if(lvl+1<L.length){p("Loading next level...","d");setTimeout(()=>start(lvl+1),1500)}else{p("You finished every level. You now know the basic hacking workflow: navigate, scan, probe, crack, log in, extract, clean up.","c");try{localStorage.removeItem("nb_lvl")}catch(e){}p("Type restart to play again.","d")}},
+submit(){p("There is no code to submit. Find the right file and the door opens automatically.","w")},
 hint(){p("HINT: "+L[lvl].hint,"w")},
 restart(){start(0)},skip(){start(Math.min(lvl+1,L.length-1))},
 clear(){out.textContent=""}};
+function completeLevel(){clearInterval(timer);timer=null;tr.textContent="";p("","d");p("── DOOR UNLOCKED ──────────────────────────────","o");p("LESSON: "+L[lvl].lesson,"c");banner("ACCESS GRANTED","o");if(lvl+1<L.length){p("Advancing to next sector...","d");setTimeout(()=>start(lvl+1),2000)}else{p("All sectors cleared. You are a ghost.","c");try{localStorage.removeItem("nb_lvl")}catch(e){}p("Type restart to run it again.","d")}}
 function tick(){tr.textContent="TRACE "+left+"s";tb.style.width=(100-left/S.tt*100)+"%";onyx.noise(1-left/S.tt);if(left--<=0)fail("Trace complete. You were locked out.")}
 function run(v){v=v.trim();if(!v||busy)return;p(pr.textContent+" "+v,"d");const [c,...a]=v.split(/\s+/);if(C[c])C[c](...a);else p("Unknown command: "+c+" (type help)","b");if(S)prompt_()}
 inp.addEventListener("keydown",e=>{if(e.key==="Enter"){run(inp.value);inp.value=""}});
