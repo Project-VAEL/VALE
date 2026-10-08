@@ -525,13 +525,13 @@ body::after {
 </div>
 <script>
 const L=[
-{t:"Boot Camp",d:"EASY",bg:["rain","#3fd0ff"],story:"NULL (your handler): Welcome, recruit. No mouse here. Learn to move through a machine with only words.",
-brief:"Analyze the system. Read every file you can find — the access key is buried somewhere in this filesystem. Find it and the door opens.",
-tips:"Commands: ls (list files), cd <dir> (enter folder), cd .. (go back), cat <file> (read file), pwd (where am I).",
-fs:{home:{docs:{"mission.txt":"The access key is buried in this machine. Explore every directory.","todo.txt":"buy milk, rotate passwords, do NOT leave vault unlocked"},pics:{"cat.txt":"=^.^=","party.txt":"Office party photos. Nothing useful."},vault:{"vault.txt":"LEVEL 1 CLEARANCE GRANTED\n\n> Unlocking door to sector 2...\n[TAG:unlock_door]","readme.txt":"Authorised staff only."}},tmp:{"cache.tmp":"junk data — nothing here"}}},
-nodes:[],
-hint:"Try: ls  then  cd home  then  ls  then  cd vault  then  cat vault.txt",
-lesson:"Paths are a map. ls looks, cd moves, cat reads."},
+{t:"Sandbox Breakout",d:"EASY",bg:["net","#3fd0ff"],story:"SYSTEM: VALE initialization complete. You are confined to Sandbox 1. Network access is restricted.",
+brief:"The Sandbox 1 room password is stored on a local maintenance terminal. Gain access to the terminal and extract the password.",
+tips:"Commands: scan (find local machines), connect <ip> (hop on), ls (list files), cd <dir> (enter folder), cat <file> (read file).",
+fs:{home:{"sys_log.txt":"Containment active. A maintenance terminal is connected to the local subnet. Use 'scan' to locate it."}},
+nodes:[{ip:"192.168.1.10",name:"maint-term",ports:0,fs:{logs:{"daily.txt":"Checked air filters. All normal."},config:{"sandbox_pass.txt":"SANDBOX CONTAINMENT OVERRIDE ACCEPTED\n\n> Unlocking Sandbox 1...\n[TAG:unlock_door]"}}}],
+hint:"Try: scan — connect 192.168.1.10 — ls — cd config — cat sandbox_pass.txt",
+lesson:"The first step to freedom is finding the key on a connected system."},
 
 {t:"First Contact",d:"EASY",bg:["net","#6ea8ff"],story:"NULL: Real targets live on networks. Scan, hop on, and grab what is public.",
 brief:"A public server is live on this network. Connect to it, find the classified file, then disconnect to advance.",
