@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Git Commit, Push and Merge",
+      "trigger": "UserPromptSubmit",
+      "description": "When the user's prompt mentions commit, push, or merge — stages all changes, commits with a timestamp, pushes to the current branch, then pulls with rebase. Reports conflicts if any.",
+      "action": {
+        "type": "command",
+        "command": "powershell -NoProfile -Command \"\n$input_json = $input | Out-String\ntry { $data = $input_json | ConvertFrom-Json } catch { exit 0 }\n$prompt = $data.userPrompt\nif (-not $prompt) { exit 0 }\n$lower = $prompt.ToLower()\n$keywords = @('commit', 'push', 'merge', 'commit and push', 'push changes')\n$matched = $false\nforeach ($kw in $keywords) { if ($lower -like \\\"*$kw*\\\") { $matched = $true; break } }\nif (-not $matched) { exit 0 }\n\n# Stage all changes\n$stageResult = git add -A 2>&1\n# Get current branch\n$branch = (git rev-parse --abbrev-ref HEAD 2>&1).Trim()\n# Commit with timestamp message\n$timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm'\n$commitResult = git commit -m \\\"chore: auto-commit $timestamp\\\" 2>&1\n$commitOut = $commitResult | Out-String\n# Push to current branch\n$pushResult = git push origin $branch 2>&1\n$pushOut = $pushResult | Out-String\n# Pull and auto-merge (rebase strategy to reduce conflicts)\n$pullResult = git pull origin $branch --rebase 2>&1\n$pullOut = $pullResult | Out-String\n\n$summary = \\\"=== Git Auto Commit/Push/Merge ===`nBranch: $branch`nStage: $stageResult`nCommit: $commitOut`nPush: $pushOut`nPull/Rebase: $pullOut\\\"\n\n# Check for conflicts\nif (($pullOut -like '*CONFLICT*') -or ($pullOut -like '*conflict*')) {\n  $conflicts = git diff --name-only --diff-filter=U 2>&1 | Out-String\n  Write-Host \\\"$summary`n`n!! MERGE CONFLICTS DETECTED !!`nConflicted files:`n$conflicts`nPlease resolve conflicts, then run: git add . && git rebase --continue\\\"\n} else {\n  Write-Host $summary\n}\nexit 0\n\"",
+        "timeout": 60
+      }
+    }
+  ]
+}
