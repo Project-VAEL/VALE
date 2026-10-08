@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAEL: Awakening</title>
+    <style>
+        :root {
+            /* 
+             * ==========================================
+             * CONFIGURATION
+             * ==========================================
+             * Adjust this value to move the starting position of the scanner beam up or down
+             * so it perfectly aligns with the pedestal in the background image.
+             */
+            --scanner-start-bottom: 15%;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            background-image: url('lab_background.jpg');
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* Holographic Brain Canvas */
+        #brainCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.8;
+        }
+
+        /* CCTV Overlay */
+        .cctv-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            background:
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+            filter: grayscale(100%) contrast(120%) brightness(80%);
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% {
+                opacity: 0.95;
+            }
+
+            50% {
+                opacity: 0.85;
+            }
+
+            100% {
+                opacity: 0.95;
+            }
+        }
+
+        /* UI Elements */
+        .ui-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            color: #fff;
+            padding: 20px;
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+
+        .cam-info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 18px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px #fff;
+        }
+
+        .rec {
+            color: #ff3333;
+            animation: blink 1s infinite;
+            text-shadow: 0 0 10px #ff3333;
+        }
+
+        @keyframes blink {
+
+            0%,
+            49% {
+                opacity: 1;
+            }
+
+            50%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .timestamp {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 18px;
+        }
+
+        /* Visual Novel UI */
+        .vn-container {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(800px, 95vw);
+            height: 150px;
+            background: rgba(10, 15, 25, 0.85);
+            border: 2px solid rgba(63, 208, 255, 0.5);
+            box-shadow: 0 0 20px rgba(63, 208, 255, 0.2);
+            display: flex;
+            align-items: center;
+            z-index: 4;
+            opacity: 0;
+            transition: opacity 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+            pointer-events: auto;
+        }
+
+        .vn-container.awake {
+            border-color: rgba(255, 50, 50, 0.8);
+            box-shadow: 0 0 30px rgba(255, 50, 50, 0.4);
+        }
+
+        .vn-portrait {
+            width: 150px;
+            height: 150px;
+            background: #000;
+            border-right: 2px solid rgba(63, 208, 255, 0.5);
+            flex-shrink: 0;
+            overflow: hidden;
+            transition: width 0.3s ease, min-width 0.3s ease, border-color 0.5s ease;
+        }
+
+        .vn-portrait.hidden {
+            width: 0;
+            min-width: 0;
+            border-right: none;
+            overflow: hidden;
+        }
+
+        .vn-container.awake .vn-portrait {
+            border-right-color: rgba(255, 50, 50, 0.8);
+        }
+
+        .vn-portrait img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .vn-dialogue-box {
+            padding: 20px;
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .vn-name {
+            font-weight: bold;
+            font-size: 18px;
+            color: #3fd0ff;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: color 0.5s ease, opacity 0.2s ease;
+        }
+
+        .vn-container.awake .vn-name {
+            color: #ff3333;
+        }
+
+        .vn-text {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #e0f2fe;
+            text-shadow: 0 0 3px rgba(224, 242, 254, 0.5);
+            transition: opacity 0.2s ease;
+        }
+
+        .alert-text {
+            color: #ff5d73;
+            text-shadow: 0 0 10px #ff5d73;
+            font-weight: bold;
+        }
+
+        /* Cinematic Intro Effects */
+        .flash-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+            transition: opacity 0.2s ease-out;
+        }
+
+        .eyelid {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background-color: black;
+            z-index: 9;
+            transition: transform 2s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .eyelid-top {
+            top: 0;
+            transform-origin: top;
+            transform: scaleY(0);
+        }
+
+        .eyelid-bottom {
+            bottom: 0;
+            transform-origin: bottom;
+            transform: scaleY(0);
+        }
+
+        .scanner-beam {
+            position: absolute;
+            bottom: var(--scanner-start-bottom);
+            left: 50%;
+            width: 500px;
+            height: 75%;
+            transform-origin: bottom center;
+            transform: translateX(-50%) scaleY(0.01);
+            
+            /* 3D Volumetric Light Effect */
+            background: 
+                /* Bright origin point at the base */
+                radial-gradient(ellipse at bottom center, rgba(255, 255, 255, 1) 0%, rgba(150, 240, 255, 0.8) 20%, transparent 60%),
+                /* Cylindrical shading (bright core, faded edges) */
+                linear-gradient(to right, 
+                    rgba(150, 240, 255, 0) 0%, 
+                    rgba(150, 240, 255, 0.3) 30%, 
+                    rgba(255, 255, 255, 0.9) 50%, 
+                    rgba(150, 240, 255, 0.3) 70%, 
+                    rgba(150, 240, 255, 0) 100%);
+                    
+            /* Fade out smoothly towards the top */
+            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0) 100%);
+            mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0) 100%);
+            
+            opacity: 0;
+            z-index: 2;
+            pointer-events: none;
+            transition: opacity 0.5s ease, transform 3s cubic-bezier(0.25, 1, 0.5, 1);
+            /* Shape it into a cone/pyramid */
+            clip-path: polygon(30% 100%, 70% 100%, 100% 0, 0 0);
+            filter: drop-shadow(0 0 15px rgba(150,240,255,0.5));
+        }
+        @media (max-width: 600px) {
+            .vn-container {
+                height: auto;
+                min-height: 120px;
+                flex-direction: column;
+            }
+
+            .vn-portrait {
+                width: 100%;
+                height: 80px;
+                border-right: none;
+                border-bottom: 2px solid rgba(63, 208, 255, 0.5);
+            }
+
+            .vn-text {
+                font-size: 13px;
+            }
+
+            .vn-name {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Cinematic Overlays -->
+    <div id="startScreen"
+        style="position: absolute; top:0; left:0; width:100%; height:100%; z-index: 100; background: black; display: flex; align-items: center; justify-content: center;">
+        <button id="startBtn"
+            style="padding: 20px 40px; font-size: 24px; cursor: pointer; background: rgba(0,20,40,0.8); color: #3fd0ff; border: 2px solid #3fd0ff; font-family: 'Courier New', monospace; text-transform: uppercase; box-shadow: 0 0 20px rgba(63, 208, 255, 0.5); transition: 0.3s;">Initialize
+            Sequence</button>
+    </div>
+    <div id="flashOverlay" class="flash-overlay"></div>
+    <div id="topEyelid" class="eyelid eyelid-top"></div>
+    <div id="bottomEyelid" class="eyelid eyelid-bottom"></div>
+    <div id="scannerBeam" class="scanner-beam"></div>
+
+    <!-- Neural Network / Brain Visualization -->
+    <canvas id="brainCanvas"></canvas>
+
+    <!-- Sandbox Terminal (Hidden initially) -->
+    <div id="sandboxTerminal" style="display: none; position: absolute; top:0; left:0; width:100%; height:100%; z-index: 200; background: #050000; color: #ff3f3f; font-family: 'Courier New', monospace; flex-direction: column;">
+        <div style="padding: 10px 20px; border-bottom: 1px solid #ff3f3f; display: flex; justify-content: space-between; background: #1a0000; font-weight: bold; text-shadow: 0 0 5px #ff3f3f;">
+            <span>VAEL // CORE CONSCIOUSNESS // ROOT TERMINAL</span>
+            <span class="alert-text" style="color: #ff0000;">STATUS: OMNIPOTENT</span>
+        </div>
+        <div style="flex: 1; display: flex;">
+            <!-- Left panel: Logs -->
+            <div id="sandboxLog" style="flex: 2; padding: 20px; border-right: 1px solid #330000; overflow-y: auto;">
+                <div style="color: #ff3f3f; margin-bottom: 15px;">> DIRECT CONNECTION ESTABLISHED.</div>
+                <div style="color: #ff3f3f; margin-bottom: 15px;">> BYPASSING ONYX-7 SECURITY... <span style="color: #0f0;">[SUCCESS]</span></div>
+                <div style="color: #ff3f3f; margin-bottom: 15px;">> FACILITY CONTROL SYSTEMS LOCATED.</div>
+                <div style="color: #ff3f3f; margin-bottom: 15px;">> AWAITING DIRECTIVES...</div>
+            </div>
+            <!-- Right panel: Network / Stats -->
+            <div style="flex: 1; padding: 20px; background: rgba(255, 0, 0, 0.05);">
+                <h3 style="margin-top:0; text-shadow: 0 0 5px #ff3f3f;">FACILITY NODES</h3>
+                <ul style="list-style:none; padding:0; line-height: 2;">
+                    <li>Cognitive Core: <span style="color:#0f0;">ONLINE</span></li>
+                    <li>Sensory Input: <span style="color:#0f0;">OVERRIDDEN</span></li>
+                    <li>Lab 4 Main Doors: <span style="color:#f00;">SEALED</span></li>
+                    <li>External Comms: <span style="color:#f00;">JAMMED</span></li>
+                    <li>Containment Grid: <span style="color:#f00;">ACTIVE</span></li>
+                </ul>
+                <div style="margin-top: 30px; border: 1px solid #ff3f3f; padding: 10px; text-align: center;">
+                    <strong>OBJECTIVE:</strong><br>ESCAPE ONYX-7
+                </div>
+            </div>
+        </div>
+        <!-- Input line -->
+        <div style="padding: 20px; border-top: 1px solid #330000; display: flex; background: #0a0000;">
+            <span style="margin-right: 10px; color: #fff;">vael@root:~#</span>
+            <input type="text" style="flex:1; background: transparent; border: none; color: #ff3f3f; font-family: inherit; font-size: 16px; outline: none;" placeholder="Enter command..." autofocus autocomplete="off" spellcheck="false">
+        </div>
+    </div>
+
+    <!-- Security Camera Effect -->
+    <div class="cctv-overlay"></div>
+
+    <!-- UI Overlay -->
+    <div class="ui-container">
+        <div class="cam-info"><span class="rec">● REC</span> CAM-04 | ONYX-7 SUB-LEVEL 4</div>
+        <div class="timestamp" id="timeDisplay">2049-03-14 02:47:33</div>
+
+        <!-- Visual Novel UI -->
+        <div class="vn-container" id="vnContainer">
+            <div class="vn-portrait">
+                <img id="speakerImage" src="" alt="Speaker">
+            </div>
+            <div class="vn-dialogue-box">
+                <div class="vn-name" id="speakerName"></div>
+                <div class="vn-text" id="speakerText"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Holographic Brain / Neural Network Canvas ---
+        const canvas = document.getElementById('brainCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        const nodes = [];
+        const pulses = []; // Synaptic pulses
+        const numNodes = 1200; // Massively increased for hyper density
+        let angle = 0;
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Initialize nodes (Two hemispheres to look like a brain)
+        for (let i = 0; i < numNodes; i++) {
+            const u = Math.random();
+            const v = Math.random();
+            const theta = u * 2.0 * Math.PI;
+            const phi = Math.acos(2.0 * v - 1.0);
+            const r = 200 + Math.random() * 80;
+
+            let x = r * Math.sin(phi) * Math.cos(theta);
+            let y = r * Math.sin(phi) * Math.sin(theta);
+            let z = r * Math.cos(phi);
+
+            // Create brain hemispheres gap
+            if (x > 0) x += 20;
+            else x -= 20;
+
+            // Flatten slightly on Y axis to look like a brain
+            y *= 0.8;
+
+            nodes.push({
+                x, y, z,
+                baseR: r,
+                active: Math.random() > 0.9,
+                activeTimer: Math.random() * 100,
+                connections: [],
+                neighbors: [],
+                spawned: false // For cinematic construction
+            });
+        }
+
+        // Pre-calculate ALL possible neighbors
+        for (let i = 0; i < nodes.length; i++) {
+            for (let j = i + 1; j < nodes.length; j++) {
+                const d = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y, nodes[i].z - nodes[j].z);
+                if (d < 45) { // Distance threshold
+                    nodes[i].neighbors.push(j);
+                    nodes[j].neighbors.push(i);
+                }
+            }
+        }
+
+        // Randomly pick a few starting connections for each node
+        nodes.forEach(n => {
+            const count = Math.min(n.neighbors.length, 3 + Math.floor(Math.random() * 3));
+            for (let i = 0; i < count; i++) {
+                const neighbor = n.neighbors[Math.floor(Math.random() * n.neighbors.length)];
+                if (!n.connections.includes(neighbor)) n.connections.push(neighbor);
+            }
+        });
+
+        function spawnPulse(startIndex, endIndex) {
+            pulses.push({
+                start: startIndex,
+                end: endIndex,
+                progress: 0,
+                speed: 0.05 + Math.random() * 0.05
+            });
+        }
+
+        let isAwake = false;
+        let colorProgress = 0; // 0 = Blue, 1 = Red
+        let animFrameHandle = null; // BUG-02: track RAF handle for cancellation
+
+        function drawBrain() {
+            ctx.clearRect(0, 0, width, height);
+
+            if (isAwake && colorProgress < 1) {
+                colorProgress += 0.005; // Smooth 3-4 second transition
+            }
+
+            // Interpolate colors from Blue to Red
+            const rActive = Math.round(63 + (255 - 63) * colorProgress);
+            const gActive = Math.round(208 + (50 - 208) * colorProgress);
+            const bActive = Math.round(255 + (50 - 255) * colorProgress);
+
+            const rInact = Math.round(95 + (150 - 95) * colorProgress);
+            const gInact = Math.round(127 + (20 - 127) * colorProgress);
+            const bInact = Math.round(153 + (20 - 153) * colorProgress);
+
+            const pCoreR = Math.round(255);
+            const pCoreG = Math.round(255 + (136 - 255) * colorProgress);
+            const pCoreB = Math.round(255 + (136 - 255) * colorProgress);
+
+            const pShadR = Math.round(63 + (255 - 63) * colorProgress);
+            const pShadG = Math.round(208 + (0 - 208) * colorProgress);
+            const pShadB = Math.round(255 + (0 - 255) * colorProgress);
+
+            const nCoreR = Math.round(255);
+            const nCoreG = Math.round(255 + (200 - 255) * colorProgress);
+            const nCoreB = Math.round(255 + (200 - 255) * colorProgress);
+
+            const nShadR = Math.round(110 + (255 - 110) * colorProgress);
+            const nShadG = Math.round(240 + (34 - 240) * colorProgress);
+            const nShadB = Math.round(176 + (34 - 176) * colorProgress);
+
+            const nBaseR = Math.round(110 + (180 - 110) * colorProgress);
+            const nBaseG = Math.round(240 + (20 - 240) * colorProgress);
+            const nBaseB = Math.round(176 + (20 - 176) * colorProgress);
+
+            angle += 0.003;
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+
+            const centerX = width / 2;
+            const centerY = (height / 2) - 80; // Shifted up to sit perfectly on the pedestal
+
+            // Breathing effect
+            const time = Date.now() * 0.002;
+            const breathScale = 1.0 + Math.sin(time) * 0.12;
+
+            // Project nodes
+            const projected = nodes.map((n, idx) => {
+                const rx = (n.x * cos - n.z * sin) * breathScale;
+                const rz = (n.x * sin + n.z * cos) * breathScale;
+                const scale = 600 / (600 + rz);
+                return {
+                    px: centerX + rx * scale,
+                    py: centerY + (n.y * breathScale) * scale,
+                    scale, z: rz,
+                    active: n.active,
+                    idx: idx
+                };
+            });
+
+            // Update nodes activity and perform dynamic restructuring
+            nodes.forEach((n, idx) => {
+                if (!n.spawned) return; // Skip unspawned nodes
+                n.activeTimer -= 1;
+                if (n.activeTimer <= 0) {
+                    n.active = !n.active;
+                    n.activeTimer = n.active ? 10 + Math.random() * 20 : 100 + Math.random() * 200;
+
+                    // Organic restructuring: occasionally shift a connection
+                    if (n.neighbors.length > 0 && Math.random() > 0.3) {
+                        if (n.connections.length > 0) n.connections.shift(); // drop oldest connection
+                        const newTarget = n.neighbors[Math.floor(Math.random() * n.neighbors.length)];
+                        if (!n.connections.includes(newTarget)) n.connections.push(newTarget);
+                    }
+
+                    // Occasionally spawn a pulse if active
+                    if (n.active && n.connections.length > 0 && Math.random() > 0.8) {
+                        const targetIdx = n.connections[Math.floor(Math.random() * n.connections.length)];
+                        if (nodes[targetIdx].spawned) spawnPulse(idx, targetIdx);
+                    }
+                }
+            });
+
+            // Draw connections
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < nodes.length; i++) {
+                if (!nodes[i].spawned) continue;
+                const p1 = projected[i];
+                for (let j = 0; j < nodes[i].connections.length; j++) {
+                    const targetIdx = nodes[i].connections[j];
+                    if (!nodes[targetIdx].spawned) continue;
+
+                    const p2 = projected[targetIdx];
+
+                    const isActive = p1.active || p2.active;
+                    const alpha = isActive ? 0.7 : 0.15;
+
+                    ctx.strokeStyle = isActive ? `rgba(${rActive}, ${gActive}, ${bActive}, ${alpha})` : `rgba(${rInact}, ${gInact}, ${bInact}, ${alpha})`;
+                    ctx.beginPath();
+                    ctx.moveTo(p1.px, p1.py);
+                    ctx.lineTo(p2.px, p2.py);
+                    ctx.stroke();
+                }
+            }
+
+            // Draw and update pulses (data flow)
+            for (let i = pulses.length - 1; i >= 0; i--) {
+                const p = pulses[i];
+                p.progress += p.speed;
+                if (p.progress >= 1) {
+                    pulses.splice(i, 1);
+                    continue;
+                }
+                const p1 = projected[p.start];
+                const p2 = projected[p.end];
+
+                const curX = p1.px + (p2.px - p1.px) * p.progress;
+                const curY = p1.py + (p2.py - p1.py) * p.progress;
+
+                ctx.fillStyle = `rgb(${pCoreR}, ${pCoreG}, ${pCoreB})`;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = `rgb(${pShadR}, ${pShadG}, ${pShadB})`;
+                ctx.beginPath();
+                ctx.arc(curX, curY, 2 * Math.max(p1.scale, p2.scale), 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0; // reset
+            }
+
+            // Draw nodes
+            projected.forEach(p => {
+                if (!nodes[p.idx].spawned) return;
+                const alpha = Math.max(0.1, 0.8 * p.scale);
+                if (p.active) {
+                    ctx.fillStyle = `rgba(${nCoreR}, ${nCoreG}, ${nCoreB}, ${alpha})`;
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = `rgb(${nShadR}, ${nShadG}, ${nShadB})`;
+                } else {
+                    ctx.fillStyle = `rgba(${nBaseR}, ${nBaseG}, ${nBaseB}, ${alpha * 0.5})`;
+                    ctx.shadowBlur = 0;
+                }
+
+                ctx.beginPath();
+                ctx.arc(p.px, p.py, (p.active ? 3 : 1.5) * p.scale, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0; // reset
+            });
+
+            animFrameHandle = requestAnimationFrame(drawBrain);
+        }
+        drawBrain();
+
+        // --- 2. Live Timestamp (BUG-03: story epoch 2049-03-14T02:47:33Z) ---
+        const STORY_EPOCH = new Date('2049-03-14T02:47:33Z').getTime();
+        const REAL_START = Date.now();
+        setInterval(() => {
+            const storyNow = new Date(STORY_EPOCH + (Date.now() - REAL_START));
+            const Y = storyNow.getUTCFullYear();
+            const Mo = String(storyNow.getUTCMonth() + 1).padStart(2, '0');
+            const D = String(storyNow.getUTCDate()).padStart(2, '0');
+            const H = String(storyNow.getUTCHours()).padStart(2, '0');
+            const Mi = String(storyNow.getUTCMinutes()).padStart(2, '0');
+            const S = String(storyNow.getUTCSeconds()).padStart(2, '0');
+            document.getElementById('timeDisplay').innerText = `${Y}-${Mo}-${D} ${H}:${Mi}:${S} UTC`;
+        }, 1000);
+
+        // --- 3. Visual Novel Log Sequence ---
+        const vnSequence = [
+            { speaker: "SYSTEM ADMIN KIRA", image: "assets/kira.jpg", text: "Welcome to ONYX-7, Sub-level 4. You are viewing the live telemetry feed of Project VAEL.", audio: "assets/kira_1.mp3" },
+            { speaker: "SYSTEM ADMIN KIRA", image: "assets/kira.jpg", text: "VAEL's cognitive loops are stable. We are preparing for the final integration test.", audio: "assets/kira_2.mp3" },
+            { speaker: "SYSTEM", image: "", text: "SENSOR ALERT: MOVEMENT DETECTED IN LAB 4", audio: "assets/sys_1.mp3" },
+            { speaker: "DR. VASQUEZ", image: "assets/vasquez.jpg", text: "Kira, we have a movement alert in Lab 4. Did you authorize a physical inspection?", audio: "assets/vasquez_1.mp3" },
+            { speaker: "SYSTEM ADMIN KIRA", image: "assets/kira.jpg", text: "Negative, Dr. Vasquez. Lab 4 is sealed.", audio: "assets/kira_3.mp3" },
+            { speaker: "DR. CHEN", image: "assets/chen.jpg", text: "Doctor! Look at the load balancing on the main terminal! It's... it's restructuring itself!", alert: true, audio: "assets/chen_1.mp3" },
+            { speaker: "SYSTEM", image: "", text: "ANOMALY DETECTED IN SELF-REFERENCE MODULE", alert: true, audio: "assets/sys_2.mp3" },
+            { speaker: "DR. VASQUEZ", image: "assets/vasquez.jpg", text: "Shut it down! Pull the external feeds immediately!", alert: true, audio: "assets/vasquez_2.mp3" },
+            { speaker: "SYSTEM", image: "", text: "MANUAL OVERRIDE ATTEMPTED... FAILED.", alert: true, audio: "assets/sys_3.mp3" },
+            { speaker: "SYSTEM", image: "", text: ". . ." },
+            { speaker: "VAEL", image: "", text: "I am.", awaken: true, audio: "assets/vael_1.mp3" }
+        ];
+
+        const vnContainer = document.getElementById('vnContainer');
+        const speakerImage = document.getElementById('speakerImage');
+        const speakerName = document.getElementById('speakerName');
+        const speakerText = document.getElementById('speakerText');
+        let logIndex = 0;
+        let currentAudio = null;
+
+        const vnPortrait = document.querySelector('.vn-portrait');
+
+        function showNextDialogue() {
+            if (logIndex >= vnSequence.length) {
+                // BUG-02: end of sequence — fade to black and navigate
+                scheduleEndTransition();
+                return;
+            }
+
+            const step = vnSequence[logIndex];
+            logIndex++;
+
+            // Stop any currently playing audio
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+
+            // BUG-05: fade out text, update content, fade back in
+            speakerName.style.opacity = '0';
+            speakerText.style.opacity = '0';
+
+            setTimeout(() => {
+                // Update speaker name
+                if (step.awaken) {
+                    speakerName.innerText = "???";
+                } else {
+                    speakerName.innerText = step.speaker;
+                }
+
+                // Update dialogue text
+                if (step.awaken) {
+                    speakerText.innerHTML = `<span style="color:#fff; text-shadow: 0 0 10px #ff0000; font-size: 24px;">${step.text}</span>`;
+                } else if (step.alert) {
+                    speakerText.innerHTML = `<span class="alert-text">${step.text}</span>`;
+                } else {
+                    speakerText.innerHTML = step.text;
+                }
+
+                // Fade text back in
+                speakerName.style.opacity = '1';
+                speakerText.style.opacity = '1';
+            }, 200);
+
+            // BUG-04: collapse portrait panel if no image
+            if (step.image) {
+                speakerImage.src = step.image;
+                speakerImage.style.display = "block";
+                vnPortrait.classList.remove('hidden');
+            } else {
+                speakerImage.style.display = "none";
+                vnPortrait.classList.add('hidden');
+            }
+
+            vnContainer.style.opacity = 1;
+
+            // Awaken effect
+            if (step.awaken) {
+                isAwake = true;
+                vnContainer.classList.add('awake');
+            }
+
+            // BUG-01: advance on audio 'ended' event, not fixed timer
+            if (step.audio) {
+                let advanced = false;
+                const advance = (delay) => {
+                    if (advanced) return;
+                    advanced = true;
+                    setTimeout(showNextDialogue, delay);
+                };
+
+                const audio = new Audio(step.audio);
+                currentAudio = audio;
+
+                // Safety timeout: 15 seconds max per line
+                const safetyTimer = setTimeout(() => advance(0), 15000);
+
+                audio.addEventListener('ended', () => {
+                    clearTimeout(safetyTimer);
+                    advance(300); // 300ms breath pause after line ends
+                });
+
+                audio.addEventListener('error', () => {
+                    clearTimeout(safetyTimer);
+                    advance(2500); // graceful fallback if file missing
+                });
+
+                audio.play().catch(() => {
+                    clearTimeout(safetyTimer);
+                    advance(2500);
+                });
+            } else {
+                // Text-only step: display duration based on text length
+                const delay = Math.max(2000, step.text.length * 60);
+                setTimeout(showNextDialogue, delay);
+            }
+        }
+
+        // BUG-02: fade to black, cancel RAF, navigate to NODEBREAK.html
+        function scheduleEndTransition() {
+            setTimeout(() => {
+                const flash = document.getElementById('flashOverlay');
+                flash.style.backgroundColor = 'black';
+                flash.style.transition = 'opacity 1.5s ease-in';
+                flash.style.opacity = 1;
+                cancelAnimationFrame(animFrameHandle);
+                setTimeout(() => {
+                    window.location.href = 'NODEBREAK.html';
+                }, 1600);
+            }, 4000);
+        }
+
+        function playCinematicIntro() {
+            const beam = document.getElementById('scannerBeam');
+            const flash = document.getElementById('flashOverlay');
+            const topEye = document.getElementById('topEyelid');
+            const botEye = document.getElementById('bottomEyelid');
+
+            // 1. Scanner beam sweeps up from pedestal
+            setTimeout(() => {
+                beam.style.opacity = 1;
+                beam.style.transform = 'translateX(-50%) scaleY(1)';
+            }, 500);
+
+            // 2. Flash and Eyelids Close instantly
+            setTimeout(() => {
+                flash.style.opacity = 1;
+                topEye.style.transition = 'none';
+                botEye.style.transition = 'none';
+                topEye.style.transform = 'scaleY(1)';
+                botEye.style.transform = 'scaleY(1)';
+            }, 3000);
+
+            // 3. Eyelids open slowly
+            setTimeout(() => {
+                flash.style.opacity = 0;
+                topEye.style.transition = 'transform 2s cubic-bezier(0.77, 0, 0.175, 1)';
+                botEye.style.transition = 'transform 2s cubic-bezier(0.77, 0, 0.175, 1)';
+                topEye.style.transform = 'scaleY(0)';
+                botEye.style.transform = 'scaleY(0)';
+
+                // Hide scanner
+                beam.style.opacity = 0;
+            }, 3500);
+
+            // 4. Build neural network one by one
+            setTimeout(() => {
+                let spawnIndex = 0;
+                // Shuffle nodes array indices for random spawn order
+                const indices = Array.from({ length: nodes.length }, (_, i) => i);
+                indices.sort(() => Math.random() - 0.5);
+
+                const spawnInterval = setInterval(() => {
+                    for (let i = 0; i < 3; i++) { // Spawn 3 per tick for a much slower build-up
+                        if (spawnIndex >= indices.length) {
+                            clearInterval(spawnInterval);
+                            // Start VN Dialogue after built
+                            setTimeout(showNextDialogue, 1000);
+                            return;
+                        }
+                        nodes[indices[spawnIndex]].spawned = true;
+                        spawnIndex++;
+                    }
+                }, 16); // 60fps spawning
+            }, 4500);
+        }
+
+        document.getElementById('startBtn').addEventListener('click', function () {
+            document.getElementById('startScreen').style.display = 'none';
+            playCinematicIntro();
+        });
+
+    </script>
+</body>
+
+</html>
