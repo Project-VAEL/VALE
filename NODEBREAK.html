@@ -802,16 +802,20 @@ function renderMap(){
     const total = S.nodes.length;
     const radius = 160;
     
-    // Distribute along a semi-circle to the right
+    // Pseudo-random scattered coordinates to make the network topology look organic
+    const scatteredCoords = [
+      {a: -38, r: 170},
+      {a: 35, r: 210},
+      {a: 5, r: 145},
+      {a: -68, r: 230},
+      {a: 58, r: 160}
+    ];
+    
     S.nodes.forEach((n, i) => {
-      // angle ranges from -60 to +60 degrees
-      let angleDeg = 0;
-      if(total > 1){
-         angleDeg = -60 + (120 / (total - 1)) * i;
-      }
-      const rad = angleDeg * (Math.PI / 180);
-      const nx = cx + radius * Math.cos(rad);
-      const ny = cy + radius * Math.sin(rad);
+      const coord = scatteredCoords[i % scatteredCoords.length];
+      const rad = coord.a * (Math.PI / 180);
+      const nx = cx + coord.r * Math.cos(rad);
+      const ny = cy + coord.r * Math.sin(rad);
       
       const isConnected = (S.node && S.node.ip === n.ip);
       
