@@ -1011,23 +1011,8 @@
                 scanLineRunning = false;
 
                 setTimeout(() => {
-                    // Hide cinematic elements
-                    document.getElementById('vnContainer').style.display = 'none';
-                    document.getElementById('brainCanvas').style.display = 'none';
-                    document.getElementById('scanCanvas').style.display = 'none';
-                    document.querySelector('.cam-info').style.display = 'none';
-                    document.getElementById('timeDisplay').style.display = 'none';
-                    document.querySelector('.cctv-overlay').style.display = 'none';
-                    const beam = document.getElementById('scannerBeam');
-                    if (beam) beam.style.display = 'none';
-
-                    // Show our Sandbox Terminal
-                    const terminal = document.getElementById('sandboxTerminal');
-                    terminal.style.display = 'flex';
-
-                    // Fade out red flash to reveal terminal
-                    flash.style.transition = 'opacity 2s ease-out';
-                    flash.style.opacity = 0;
+                    // Navigate to NODEBREAK.html (FEAT-001 acceptance criterion)
+                    window.location.href = 'NODEBREAK.html';
                 }, 50);
             }, 3000);
         }
