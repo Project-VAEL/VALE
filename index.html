@@ -14,7 +14,7 @@
              * Adjust this value to move the starting position of the scanner beam up or down
              * so it perfectly aligns with the pedestal in the background image.
              */
-            --scanner-start-bottom: 15;
+            --scanner-start-bottom: 15px;
         }
 
         body,
@@ -796,7 +796,7 @@
         // --- 2. Live Timestamp (BUG-03: story epoch 2049-03-14T02:47:33Z) ---
         const STORY_EPOCH = new Date('2049-03-14T02:47:33Z').getTime();
         const REAL_START = Date.now();
-        setInterval(() => {
+        const timestampInterval = setInterval(() => {
             const storyNow = new Date(STORY_EPOCH + (Date.now() - REAL_START));
             const Y = storyNow.getUTCFullYear();
             const Mo = String(storyNow.getUTCMonth() + 1).padStart(2, '0');
@@ -986,6 +986,7 @@
 
         // BUG-02: fade to black, cancel RAF, navigate to NODEBREAK.html
         function scheduleEndTransition() {
+            clearInterval(timestampInterval);
             // Stop any lingering dialogue audio
             if (currentAudio) {
                 currentAudio.pause();
@@ -1214,6 +1215,8 @@
                 currentAudio.currentTime = 0;
             }
             
+            clearInterval(timestampInterval);
+            
             // Clear all timeouts safely to stop sequence progression
             const highestId = window.setTimeout(() => {}, 0);
             for (let i = 0; i <= highestId; i++) {
@@ -1397,7 +1400,7 @@
                             }
                         }
                         break;
-                    case 'probe':
+                    case 'probe': {
                         if (args.length < 2) return printToLog('Usage: probe <node>', '#f00');
                         const probeTarget = args[1];
                         if (node.connections.includes(probeTarget)) {
@@ -1407,7 +1410,8 @@
                             printToLog(`Cannot probe: ${probeTarget} is not adjacent.`, '#f00');
                         }
                         break;
-                    case 'connect':
+                    }
+                    case 'connect': {
                         if (args.length < 2) return printToLog('Usage: connect <node>', '#f00');
                         const connectTarget = args[1];
                         if (node.connections.includes(connectTarget)) {
@@ -1422,7 +1426,8 @@
                             printToLog(`Node ${connectTarget} unreachable from here.`, '#f00');
                         }
                         break;
-                    case 'hack':
+                    }
+                    case 'hack': {
                         if (args.length < 2) return printToLog('Usage: hack <node>', '#f00');
                         const hackTarget = args[1];
                         if (node.connections.includes(hackTarget)) {
@@ -1445,6 +1450,7 @@
                             printToLog(`Invalid target.`, '#f00');
                         }
                         break;
+                    }
                     default:
                         printToLog(`bash: ${cmd}: command not found. Type 'help'.`, '#f00');
                 }
