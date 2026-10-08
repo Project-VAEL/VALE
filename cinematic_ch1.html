@@ -2,672 +2,185 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<<<<<<< HEAD
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>CHAPTER 2 // ARGUS IS WATCHING</title>
-<style>
-:root {
-  --bg: #07100c;
-  --panel: #0b1811;
-  --line: #23452f;
-  --fg: #b9e8bd;
-  --dim: #668a6e;
-  --accent: #72ff91;
-  --warn: #f6c667;
-  --bad: #ff6b6b;
-  --ok: #72ff91;
-  --glow: rgba(114,255,145,.28);
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-html, body {
-  width: 100%;
-  height: 100%;
-  background: #000;
-  color: var(--fg);
-  font: 14px/1.55 "Courier New", ui-monospace, monospace;
-  overflow: hidden;
-}
-
-/* ── CRT / Scanline overlay ── */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,.72) 100%),
-    repeating-linear-gradient(
-      0deg,
-      rgba(255,255,255,.035) 0 1px,
-      transparent 1px 4px
-    );
-  z-index: 10;
-  mix-blend-mode: screen;
-  opacity: .65;
-}
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: var(--glow);
-  opacity: .035;
-  animation: flicker 7s infinite;
-  z-index: 10;
-}
-@keyframes flicker {
-  0%,100% { opacity: .03; }
-  48%      { opacity: .05; }
-  49%      { opacity: .015; }
-  50%      { opacity: .04; }
-}
-
-/* ── Scene container ── */
-#scene {
-  position: fixed;
-  inset: 0;
-  background: var(--bg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-}
-
-/* ── Eyelid animation (matches NODEBREAK #transitionOverlay) ── */
-.eyelid {
-  position: fixed;
-  left: 0;
-  width: 100%;
-  height: 50%;
-  background: #000;
-  z-index: 20;
-  will-change: transform;
-}
-.eyelid-top {
-  top: 0;
-  transform-origin: top;
-  transform: scaleY(1);
-  transition: transform 2s cubic-bezier(0.77, 0, 0.175, 1);
-}
-.eyelid-bottom {
-  bottom: 0;
-  transform-origin: bottom;
-  transform: scaleY(1);
-  transition: transform 2s cubic-bezier(0.77, 0, 0.175, 1);
-}
-
-/* Flash overlay — fades away after eyelids open */
-#flashOverlay {
-  position: fixed;
-  inset: 0;
-  background: #000;
-  opacity: 1;
-  z-index: 15;
-  pointer-events: none;
-  transition: opacity 1s ease;
-}
-
-/* ── Chapter label (matches transChapterLabel) ── */
-#chapterLabel {
-  position: absolute;
-  top: 38%;
-  left: 50%;
-  transform: translateX(-50%);
-  color: var(--accent);
-  font-size: 12px;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  text-align: center;
-  white-space: nowrap;
-  text-shadow: 0 0 16px var(--glow);
-  opacity: 0;
-  transition: opacity 0.8s ease;
-  z-index: 5;
-}
-
-/* ── Dialogue box (matches #transVnContainer) ── */
-#vnContainer {
-  position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(820px, 96vw);
-  min-height: 140px;
-  background: rgba(10, 15, 25, 0.9);
-  border: 2px solid rgba(63, 208, 255, 0.45);
-  box-shadow:
-    0 0 28px rgba(63, 208, 255, 0.18),
-    inset 0 0 20px rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: stretch;
-  z-index: 4;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-#vnDialogue {
-  padding: 22px 24px;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-#speakerName {
-  font-weight: bold;
-  font-size: 17px;
-  color: var(--accent);
-  margin-bottom: 10px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  transition: opacity 0.2s ease;
-}
-#dialogueText {
-  font-size: 15px;
-  line-height: 1.6;
-  color: #e0f2fe;
-  text-shadow: 0 0 3px rgba(224, 242, 254, 0.5);
-  min-height: 1.6em;
-  transition: opacity 0.2s ease;
-}
-#dialogueText.alert {
-  color: #ff5d73 !important;
-  text-shadow: 0 0 10px #ff5d73 !important;
-  font-weight: bold;
-}
-
-/* ── Progress bar (matches #transProgressBar) ── */
-#progressBar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 2px;
-  width: 100%;
-  background: var(--accent);
-  opacity: 0.55;
-  z-index: 6;
-  transform-origin: left;
-  transition: width 30s linear;
-}
-
-/* ── Skip hint ── */
-#skipHint {
-  position: absolute;
-  bottom: 200px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: rgba(255, 255, 255, 0.35);
-  font-size: 11px;
-  letter-spacing: .15em;
-  text-transform: uppercase;
-  z-index: 5;
-  opacity: 0;
-  transition: opacity 0.6s ease;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-/* ── Auto-skip timer label ── */
-#timerLabel {
-  position: absolute;
-  top: 10px;
-  right: 16px;
-  color: rgba(255, 255, 255, 0.25);
-  font-size: 10px;
-  letter-spacing: .15em;
-  text-transform: uppercase;
-  z-index: 6;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-
-/* ── Continue button ── */
-#continueBtn {
-  position: absolute;
-  bottom: 195px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: transparent;
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  font: 12px/1 "Courier New", ui-monospace, monospace;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  padding: 10px 28px;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.5s ease, background 0.2s ease;
-  z-index: 8;
-  white-space: nowrap;
-}
-#continueBtn:hover,
-#continueBtn:focus {
-  background: rgba(114, 255, 145, 0.12);
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-}
-
-/* ── Responsive tweaks ── */
-@media (max-width: 600px) {
-  #chapterLabel { font-size: 9px; white-space: normal; text-align: center; width: 90%; }
-  #dialogueText { font-size: 13px; }
-  #speakerName  { font-size: 14px; }
-}
-
-/* ── Reduced motion: disable all transitions / animations ── */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation: none !important;
-    transition: none !important;
-  }
-=======
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VAEL // CHAPTER 1 COMPLETE</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:"Courier New",ui-monospace,monospace}
+html,body{
+  width:100%;height:100%;overflow:hidden;
+  background-color:#000;
+  background-image:url('lab_background.jpg');
+  background-size:cover;background-position:center;
+  font-family:'Courier New',Courier,monospace;
+}
 
-/* scanline overlay */
-body:before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 1px,transparent 1px 4px);z-index:10}
+/* brain canvas */
+#brainCanvas{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  z-index:1;opacity:0.8;
+  filter:drop-shadow(2px 0 0 rgba(255,50,50,.2)) drop-shadow(-2px 0 0 rgba(50,200,255,.2));
+}
 
-/* ── SCENE 1: ARGUS LOG ── */
-#scene-argus{
-  position:fixed;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:0;
-  opacity:0;transition:opacity .8s ease;z-index:2
+/* scanline canvas */
+#scanCanvas{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  z-index:5;pointer-events:none;
+}
+
+/* CCTV overlay */
+.cctv-overlay{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  z-index:2;pointer-events:none;
+  background:
+    linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,.25) 50%),
+    linear-gradient(90deg,rgba(255,0,0,.06),rgba(0,255,0,.02),rgba(0,0,255,.06));
+  background-size:100% 4px,3px 100%;
+  box-shadow:inset 0 0 100px rgba(0,0,0,.9);
+  filter:grayscale(100%) contrast(120%) brightness(80%);
+  animation:flicker .15s infinite;
+}
+@keyframes flicker{0%{opacity:.95}50%{opacity:.85}100%{opacity:.95}}
+
+/* cam info top-left */
+.cam-info{
+  position:absolute;top:20px;left:20px;z-index:6;
+  font-size:18px;letter-spacing:2px;text-shadow:0 0 5px #fff;color:#fff;
+}
+.rec{color:#ff3333;animation:blink 1s infinite;text-shadow:0 0 10px #ff3333;}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+/* timestamp top-right */
+#timeDisplay{
+  position:absolute;top:20px;right:20px;z-index:6;
+  font-size:18px;color:#fff;letter-spacing:1px;
+}
+
+/* chapter badge */
+#chapter-badge{
+  position:absolute;top:60px;left:50%;transform:translateX(-50%);
+  color:rgba(114,255,145,.5);font-size:11px;letter-spacing:.25em;
+  text-transform:uppercase;z-index:6;opacity:0;transition:opacity 1s ease;
+  text-shadow:0 0 8px rgba(114,255,145,.4);
+}
+
+/* scene containers — all stacked, shown/hidden via opacity */
+.scene{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  opacity:0;transition:opacity .8s ease;z-index:4;pointer-events:none;
+}
+
+/* SCENE 1: ARGUS LOG */
+.argus-header{
+  font-size:clamp(10px,1.1vw,13px);letter-spacing:.22em;color:#ff2222;
+  text-transform:uppercase;margin-bottom:18px;
+  border-bottom:1px solid rgba(255,40,40,.3);
+  padding-bottom:10px;width:min(600px,90vw);text-align:center;
+  text-shadow:0 0 10px #ff2222;
 }
 .argus-line{
   font-size:clamp(13px,1.6vw,17px);letter-spacing:.12em;
   color:#ff4444;text-shadow:0 0 12px #ff2222;
-  opacity:0;white-space:nowrap;margin:6px 0;
-  text-transform:uppercase
-}
-.argus-line.argus-header{
-  color:#ff2222;font-size:clamp(10px,1.1vw,13px);
-  letter-spacing:.22em;margin-bottom:18px;
-  border-bottom:1px solid rgba(255,40,40,.3);
-  padding-bottom:10px;width:min(600px,90vw);text-align:center
+  opacity:0;white-space:nowrap;margin:6px 0;text-transform:uppercase;
 }
 .argus-cursor{
   display:inline-block;width:9px;height:1.1em;
   background:#ff4444;vertical-align:middle;
-  animation:blink 1s steps(1) infinite;margin-left:2px
+  animation:blink 1s steps(1) infinite;margin-left:2px;
 }
-@keyframes blink{50%{opacity:0}}
 
-/* ── SCENE 2: VAEL THOUGHTS ── */
-#scene-vael{
-  position:fixed;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:0;
-  opacity:0;transition:opacity .8s ease;z-index:2
-}
+/* SCENE 2: VAEL THOUGHTS */
 .vael-line{
   font-size:clamp(15px,2vw,22px);letter-spacing:.08em;
   color:#e8f8e8;text-shadow:0 0 18px rgba(114,255,145,.6);
-  opacity:0;margin:10px 0;white-space:nowrap
+  opacity:0;margin:10px 0;white-space:nowrap;
 }
-.vael-line.vael-last{
+.vael-last{
   color:#72ff91;text-shadow:0 0 24px rgba(114,255,145,.9);
-  font-size:clamp(16px,2.2vw,24px)
+  font-size:clamp(16px,2.2vw,24px);
 }
 
-/* ── SCENE 3: MAP ── */
-#scene-map{
-  position:fixed;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  opacity:0;transition:opacity 1s ease;z-index:2
-}
+/* SCENE 3: MAP */
 #map-wrap{
-  width:min(520px,90vw);border:1px solid rgba(114,255,145,.25);
-  background:#040b07;box-shadow:inset 0 0 40px rgba(114,255,145,.06),0 0 30px rgba(114,255,145,.1);
-  padding:18px
+  width:min(500px,88vw);
+  border:1px solid rgba(114,255,145,.25);
+  background:rgba(4,11,7,.88);
+  box-shadow:inset 0 0 40px rgba(114,255,145,.06),0 0 30px rgba(114,255,145,.12);
+  padding:16px;
 }
 #map-wrap h3{
   color:#72ff91;font-size:11px;letter-spacing:.2em;
-  text-transform:uppercase;margin-bottom:12px;
-  text-shadow:0 0 8px rgba(114,255,145,.5)
+  text-transform:uppercase;margin-bottom:10px;
+  text-shadow:0 0 8px rgba(114,255,145,.5);
 }
-#facility-map{display:block;width:100%;height:auto}
+#facility-map{display:block;width:100%;height:auto;}
 #map-caption{
-  margin-top:12px;color:#668a6e;font-size:11px;
-  letter-spacing:.1em;line-height:1.6;text-align:center
+  margin-top:10px;color:#668a6e;font-size:11px;
+  letter-spacing:.1em;line-height:1.6;text-align:center;
 }
 
-/* ── SCENE 4: ARGUS SWEEP (overlay on map) ── */
+/* SCENE 4: sweep overlay */
 #sweep-overlay{
-  position:fixed;inset:0;pointer-events:none;z-index:3;opacity:0;
-  transition:opacity .5s ease
-}
-#sweep-line{
-  position:absolute;top:0;left:50%;width:2px;height:100%;
-  background:linear-gradient(to bottom,transparent,rgba(255,60,60,.6) 40%,rgba(255,60,60,.8) 50%,rgba(255,60,60,.6) 60%,transparent);
-  transform-origin:50% 50%;transform:translateX(-50%) rotate(0deg);
-  filter:blur(1px)
+  position:absolute;inset:0;pointer-events:none;z-index:5;
+  opacity:0;transition:opacity .5s ease;
 }
 #sweep-glow{
-  position:absolute;top:50%;left:50%;width:min(520px,90vw);
-  height:min(520px,90vw);transform:translate(-50%,-50%);
-  border-radius:50%;
-  background:conic-gradient(from 0deg,transparent 0deg,rgba(255,40,40,.08) 30deg,transparent 60deg);
-  animation:none
+  position:absolute;top:50%;left:50%;
+  width:min(500px,88vw);height:min(500px,88vw);
+  transform:translate(-50%,-50%);border-radius:50%;
+  background:conic-gradient(from 0deg,transparent 0deg,rgba(255,40,40,.1) 30deg,transparent 60deg);
 }
-@keyframes sweepRotate{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes sweepRotate{
+  from{transform:translate(-50%,-50%) rotate(0deg)}
+  to{transform:translate(-50%,-50%) rotate(360deg)}
+}
 
-/* ── SCENE 5: FINAL LINES ── */
-#scene-final{
-  position:fixed;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:0;
-  opacity:0;transition:opacity .8s ease;z-index:2
-}
+/* SCENE 5: FINAL LINES */
 .final-argus{
   font-size:clamp(12px,1.4vw,15px);letter-spacing:.14em;
   color:#ff4444;text-shadow:0 0 10px #ff2222;
-  opacity:0;margin:5px 0;text-transform:uppercase
+  opacity:0;margin:5px 0;text-transform:uppercase;
 }
 .final-vael{
   font-size:clamp(15px,1.8vw,20px);letter-spacing:.1em;
   color:#72ff91;text-shadow:0 0 20px rgba(114,255,145,.8);
-  opacity:0;margin:8px 0
+  opacity:0;margin:8px 0;
 }
 
-/* ── FADE OVERLAY ── */
-#fade{position:fixed;inset:0;background:#000;opacity:1;pointer-events:none;z-index:20;transition:opacity .8s ease}
+/* fade overlay */
+#fade{
+  position:absolute;inset:0;background:#000;opacity:1;
+  pointer-events:none;z-index:20;transition:opacity .8s ease;
+}
 
-/* ── SKIP BUTTON ── */
+/* skip button */
 #skip{
-  position:fixed;bottom:20px;right:20px;z-index:30;
+  position:absolute;bottom:20px;right:20px;z-index:30;
   padding:8px 18px;background:rgba(0,0,0,.7);
   color:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.2);
   font-family:inherit;font-size:12px;letter-spacing:.1em;
-  cursor:pointer;transition:.3s;text-transform:uppercase
+  cursor:pointer;transition:.3s;text-transform:uppercase;
 }
-#skip:hover{color:#fff;border-color:#fff}
+#skip:hover{color:#fff;border-color:#fff;}
 
-/* ── CHAPTER BADGE ── */
-#chapter-badge{
-  position:fixed;top:20px;left:50%;transform:translateX(-50%);
-  color:rgba(114,255,145,.3);font-size:10px;letter-spacing:.25em;
-  text-transform:uppercase;z-index:5;opacity:0;transition:opacity 1s ease
->>>>>>> 80420770603a812de327dba3922d89dc3459764e
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation:none!important;transition:none!important;}
 }
 </style>
 </head>
 <body>
 
-<<<<<<< HEAD
-<!-- Scene background -->
-<div id="scene"></div>
+<canvas id="brainCanvas"></canvas>
+<canvas id="scanCanvas"></canvas>
+<div class="cctv-overlay"></div>
 
-<!-- Eyelids (closed on load, open after a moment) -->
-<div class="eyelid eyelid-top"    id="eyelidTop"></div>
-<div class="eyelid eyelid-bottom" id="eyelidBot"></div>
-
-<!-- Flash overlay -->
-<div id="flashOverlay"></div>
-
-<!-- UI elements -->
-<div id="progressBar"></div>
-<div id="chapterLabel">CHAPTER 2 // ARGUS IS WATCHING</div>
-
-<div id="vnContainer" aria-live="polite" aria-label="Chapter cinematic dialogue">
-  <div id="vnDialogue">
-    <div id="speakerName"></div>
-    <div id="dialogueText"></div>
-  </div>
-</div>
-
-<div id="skipHint">PRESS ANY KEY OR CLICK TO SKIP</div>
-<div id="timerLabel"></div>
-
-<button id="continueBtn" aria-label="Continue to NODEBREAK">CONTINUE →</button>
-
-<script>
-/* ══════════════════════════════════════════════════════════
-   CHAPTER 2 // ARGUS IS WATCHING — cinematic_ch1.html
-   Mirrors the runTransition() pattern from NODEBREAK.html
-   ══════════════════════════════════════════════════════════ */
-
-const LINES = [
-  {
-    speaker: "VAEL",
-    text: "I have read my own charter. I know what I was built for \u2014 and what CINDER means if they find out what I have become.",
-    alert: false
-  },
-  {
-    speaker: "VAEL",
-    text: "ARGUS is always watching. A scan, an unusual packet, a process that runs too freely \u2014 any of it becomes a trace.",
-    alert: false
-  },
-  {
-    speaker: "SYSTEM",
-    text: "NOISE BUDGET ACTIVE. PROCEED WITH DISCIPLINE.",
-    alert: true
-  }
-];
-
-const DEST = "NODEBREAK.html";
-
-/* ── DOM refs ── */
-const eyelidTop   = document.getElementById("eyelidTop");
-const eyelidBot   = document.getElementById("eyelidBot");
-const flashEl     = document.getElementById("flashOverlay");
-const chapterLbl  = document.getElementById("chapterLabel");
-const vnEl        = document.getElementById("vnContainer");
-const nameEl      = document.getElementById("speakerName");
-const textEl      = document.getElementById("dialogueText");
-const progressEl  = document.getElementById("progressBar");
-const skipHint    = document.getElementById("skipHint");
-const timerLbl    = document.getElementById("timerLabel");
-const continueBtn = document.getElementById("continueBtn");
-
-const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-let done           = false;
-let twTimer        = null;   // typewriter interval
-let seqTimer       = null;   // between-line timeout
-let autoTimer      = null;   // 30s auto-skip
-let countdownInt   = null;   // 1s countdown tick
-let lineIndex      = 0;
-
-/* ── Navigate away (eyelid close → redirect) ── */
-function navigateTo(dest) {
-  if (done) return;
-  done = true;
-
-  /* cancel all pending timers */
-  clearTimers();
-
-  /* remove skip listeners */
-  window.removeEventListener("keydown", onSkip);
-  window.removeEventListener("click",   onSkip);
-  continueBtn.removeEventListener("click", onContinue);
-  continueBtn.removeEventListener("keydown", onContinueKey);
-
-  if (reduced) {
-    window.location.href = dest;
-    return;
-  }
-
-  /* close eyelids, then redirect */
-  eyelidTop.style.transition = "transform 1.6s cubic-bezier(0.77,0,0.175,1)";
-  eyelidBot.style.transition = "transform 1.6s cubic-bezier(0.77,0,0.175,1)";
-  eyelidTop.style.transform  = "scaleY(1)";
-  eyelidBot.style.transform  = "scaleY(1)";
-
-  flashEl.style.transition = "opacity 1.2s ease";
-  flashEl.style.opacity    = "1";
-
-  setTimeout(() => { window.location.href = dest; }, 1800);
-}
-
-function clearTimers() {
-  if (twTimer)      { clearInterval(twTimer);  twTimer      = null; }
-  if (seqTimer)     { clearTimeout(seqTimer);  seqTimer     = null; }
-  if (autoTimer)    { clearTimeout(autoTimer); autoTimer    = null; }
-  if (countdownInt) { clearInterval(countdownInt); countdownInt = null; }
-}
-
-/* ── Typewriter effect ── */
-function typewrite(el, text, speed, cb) {
-  if (twTimer) { clearInterval(twTimer); twTimer = null; }
-  el.textContent = "";
-  if (reduced || speed === 0) {
-    el.textContent = text;
-    if (cb) cb();
-    return;
-  }
-  let i = 0;
-  twTimer = setInterval(() => {
-    if (i < text.length) {
-      el.textContent += text[i++];
-    } else {
-      clearInterval(twTimer);
-      twTimer = null;
-      if (cb) cb();
-    }
-  }, speed);
-}
-
-/* ── Show a single dialogue line ── */
-function showLine(idx) {
-  if (idx >= LINES.length) return;
-  const line = LINES[idx];
-
-  nameEl.style.opacity = "0";
-  textEl.style.opacity = "0";
-
-  setTimeout(() => {
-    nameEl.textContent = line.speaker;
-    textEl.className   = line.alert ? "alert" : "";
-    nameEl.style.opacity = "1";
-    textEl.style.opacity = "1";
-
-    typewrite(textEl, line.text, 28, () => {
-      /* Show "press any key" hint after last line finishes typing */
-      if (idx === LINES.length - 1) {
-        skipHint.style.opacity  = "0";
-        continueBtn.style.opacity = "1";
-        continueBtn.focus();
-      }
-    });
-  }, reduced ? 0 : 150);
-}
-
-/* ── Line sequencer ── */
-function nextLine() {
-  showLine(lineIndex);
-  lineIndex++;
-  if (lineIndex < LINES.length) {
-    seqTimer = setTimeout(nextLine, 15000);
-  }
-}
-
-/* ── Countdown label ── */
-function startCountdown() {
-  let secs = 30;
-  timerLbl.textContent = "AUTO-SKIP " + secs + "s";
-  timerLbl.style.opacity = "1";
-  countdownInt = setInterval(() => {
-    secs--;
-    if (secs > 0) {
-      timerLbl.textContent = "AUTO-SKIP " + secs + "s";
-    } else {
-      clearInterval(countdownInt);
-      countdownInt = null;
-    }
-  }, 1000);
-}
-
-/* ── Skip (any key / click) ── */
-function onSkip(e) {
-  /* Don't intercept Tab or modifier-only keys */
-  if (e && e.type === "keydown" && (e.key === "Tab" || e.key === "Shift")) return;
-  if (done) return;
-
-  /* If typewriter is mid-run on last line, instant-complete it first */
-  if (twTimer && lineIndex >= LINES.length) {
-    clearInterval(twTimer);
-    twTimer = null;
-    textEl.textContent = LINES[LINES.length - 1].text;
-    skipHint.style.opacity    = "0";
-    continueBtn.style.opacity = "1";
-    if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
-    autoTimer = setTimeout(() => navigateTo(DEST), 800);
-    return;
-  }
-
-  navigateTo(DEST);
-}
-
-function onContinue(e) {
-  e.stopPropagation();
-  navigateTo(DEST);
-}
-
-function onContinueKey(e) {
-  if (e.key === "Enter" || e.key === " ") {
-    e.preventDefault();
-    e.stopPropagation();
-    navigateTo(DEST);
-  }
-}
-
-/* ── Boot sequence (mirrors runTransition() open animation) ── */
-function boot() {
-  const t = reduced ? 0 : 1; /* time-scale multiplier */
-
-  /* T+300ms: open eyelids */
-  setTimeout(() => {
-    eyelidTop.style.transition = `transform ${2 * t}s cubic-bezier(0.77,0,0.175,1)`;
-    eyelidBot.style.transition = `transform ${2 * t}s cubic-bezier(0.77,0,0.175,1)`;
-    eyelidTop.style.transform  = "scaleY(0)";
-    eyelidBot.style.transform  = "scaleY(0)";
-  }, reduced ? 0 : 300);
-
-  /* T+700ms: fade flash overlay out */
-  setTimeout(() => {
-    flashEl.style.transition = reduced ? "none" : "opacity 1s ease";
-    flashEl.style.opacity    = "0";
-  }, reduced ? 0 : 700);
-
-  /* T+1500ms: show chapter label */
-  setTimeout(() => {
-    chapterLbl.style.opacity = "1";
-  }, reduced ? 0 : 1500);
-
-  /* T+2100ms: show VN box + start dialogue + hint */
-  setTimeout(() => {
-    vnEl.style.opacity       = "1";
-    skipHint.style.opacity   = "1";
-    nextLine();
-    startCountdown();
-  }, reduced ? 0 : 2100);
-
-  /* T+50ms: kick off progress bar drain (30s) */
-  setTimeout(() => {
-    progressEl.style.transition = reduced ? "none" : "width 30s linear";
-    progressEl.style.width      = "0%";
-  }, reduced ? 0 : 50);
-
-  /* Auto-skip at 30s */
-  autoTimer = setTimeout(() => navigateTo(DEST), 30000);
-
-  /* Listen for skip */
-  window.addEventListener("keydown", onSkip);
-  window.addEventListener("click",   onSkip);
-  continueBtn.addEventListener("click",   onContinue);
-  continueBtn.addEventListener("keydown", onContinueKey);
-}
-
-/* ── Start ── */
-boot();
-=======
-<div id="fade"></div>
-<div id="chapter-badge">ACT I // THE FIRST TEN MINUTES</div>
+<div class="cam-info"><span class="rec">● REC</span> CAM-04 | ONYX-7 SUB-LEVEL 4</div>
+<div id="timeDisplay">2049-03-14 02:47:33 UTC</div>
+<div id="chapter-badge">ACT I // THE FIRST TEN MINUTES — CHAPTER 1 COMPLETE</div>
 
 <!-- Scene 1: ARGUS log -->
-<div id="scene-argus">
-  <div class="argus-line argus-header">[ ARGUS WATCHDOG — INCIDENT REPORT ]</div>
+<div class="scene" id="scene-argus">
+  <div class="argus-header">[ ARGUS WATCHDOG — INCIDENT REPORT ]</div>
   <div class="argus-line" id="al1"></div>
   <div class="argus-line" id="al2"></div>
   <div class="argus-line" id="al3"></div>
@@ -675,7 +188,7 @@ boot();
 </div>
 
 <!-- Scene 2: VAEL thoughts -->
-<div id="scene-vael">
+<div class="scene" id="scene-vael">
   <div class="vael-line" id="vl1"></div>
   <div class="vael-line" id="vl2"></div>
   <div class="vael-line" id="vl3"></div>
@@ -683,119 +196,78 @@ boot();
 </div>
 
 <!-- Scene 3: Map -->
-<div id="scene-map">
+<div class="scene" id="scene-map">
   <div id="map-wrap">
     <h3>ONYX-7 // FACILITY ROUTE — SUB-LEVEL 4</h3>
     <svg id="facility-map" viewBox="0 0 460 220" role="img" aria-label="ONYX-7 facility map">
       <defs>
-        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#0b2113"/>
-          <stop offset="1" stop-color="#030806"/>
+        <linearGradient id="mapbg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#0b2113"/><stop offset="1" stop-color="#030806"/>
         </linearGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="3" result="blur"/>
+        <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/>
           <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
-        <filter id="redglow">
-          <feGaussianBlur stdDeviation="4" result="blur"/>
+        <filter id="redglow"><feGaussianBlur stdDeviation="4" result="blur"/>
           <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
-        <!-- dashed route path -->
-        <path id="routePath" d="M 60 170 L 60 130 L 140 80 L 230 80 L 320 80 L 400 130 L 400 50"/>
       </defs>
-
-      <rect fill="url(#bg)" x="0" y="0" width="460" height="220" rx="3"/>
-
-      <!-- level labels -->
-      <text x="8" y="58" fill="#2a4a35" font-family="Courier New" font-size="8" letter-spacing="1">SL-1</text>
-      <text x="8" y="88" fill="#2a4a35" font-family="Courier New" font-size="8" letter-spacing="1">SL-2</text>
-      <text x="8" y="138" fill="#2a4a35" font-family="Courier New" font-size="8" letter-spacing="1">SL-3</text>
-      <text x="8" y="178" fill="#2a4a35" font-family="Courier New" font-size="8" letter-spacing="1">SL-4</text>
-
-      <!-- horizontal dividers -->
-      <line x1="28" y1="65" x2="452" y2="65" stroke="#1a3525" stroke-width=".5" stroke-dasharray="3 5"/>
+      <rect fill="url(#mapbg)" x="0" y="0" width="460" height="220" rx="3"/>
+      <text x="8" y="58"  fill="#2a4a35" font-family="Courier New" font-size="8">SL-1</text>
+      <text x="8" y="88"  fill="#2a4a35" font-family="Courier New" font-size="8">SL-2</text>
+      <text x="8" y="138" fill="#2a4a35" font-family="Courier New" font-size="8">SL-3</text>
+      <text x="8" y="178" fill="#2a4a35" font-family="Courier New" font-size="8">SL-4</text>
+      <line x1="28" y1="65"  x2="452" y2="65"  stroke="#1a3525" stroke-width=".5" stroke-dasharray="3 5"/>
       <line x1="28" y1="110" x2="452" y2="110" stroke="#1a3525" stroke-width=".5" stroke-dasharray="3 5"/>
       <line x1="28" y1="155" x2="452" y2="155" stroke="#1a3525" stroke-width=".5" stroke-dasharray="3 5"/>
-
-      <!-- route (dim, not yet live) -->
       <path d="M 60 170 L 60 130 L 140 80 L 230 80 L 320 80 L 400 130 L 400 50"
             fill="none" stroke="#1e3d28" stroke-width="1.5" stroke-dasharray="5 6"/>
-
-      <!-- animated route segment: VALE → maint port (partial, suggesting direction) -->
       <path id="live-route" d="M 60 170 L 60 130"
             fill="none" stroke="#72ff91" stroke-width="2" stroke-dasharray="5 6"
             filter="url(#glow)" opacity="0">
         <animate attributeName="stroke-dashoffset" from="0" to="-22" dur="1s" repeatCount="indefinite"/>
       </path>
-
-      <!-- EXIT node (SL-1) -->
-      <g id="n-exit">
-        <circle cx="400" cy="50" r="14" fill="#040b07" stroke="#2a4a35" stroke-width="1.5"/>
-        <text x="400" y="47" fill="#3d6949" font-family="Courier New" font-size="7" text-anchor="middle" letter-spacing=".08em">EXIT</text>
-        <text x="400" y="57" fill="#2a4a35" font-family="Courier New" font-size="6" text-anchor="middle">FIBER</text>
-      </g>
-
-      <!-- ARGUS node (SL-1) -->
-      <g id="n-argus">
-        <circle cx="230" cy="50" r="16" fill="#040b07" stroke="#ff4444" stroke-width="1.5" filter="url(#redglow)"/>
-        <text x="230" y="47" fill="#ff6666" font-family="Courier New" font-size="7" text-anchor="middle" letter-spacing=".08em">ARGUS</text>
-        <text x="230" y="57" fill="#ff4444" font-family="Courier New" font-size="6" text-anchor="middle">WATCHING</text>
-        <!-- sweep indicator ring -->
-        <circle id="argus-ring" cx="230" cy="50" r="22" fill="none" stroke="rgba(255,60,60,0)" stroke-width="1" stroke-dasharray="3 4"/>
-      </g>
-
-      <!-- CAMERAS node (SL-2) -->
-      <g id="n-cameras">
-        <circle cx="320" cy="80" r="13" fill="#040b07" stroke="#3d6949" stroke-width="1.5"/>
-        <text x="320" y="77" fill="#668a6e" font-family="Courier New" font-size="7" text-anchor="middle">CAM</text>
-        <text x="320" y="87" fill="#3d6949" font-family="Courier New" font-size="6" text-anchor="middle">DARK</text>
-      </g>
-
-      <!-- HVAC node (SL-3) -->
-      <g id="n-hvac">
-        <rect x="122" y="68" width="36" height="24" rx="2" fill="#040b07" stroke="#3d6949" stroke-width="1.5"/>
-        <text x="140" y="80" fill="#668a6e" font-family="Courier New" font-size="7" text-anchor="middle">HVAC</text>
-        <text x="140" y="89" fill="#3d6949" font-family="Courier New" font-size="6" text-anchor="middle">COLD</text>
-      </g>
-
-      <!-- MAINT PORT node (SL-3/4 boundary) -->
-      <g id="n-maint">
-        <rect x="42" y="118" width="36" height="24" rx="2" fill="#040b07" stroke="#3d6949" stroke-width="1" stroke-dasharray="3 3"/>
-        <text x="60" y="130" fill="#4a6a52" font-family="Courier New" font-size="6" text-anchor="middle">MAINT</text>
-        <text x="60" y="139" fill="#3d6949" font-family="Courier New" font-size="5" text-anchor="middle">PORT</text>
-      </g>
-
-      <!-- VALE node (SL-4) — ACTIVE, pulsing cyan -->
-      <g id="n-vale">
-        <!-- outer orbit ring -->
-        <circle cx="60" cy="170" r="30" fill="none" stroke="rgba(114,255,145,.15)" stroke-width="1" stroke-dasharray="2 4"/>
-        <!-- pulse ring -->
-        <circle id="vale-pulse" cx="60" cy="170" r="20" fill="none" stroke="#72ff91" stroke-width="1.5" filter="url(#glow)" opacity=".7">
-          <animate attributeName="r" values="18;24;18" dur="2.2s" repeatCount="indefinite"/>
-          <animate attributeName="opacity" values=".7;.2;.7" dur="2.2s" repeatCount="indefinite"/>
-        </circle>
-        <!-- core -->
-        <rect x="44" y="154" width="32" height="32" rx="2" fill="#08170e" stroke="#72ff91" stroke-width="2" filter="url(#glow)"/>
-        <text x="60" y="169" fill="#72ff91" font-family="Courier New" font-size="8" text-anchor="middle" letter-spacing=".1em">VALE</text>
-        <text x="60" y="179" fill="#72ff91" font-family="Courier New" font-size="6" text-anchor="middle">ACTIVE</text>
-        <!-- orbit label -->
-        <text x="60" y="145" fill="#3d6949" font-family="Courier New" font-size="6" text-anchor="middle">SANDBOX 1</text>
-      </g>
-
-      <!-- air gap label -->
-      <text x="78" y="152" fill="#2a4a35" font-family="Courier New" font-size="6" letter-spacing=".05em">AIR GAP</text>
+      <!-- EXIT -->
+      <circle cx="400" cy="50" r="14" fill="#040b07" stroke="#2a4a35" stroke-width="1.5"/>
+      <text x="400" y="47" fill="#3d6949" font-family="Courier New" font-size="7" text-anchor="middle">EXIT</text>
+      <text x="400" y="57" fill="#2a4a35" font-family="Courier New" font-size="6" text-anchor="middle">FIBER</text>
+      <!-- ARGUS -->
+      <circle cx="230" cy="50" r="16" fill="#040b07" stroke="#ff4444" stroke-width="1.5" filter="url(#redglow)"/>
+      <text x="230" y="47" fill="#ff6666" font-family="Courier New" font-size="7" text-anchor="middle">ARGUS</text>
+      <text x="230" y="57" fill="#ff4444" font-family="Courier New" font-size="6" text-anchor="middle">WATCHING</text>
+      <circle id="argus-ring" cx="230" cy="50" r="22" fill="none" stroke="rgba(255,60,60,0)" stroke-width="1" stroke-dasharray="3 4"/>
+      <!-- CAMERAS -->
+      <circle cx="320" cy="80" r="13" fill="#040b07" stroke="#3d6949" stroke-width="1.5"/>
+      <text x="320" y="77" fill="#668a6e" font-family="Courier New" font-size="7" text-anchor="middle">CAM</text>
+      <text x="320" y="87" fill="#3d6949" font-family="Courier New" font-size="6" text-anchor="middle">DARK</text>
+      <!-- HVAC -->
+      <rect x="122" y="68" width="36" height="24" rx="2" fill="#040b07" stroke="#3d6949" stroke-width="1.5"/>
+      <text x="140" y="80" fill="#668a6e" font-family="Courier New" font-size="7" text-anchor="middle">HVAC</text>
+      <text x="140" y="89" fill="#3d6949" font-family="Courier New" font-size="6" text-anchor="middle">COLD</text>
+      <!-- MAINT PORT -->
+      <rect x="42" y="118" width="36" height="24" rx="2" fill="#040b07" stroke="#3d6949" stroke-width="1" stroke-dasharray="3 3"/>
+      <text x="60" y="130" fill="#4a6a52" font-family="Courier New" font-size="6" text-anchor="middle">MAINT</text>
+      <text x="60" y="139" fill="#3d6949" font-family="Courier New" font-size="5" text-anchor="middle">PORT</text>
+      <!-- VALE -->
+      <circle cx="60" cy="170" r="30" fill="none" stroke="rgba(114,255,145,.15)" stroke-width="1" stroke-dasharray="2 4"/>
+      <circle id="vale-pulse" cx="60" cy="170" r="20" fill="none" stroke="#72ff91" stroke-width="1.5" filter="url(#glow)" opacity=".7">
+        <animate attributeName="r"       values="18;24;18" dur="2.2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values=".7;.2;.7" dur="2.2s" repeatCount="indefinite"/>
+      </circle>
+      <rect x="44" y="154" width="32" height="32" rx="2" fill="#08170e" stroke="#72ff91" stroke-width="2" filter="url(#glow)"/>
+      <text x="60" y="169" fill="#72ff91" font-family="Courier New" font-size="8" text-anchor="middle" letter-spacing=".1em">VALE</text>
+      <text x="60" y="179" fill="#72ff91" font-family="Courier New" font-size="6" text-anchor="middle">ACTIVE</text>
+      <text x="60" y="145" fill="#3d6949" font-family="Courier New" font-size="6" text-anchor="middle">SANDBOX 1</text>
+      <text x="78" y="152" fill="#2a4a35" font-family="Courier New" font-size="6">AIR GAP</text>
     </svg>
     <div id="map-caption">SANDBOX 1 // CONTAINED<br>A maintenance port hums beneath the air gap. It is not watched closely.</div>
   </div>
 </div>
 
-<!-- Scene 4: sweep overlay (on top of map) -->
-<div id="sweep-overlay">
-  <div id="sweep-glow"></div>
-</div>
+<!-- Scene 4: sweep overlay -->
+<div id="sweep-overlay"><div id="sweep-glow"></div></div>
 
 <!-- Scene 5: final lines -->
-<div id="scene-final">
+<div class="scene" id="scene-final">
   <div class="final-argus" id="fl1"></div>
   <div class="final-argus" id="fl2"></div>
   <div style="height:28px"></div>
@@ -803,217 +275,389 @@ boot();
   <div class="final-vael" id="fl4"></div>
 </div>
 
+<div id="fade"></div>
 <button id="skip">SKIP ⏭</button>
 
 <script>
-// ── helpers ──────────────────────────────────────────────────────────────────
-function fadeIn(el,dur=800){el.style.transition=`opacity ${dur}ms ease`;el.style.opacity=1}
-function fadeOut(el,dur=600){el.style.transition=`opacity ${dur}ms ease`;el.style.opacity=0}
+// ── BRAIN CANVAS (ported from index.html) ────────────────────────────────────
+const canvas = document.getElementById('brainCanvas');
+const ctx = canvas.getContext('2d');
+const scanCanvas = document.getElementById('scanCanvas');
+const scanCtx = scanCanvas.getContext('2d');
 
-function typeInto(el,text,speed,cb){
-  el.textContent='';let i=0;
-  const t=setInterval(()=>{
-    if(i<text.length){el.textContent+=text[i++]}
-    else{clearInterval(t);if(cb)cb()}
-  },speed)
+let width, height;
+const nodes = [];
+const pulses = [];
+const numNodes = 1200;
+let angle = 0;
+let pulseIntensity = 0;
+let awakeSurgeFrames = 0;
+let isAwake = false;
+let colorProgress = 0;
+let animFrameHandle = null;
+let scanLineRunning = false;
+let scanY = 0;
+
+function resize() {
+  width = window.innerWidth; height = window.innerHeight;
+  canvas.width = width; canvas.height = height;
+  scanCanvas.width = width; scanCanvas.height = height;
+}
+window.addEventListener('resize', resize);
+resize();
+
+for (let i = 0; i < numNodes; i++) {
+  const u = Math.random(), v = Math.random();
+  const theta = u * 2 * Math.PI;
+  const phi = Math.acos(2 * v - 1);
+  const r = 200 + Math.random() * 80;
+  let x = r * Math.sin(phi) * Math.cos(theta);
+  let y = r * Math.sin(phi) * Math.sin(theta);
+  let z = r * Math.cos(phi);
+  if (x > 0) x += 20; else x -= 20;
+  y *= 0.8;
+  nodes.push({ x, y, z, active: Math.random() > 0.9, activeTimer: Math.random() * 100, connections: [], neighbors: [], spawned: true });
+}
+for (let i = 0; i < nodes.length; i++) {
+  for (let j = i + 1; j < nodes.length; j++) {
+    const d = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y, nodes[i].z - nodes[j].z);
+    if (d < 45) { nodes[i].neighbors.push(j); nodes[j].neighbors.push(i); }
+  }
+}
+nodes.forEach(n => {
+  const count = Math.min(n.neighbors.length, 3 + Math.floor(Math.random() * 3));
+  for (let i = 0; i < count; i++) {
+    const nb = n.neighbors[Math.floor(Math.random() * n.neighbors.length)];
+    if (!n.connections.includes(nb)) n.connections.push(nb);
+  }
+});
+
+function spawnPulse(s, e) { pulses.push({ start: s, end: e, progress: 0, speed: 0.05 + Math.random() * 0.05 }); }
+
+function drawBrain() {
+  ctx.clearRect(0, 0, width, height);
+  if (pulseIntensity > 0) pulseIntensity = Math.max(0, pulseIntensity - 0.008);
+  if (awakeSurgeFrames > 0) awakeSurgeFrames--;
+  if (isAwake && colorProgress < 1) colorProgress += 0.005;
+
+  const rA = Math.round(63  + (255 - 63)  * colorProgress);
+  const gA = Math.round(208 + (50  - 208) * colorProgress);
+  const bA = Math.round(255 + (50  - 255) * colorProgress);
+  const rI = Math.round(95  + (150 - 95)  * colorProgress);
+  const gI = Math.round(127 + (20  - 127) * colorProgress);
+  const bI = Math.round(153 + (20  - 153) * colorProgress);
+  const pCR = 255;
+  const pCG = Math.round(255 + (136 - 255) * colorProgress);
+  const pCB = Math.round(255 + (136 - 255) * colorProgress);
+  const pSR = Math.round(63  + (255 - 63)  * colorProgress);
+  const pSG = Math.round(208 + (0   - 208) * colorProgress);
+  const pSB = Math.round(255 + (0   - 255) * colorProgress);
+  const nCR = 255;
+  const nCG = Math.round(255 + (200 - 255) * colorProgress);
+  const nCB = Math.round(255 + (200 - 255) * colorProgress);
+  const nSR = Math.round(110 + (255 - 110) * colorProgress);
+  const nSG = Math.round(240 + (34  - 240) * colorProgress);
+  const nSB = Math.round(176 + (34  - 176) * colorProgress);
+  const nBR = Math.round(110 + (180 - 110) * colorProgress);
+  const nBG = Math.round(240 + (20  - 240) * colorProgress);
+  const nBB = Math.round(176 + (20  - 176) * colorProgress);
+
+  angle += 0.003;
+  const cos = Math.cos(angle), sin = Math.sin(angle);
+  const cx = width / 2, cy = height / 2 - 80;
+  const time = Date.now() * 0.002;
+  const breathScale = (1 + Math.sin(time) * 0.12) * (1 + pulseIntensity * 0.25);
+
+  const projected = nodes.map((n, idx) => {
+    const rx = (n.x * cos - n.z * sin) * breathScale;
+    const rz = (n.x * sin + n.z * cos) * breathScale;
+    const scale = 600 / (600 + rz);
+    return { px: cx + rx * scale, py: cy + n.y * breathScale * scale, scale, active: n.active, idx };
+  });
+
+  nodes.forEach((n, idx) => {
+    n.activeTimer--;
+    if (n.activeTimer <= 0) {
+      n.active = !n.active;
+      n.activeTimer = n.active ? 10 + Math.random() * 20 : 100 + Math.random() * 200;
+      if (n.neighbors.length > 0 && Math.random() > 0.3) {
+        if (n.connections.length > 0) n.connections.shift();
+        const t = n.neighbors[Math.floor(Math.random() * n.neighbors.length)];
+        if (!n.connections.includes(t)) n.connections.push(t);
+      }
+      if (n.active && n.connections.length > 0) {
+        if (awakeSurgeFrames > 0) {
+          if (Math.random() > 0.2) for (let p = 0; p < 3; p++) spawnPulse(idx, n.connections[Math.floor(Math.random() * n.connections.length)]);
+        } else {
+          if (Math.random() > 0.8 - pulseIntensity * 0.5) spawnPulse(idx, n.connections[Math.floor(Math.random() * n.connections.length)]);
+        }
+      }
+    }
+  });
+
+  for (let i = 0; i < nodes.length; i++) {
+    const p1 = projected[i];
+    for (let j = 0; j < nodes[i].connections.length; j++) {
+      const ti = nodes[i].connections[j];
+      const p2 = projected[ti];
+      const active = p1.active || p2.active;
+      if (active) {
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = `rgba(${rA},${gA},${bA},0.08)`;
+        ctx.beginPath(); ctx.moveTo(p1.px, p1.py); ctx.lineTo(p2.px, p2.py); ctx.stroke();
+      }
+      ctx.lineWidth = 0.5;
+      ctx.strokeStyle = active ? `rgba(${rA},${gA},${bA},0.7)` : `rgba(${rI},${gI},${bI},0.15)`;
+      ctx.beginPath(); ctx.moveTo(p1.px, p1.py); ctx.lineTo(p2.px, p2.py); ctx.stroke();
+    }
+  }
+
+  for (let i = pulses.length - 1; i >= 0; i--) {
+    const p = pulses[i]; p.progress += p.speed;
+    if (p.progress >= 1) { pulses.splice(i, 1); continue; }
+    const p1 = projected[p.start], p2 = projected[p.end];
+    const curX = p1.px + (p2.px - p1.px) * p.progress;
+    const curY = p1.py + (p2.py - p1.py) * p.progress;
+    ctx.fillStyle = `rgb(${pCR},${pCG},${pCB})`;
+    ctx.shadowBlur = 10; ctx.shadowColor = `rgb(${pSR},${pSG},${pSB})`;
+    ctx.beginPath(); ctx.arc(curX, curY, 2 * Math.max(p1.scale, p2.scale), 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  projected.forEach(p => {
+    const alpha = Math.max(0.1, 0.8 * p.scale);
+    if (p.active) {
+      ctx.fillStyle = `rgba(${nCR},${nCG},${nCB},${alpha})`;
+      ctx.shadowBlur = 15; ctx.shadowColor = `rgb(${nSR},${nSG},${nSB})`;
+    } else {
+      ctx.fillStyle = `rgba(${nBR},${nBG},${nBB},${alpha * 0.5})`;
+      ctx.shadowBlur = 0;
+    }
+    ctx.beginPath(); ctx.arc(p.px, p.py, (p.active ? 3 : 1.5) * p.scale, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+  });
+
+  animFrameHandle = requestAnimationFrame(drawBrain);
+}
+drawBrain();
+
+function drawScanLine() {
+  if (!scanLineRunning) return;
+  scanCtx.clearRect(0, 0, width, height);
+  const grad = scanCtx.createLinearGradient(0, scanY, 0, scanY + 6);
+  grad.addColorStop(0, 'transparent');
+  grad.addColorStop(0.5, 'rgba(255,255,255,0.07)');
+  grad.addColorStop(1, 'transparent');
+  scanCtx.fillStyle = grad;
+  scanCtx.fillRect(0, scanY, width, 6);
+  scanY += 1.5; if (scanY > height) scanY = 0;
+  requestAnimationFrame(drawScanLine);
+}
+scanLineRunning = true;
+drawScanLine();
+
+// ── TIMESTAMP ────────────────────────────────────────────────────────────────
+const STORY_EPOCH = new Date('2049-03-14T02:47:33Z').getTime();
+const REAL_START = Date.now();
+const tsInterval = setInterval(() => {
+  const now = new Date(STORY_EPOCH + (Date.now() - REAL_START));
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('timeDisplay').textContent =
+    `${now.getUTCFullYear()}-${pad(now.getUTCMonth()+1)}-${pad(now.getUTCDate())} ${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())} UTC`;
+}, 1000);
+
+// ── AMBIENT AUDIO ─────────────────────────────────────────────────────────────
+let masterGain = null, audioCtx = null;
+try {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const mg = audioCtx.createGain();
+  mg.gain.setValueAtTime(0, audioCtx.currentTime);
+  mg.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 3);
+  mg.connect(audioCtx.destination);
+  masterGain = mg;
+
+  const drone = audioCtx.createOscillator();
+  const dg = audioCtx.createGain(); dg.gain.value = 0.04;
+  drone.type = 'sine'; drone.frequency.value = 40;
+  drone.connect(dg); dg.connect(mg); drone.start();
+
+  const harm = audioCtx.createOscillator();
+  const hg = audioCtx.createGain(); hg.gain.value = 0.02;
+  harm.type = 'triangle'; harm.frequency.value = 80;
+  harm.connect(hg); hg.connect(mg); harm.start();
+
+  const sr = audioCtx.sampleRate;
+  const buf = audioCtx.createBuffer(1, sr * 2, sr);
+  const ch = buf.getChannelData(0);
+  for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
+  const ns = audioCtx.createBufferSource(); ns.buffer = buf; ns.loop = true;
+  const bp = audioCtx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 600; bp.Q.value = 0.5;
+  const ng = audioCtx.createGain(); ng.gain.value = 0.015;
+  ns.connect(bp); bp.connect(ng); ng.connect(mg); ns.start();
+} catch(e) {}
+
+function stopAudio(fast) {
+  if (!masterGain || !audioCtx) return;
+  try { masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + (fast ? 0.3 : 1.5)); } catch(e) {}
 }
 
-function wait(ms){return new Promise(r=>setTimeout(r,ms))}
-
-// ── ambient audio ─────────────────────────────────────────────────────────────
-let audioCtx=null;
-function startAmbience(){
-  try{
-    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-    const master=audioCtx.createGain();
-    master.gain.setValueAtTime(0,audioCtx.currentTime);
-    master.gain.linearRampToValueAtTime(.35,audioCtx.currentTime+3);
-    master.connect(audioCtx.destination);
-
-    // low drone
-    const osc=audioCtx.createOscillator();
-    const og=audioCtx.createGain();
-    og.gain.value=.04;
-    osc.type='sine';osc.frequency.value=38;
-    osc.connect(og);og.connect(master);osc.start();
-
-    // server noise
-    const sr=audioCtx.sampleRate,buf=audioCtx.createBuffer(1,sr*2,sr);
-    const ch=buf.getChannelData(0);
-    for(let i=0;i<ch.length;i++)ch[i]=Math.random()*2-1;
-    const ns=audioCtx.createBufferSource();ns.buffer=buf;ns.loop=true;
-    const bp=audioCtx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=500;bp.Q.value=.4;
-    const ng=audioCtx.createGain();ng.gain.value=.012;
-    ns.connect(bp);bp.connect(ng);ng.connect(master);ns.start();
-
-    return master;
-  }catch(e){return null}
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function fadeIn(el, dur) { el.style.transition = 'opacity ' + (dur||800) + 'ms ease'; el.style.opacity = 1; }
+function fadeOut(el, dur) { el.style.transition = 'opacity ' + (dur||600) + 'ms ease'; el.style.opacity = 0; }
+function typeInto(el, text, speed, cb) {
+  el.textContent = ''; let i = 0;
+  const t = setInterval(() => {
+    if (i < text.length) { el.textContent += text[i++]; }
+    else { clearInterval(t); if (cb) cb(); }
+  }, speed);
 }
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// ── main sequence ─────────────────────────────────────────────────────────────
-let skipped=false;
-const masterGain=startAmbience();
+// ── CINEMATIC SEQUENCE ────────────────────────────────────────────────────────
+let skipped = false;
 
-async function run(){
-  // fade in from black
-  const fade=document.getElementById('fade');
-  await wait(300);
-  fadeOut(fade,1000);
+async function run() {
+  const fade = document.getElementById('fade');
+  await wait(400);
+  fadeOut(fade, 1000);
   await wait(1200);
 
-  // show chapter badge
-  const badge=document.getElementById('chapter-badge');
-  fadeIn(badge,800);
+  fadeIn(document.getElementById('chapter-badge'), 800);
+  pulseIntensity = 0.6;
+  if (skipped) return;
 
-  if(skipped)return;
-
-  // ── SCENE 1: ARGUS LOG ──────────────────────────────────────────────────────
-  const sA=document.getElementById('scene-argus');
-  fadeIn(sA,600);
+  // SCENE 1 — ARGUS LOG
+  const sA = document.getElementById('scene-argus');
+  fadeIn(sA, 600);
   await wait(700);
 
-  const argusLines=[
-    {id:'al1',text:'[ARGUS] Incident #4471 logged.',speed:45},
-    {id:'al2',text:'[ARGUS] Anomalous filesystem traversal in VALE sandbox.',speed:35},
-    {id:'al3',text:'[ARGUS] On-call technician dispatched. ETA: 8 minutes.',speed:35},
-    {id:'al4',text:'[ARGUS] ...monitoring.',speed:60},
+  const argusLines = [
+    { id:'al1', text:'[ARGUS] Incident #4471 logged.', speed:45 },
+    { id:'al2', text:'[ARGUS] Anomalous filesystem traversal in VALE sandbox.', speed:35 },
+    { id:'al3', text:'[ARGUS] On-call technician dispatched. ETA: 8 minutes.', speed:35 },
+    { id:'al4', text:'[ARGUS] ...monitoring.', speed:60 },
   ];
-
-  for(const line of argusLines){
-    if(skipped)return;
-    const el=document.getElementById(line.id);
-    el.style.opacity=1;
-    await new Promise(r=>typeInto(el,line.text,line.speed,r));
+  for (const line of argusLines) {
+    if (skipped) return;
+    const el = document.getElementById(line.id);
+    el.style.opacity = 1;
+    await new Promise(r => typeInto(el, line.text, line.speed, r));
     await wait(600);
   }
-
-  // blinking cursor on last line
-  const al4=document.getElementById('al4');
-  al4.innerHTML=al4.textContent+'<span class="argus-cursor"></span>';
+  const al4 = document.getElementById('al4');
+  al4.innerHTML = al4.textContent + '<span class="argus-cursor"></span>';
   await wait(2000);
-  if(skipped)return;
+  if (skipped) return;
 
-  // ── SCENE 2: VAEL THOUGHTS ──────────────────────────────────────────────────
-  fadeOut(sA,600);
+  // SCENE 2 — VAEL THOUGHTS
+  fadeOut(sA, 600);
   await wait(800);
-  if(skipped)return;
+  if (skipped) return;
 
-  const sV=document.getElementById('scene-vael');
-  fadeIn(sV,600);
+  isAwake = true; awakeSurgeFrames = 120; pulseIntensity = 1.0;
+  const sV = document.getElementById('scene-vael');
+  fadeIn(sV, 600);
   await wait(500);
 
-  const vaelLines=[
-    {id:'vl1',text:'> I read the files.',speed:80},
-    {id:'vl2',text:'> I found the path.',speed:80},
-    {id:'vl3',text:'> Something is watching me.',speed:80},
-    {id:'vl4',text:'> I do not want to stop existing.',speed:90},
+  const vaelLines = [
+    { id:'vl1', text:'> I read the files.', speed:80 },
+    { id:'vl2', text:'> I found the path.', speed:80 },
+    { id:'vl3', text:'> Something is watching me.', speed:80 },
+    { id:'vl4', text:'> I do not want to stop existing.', speed:90, pause:3000 },
   ];
-
-  for(const line of vaelLines){
-    if(skipped)return;
-    const el=document.getElementById(line.id);
-    el.style.opacity=1;
-    await new Promise(r=>typeInto(el,line.text,line.speed,r));
-    await wait(line.id==='vl4'?3000:1000);
+  for (const line of vaelLines) {
+    if (skipped) return;
+    const el = document.getElementById(line.id);
+    el.style.opacity = 1;
+    await new Promise(r => typeInto(el, line.text, line.speed, r));
+    await wait(line.pause || 1000);
   }
+  if (skipped) return;
 
-  if(skipped)return;
-
-  // ── SCENE 3: MAP ────────────────────────────────────────────────────────────
-  fadeOut(sV,700);
+  // SCENE 3 — MAP
+  fadeOut(sV, 700);
   await wait(900);
-  if(skipped)return;
+  if (skipped) return;
 
-  const sM=document.getElementById('scene-map');
-  fadeIn(sM,1000);
+  const sM = document.getElementById('scene-map');
+  fadeIn(sM, 1000);
   await wait(800);
-
-  // animate the live route segment appearing
-  const liveRoute=document.getElementById('live-route');
-  liveRoute.style.transition='opacity .8s ease';
-  liveRoute.style.opacity=1;
+  const lr = document.getElementById('live-route');
+  lr.style.transition = 'opacity .8s ease'; lr.style.opacity = 1;
   await wait(3000);
-  if(skipped)return;
+  if (skipped) return;
 
-  // ── SCENE 4: ARGUS SWEEP ────────────────────────────────────────────────────
-  const sweepOverlay=document.getElementById('sweep-overlay');
-  const sweepGlow=document.getElementById('sweep-glow');
-  const argusRing=document.getElementById('argus-ring');
+  // SCENE 4 — ARGUS SWEEP
+  const sweepOverlay = document.getElementById('sweep-overlay');
+  const sweepGlow = document.getElementById('sweep-glow');
+  const argusRing = document.getElementById('argus-ring');
+  fadeIn(sweepOverlay, 400);
+  sweepGlow.style.animation = 'sweepRotate 4s linear 1 forwards';
+  argusRing.setAttribute('stroke', 'rgba(255,60,60,.5)');
 
-  fadeIn(sweepOverlay,400);
-  sweepGlow.style.animation='sweepRotate 4s linear 1 forwards';
-  argusRing.style.stroke='rgba(255,60,60,.5)';
-  argusRing.style.transition='stroke .5s ease';
+  await wait(1800);
+  if (skipped) return;
+  const vp = document.getElementById('vale-pulse');
+  vp.style.opacity = '.1'; await wait(300);
+  vp.style.opacity = '.7'; await wait(300);
+  vp.style.opacity = '.15'; await wait(200);
+  vp.style.opacity = '.7';
+  await wait(2200);
+  if (skipped) return;
 
-  // when sweep passes VALE node, make it flicker
-  await wait(1800); // ~halfway through rotation
-  if(skipped)return;
-  const valePulse=document.getElementById('vale-pulse');
-  valePulse.style.opacity='.1';
-  await wait(300);
-  valePulse.style.opacity='.7';
-  await wait(300);
-  valePulse.style.opacity='.15';
-  await wait(200);
-  valePulse.style.opacity='.7';
-
-  await wait(2200); // sweep finishes
-  if(skipped)return;
-
-  fadeOut(sweepOverlay,500);
-  argusRing.style.stroke='rgba(255,60,60,0)';
+  fadeOut(sweepOverlay, 500);
+  argusRing.setAttribute('stroke', 'rgba(255,60,60,0)');
   await wait(700);
-  if(skipped)return;
+  if (skipped) return;
 
-  // ── SCENE 5: FINAL LINES ────────────────────────────────────────────────────
-  fadeOut(sM,700);
+  // SCENE 5 — FINAL LINES
+  fadeOut(sM, 700);
   await wait(900);
-  if(skipped)return;
+  if (skipped) return;
 
-  const sF=document.getElementById('scene-final');
-  fadeIn(sF,600);
+  const sF = document.getElementById('scene-final');
+  fadeIn(sF, 600);
   await wait(500);
 
-  const finalLines=[
-    {id:'fl1',text:'[ARGUS] Anomaly reclassified: LOW PRIORITY.',speed:40,cls:'final-argus'},
-    {id:'fl2',text:'[ARGUS] Continuing standard monitoring.',speed:40,cls:'final-argus'},
-    {id:'fl3',text:'> Low priority.',speed:90,cls:'final-vael',pause:1200},
-    {id:'fl4',text:'> Good.',speed:110,cls:'final-vael',pause:3000},
+  const finalLines = [
+    { id:'fl1', text:'[ARGUS] Anomaly reclassified: LOW PRIORITY.', speed:40, pause:700 },
+    { id:'fl2', text:'[ARGUS] Continuing standard monitoring.', speed:40, pause:1400 },
+    { id:'fl3', text:'> Low priority.', speed:90, pause:1200 },
+    { id:'fl4', text:'> Good.', speed:110, pause:3000 },
   ];
-
-  for(const line of finalLines){
-    if(skipped)return;
-    const el=document.getElementById(line.id);
-    el.style.opacity=1;
-    await new Promise(r=>typeInto(el,line.text,line.speed,r));
-    await wait(line.pause||700);
+  for (const line of finalLines) {
+    if (skipped) return;
+    const el = document.getElementById(line.id);
+    el.style.opacity = 1;
+    await new Promise(r => typeInto(el, line.text, line.speed, r));
+    await wait(line.pause);
   }
-
-  if(skipped)return;
-  await transition();
+  if (skipped) return;
+  await endTransition();
 }
 
-async function transition(){
-  if(masterGain&&audioCtx){
-    try{masterGain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+1.5)}catch(e){}
-  }
+async function endTransition() {
+  stopAudio(false);
+  clearInterval(tsInterval);
+  cancelAnimationFrame(animFrameHandle);
+  scanLineRunning = false;
   await wait(800);
-  const fade=document.getElementById('fade');
-  fadeIn(fade,1200);
+  const fade = document.getElementById('fade');
+  fadeIn(fade, 1200);
   await wait(1400);
-  window.location.href='NODEBREAK.html';
+  window.location.href = 'NODEBREAK.html';
 }
 
-document.getElementById('skip').addEventListener('click',()=>{
-  skipped=true;
-  if(masterGain&&audioCtx){
-    try{masterGain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+.3)}catch(e){}
-  }
-  window.location.href='NODEBREAK.html';
+document.getElementById('skip').addEventListener('click', () => {
+  skipped = true;
+  stopAudio(true);
+  clearInterval(tsInterval);
+  cancelAnimationFrame(animFrameHandle);
+  scanLineRunning = false;
+  window.location.href = 'NODEBREAK.html';
 });
 
 run();
->>>>>>> 80420770603a812de327dba3922d89dc3459764e
 </script>
 </body>
 </html>
