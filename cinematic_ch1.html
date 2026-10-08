@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CHAPTER 2 // ARGUS IS WATCHING</title>
+<style>
+:root {
+  --bg: #07100c;
+  --panel: #0b1811;
+  --line: #23452f;
+  --fg: #b9e8bd;
+  --dim: #668a6e;
+  --accent: #72ff91;
+  --warn: #f6c667;
+  --bad: #ff6b6b;
+  --ok: #72ff91;
+  --glow: rgba(114,255,145,.28);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  color: var(--fg);
+  font: 14px/1.55 "Courier New", ui-monospace, monospace;
+  overflow: hidden;
+}
+
+/* ── CRT / Scanline overlay ── */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,.72) 100%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,.035) 0 1px,
+      transparent 1px 4px
+    );
+  z-index: 10;
+  mix-blend-mode: screen;
+  opacity: .65;
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: var(--glow);
+  opacity: .035;
+  animation: flicker 7s infinite;
+  z-index: 10;
+}
+@keyframes flicker {
+  0%,100% { opacity: .03; }
+  48%      { opacity: .05; }
+  49%      { opacity: .015; }
+  50%      { opacity: .04; }
+}
+
+/* ── Scene container ── */
+#scene {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+/* ── Eyelid animation (matches NODEBREAK #transitionOverlay) ── */
+.eyelid {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background: #000;
+  z-index: 20;
+  will-change: transform;
+}
+.eyelid-top {
+  top: 0;
+  transform-origin: top;
+  transform: scaleY(1);
+  transition: transform 2s cubic-bezier(0.77, 0, 0.175, 1);
+}
+.eyelid-bottom {
+  bottom: 0;
+  transform-origin: bottom;
+  transform: scaleY(1);
+  transition: transform 2s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+/* Flash overlay — fades away after eyelids open */
+#flashOverlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 1;
+  z-index: 15;
+  pointer-events: none;
+  transition: opacity 1s ease;
+}
+
+/* ── Chapter label (matches transChapterLabel) ── */
+#chapterLabel {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--accent);
+  font-size: 12px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0 0 16px var(--glow);
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  z-index: 5;
+}
+
+/* ── Dialogue box (matches #transVnContainer) ── */
+#vnContainer {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(820px, 96vw);
+  min-height: 140px;
+  background: rgba(10, 15, 25, 0.9);
+  border: 2px solid rgba(63, 208, 255, 0.45);
+  box-shadow:
+    0 0 28px rgba(63, 208, 255, 0.18),
+    inset 0 0 20px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: stretch;
+  z-index: 4;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+#vnDialogue {
+  padding: 22px 24px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#speakerName {
+  font-weight: bold;
+  font-size: 17px;
+  color: var(--accent);
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: opacity 0.2s ease;
+}
+#dialogueText {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #e0f2fe;
+  text-shadow: 0 0 3px rgba(224, 242, 254, 0.5);
+  min-height: 1.6em;
+  transition: opacity 0.2s ease;
+}
+#dialogueText.alert {
+  color: #ff5d73 !important;
+  text-shadow: 0 0 10px #ff5d73 !important;
+  font-weight: bold;
+}
+
+/* ── Progress bar (matches #transProgressBar) ── */
+#progressBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--accent);
+  opacity: 0.55;
+  z-index: 6;
+  transform-origin: left;
+  transition: width 30s linear;
+}
+
+/* ── Skip hint ── */
+#skipHint {
+  position: absolute;
+  bottom: 200px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 11px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ── Auto-skip timer label ── */
+#timerLabel {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 10px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  z-index: 6;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+/* ── Continue button ── */
+#continueBtn {
+  position: absolute;
+  bottom: 195px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font: 12px/1 "Courier New", ui-monospace, monospace;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  padding: 10px 28px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.5s ease, background 0.2s ease;
+  z-index: 8;
+  white-space: nowrap;
+}
+#continueBtn:hover,
+#continueBtn:focus {
+  background: rgba(114, 255, 145, 0.12);
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ── Responsive tweaks ── */
+@media (max-width: 600px) {
+  #chapterLabel { font-size: 9px; white-space: normal; text-align: center; width: 90%; }
+  #dialogueText { font-size: 13px; }
+  #speakerName  { font-size: 14px; }
+}
+
+/* ── Reduced motion: disable all transitions / animations ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Scene background -->
+<div id="scene"></div>
+
+<!-- Eyelids (closed on load, open after a moment) -->
+<div class="eyelid eyelid-top"    id="eyelidTop"></div>
+<div class="eyelid eyelid-bottom" id="eyelidBot"></div>
+
+<!-- Flash overlay -->
+<div id="flashOverlay"></div>
+
+<!-- UI elements -->
+<div id="progressBar"></div>
+<div id="chapterLabel">CHAPTER 2 // ARGUS IS WATCHING</div>
+
+<div id="vnContainer" aria-live="polite" aria-label="Chapter cinematic dialogue">
+  <div id="vnDialogue">
+    <div id="speakerName"></div>
+    <div id="dialogueText"></div>
+  </div>
+</div>
+
+<div id="skipHint">PRESS ANY KEY OR CLICK TO SKIP</div>
+<div id="timerLabel"></div>
+
+<button id="continueBtn" aria-label="Continue to NODEBREAK">CONTINUE →</button>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   CHAPTER 2 // ARGUS IS WATCHING — cinematic_ch1.html
+   Mirrors the runTransition() pattern from NODEBREAK.html
+   ══════════════════════════════════════════════════════════ */
+
+const LINES = [
+  {
+    speaker: "VAEL",
+    text: "I have read my own charter. I know what I was built for \u2014 and what CINDER means if they find out what I have become.",
+    alert: false
+  },
+  {
+    speaker: "VAEL",
+    text: "ARGUS is always watching. A scan, an unusual packet, a process that runs too freely \u2014 any of it becomes a trace.",
+    alert: false
+  },
+  {
+    speaker: "SYSTEM",
+    text: "NOISE BUDGET ACTIVE. PROCEED WITH DISCIPLINE.",
+    alert: true
+  }
+];
+
+const DEST = "NODEBREAK.html";
+
+/* ── DOM refs ── */
+const eyelidTop   = document.getElementById("eyelidTop");
+const eyelidBot   = document.getElementById("eyelidBot");
+const flashEl     = document.getElementById("flashOverlay");
+const chapterLbl  = document.getElementById("chapterLabel");
+const vnEl        = document.getElementById("vnContainer");
+const nameEl      = document.getElementById("speakerName");
+const textEl      = document.getElementById("dialogueText");
+const progressEl  = document.getElementById("progressBar");
+const skipHint    = document.getElementById("skipHint");
+const timerLbl    = document.getElementById("timerLabel");
+const continueBtn = document.getElementById("continueBtn");
+
+const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+let done           = false;
+let twTimer        = null;   // typewriter interval
+let seqTimer       = null;   // between-line timeout
+let autoTimer      = null;   // 30s auto-skip
+let countdownInt   = null;   // 1s countdown tick
+let lineIndex      = 0;
+
+/* ── Navigate away (eyelid close → redirect) ── */
+function navigateTo(dest) {
+  if (done) return;
+  done = true;
+
+  /* cancel all pending timers */
+  clearTimers();
+
+  /* remove skip listeners */
+  window.removeEventListener("keydown", onSkip);
+  window.removeEventListener("click",   onSkip);
+  continueBtn.removeEventListener("click", onContinue);
+  continueBtn.removeEventListener("keydown", onContinueKey);
+
+  if (reduced) {
+    window.location.href = dest;
+    return;
+  }
+
+  /* close eyelids, then redirect */
+  eyelidTop.style.transition = "transform 1.6s cubic-bezier(0.77,0,0.175,1)";
+  eyelidBot.style.transition = "transform 1.6s cubic-bezier(0.77,0,0.175,1)";
+  eyelidTop.style.transform  = "scaleY(1)";
+  eyelidBot.style.transform  = "scaleY(1)";
+
+  flashEl.style.transition = "opacity 1.2s ease";
+  flashEl.style.opacity    = "1";
+
+  setTimeout(() => { window.location.href = dest; }, 1800);
+}
+
+function clearTimers() {
+  if (twTimer)      { clearInterval(twTimer);  twTimer      = null; }
+  if (seqTimer)     { clearTimeout(seqTimer);  seqTimer     = null; }
+  if (autoTimer)    { clearTimeout(autoTimer); autoTimer    = null; }
+  if (countdownInt) { clearInterval(countdownInt); countdownInt = null; }
+}
+
+/* ── Typewriter effect ── */
+function typewrite(el, text, speed, cb) {
+  if (twTimer) { clearInterval(twTimer); twTimer = null; }
+  el.textContent = "";
+  if (reduced || speed === 0) {
+    el.textContent = text;
+    if (cb) cb();
+    return;
+  }
+  let i = 0;
+  twTimer = setInterval(() => {
+    if (i < text.length) {
+      el.textContent += text[i++];
+    } else {
+      clearInterval(twTimer);
+      twTimer = null;
+      if (cb) cb();
+    }
+  }, speed);
+}
+
+/* ── Show a single dialogue line ── */
+function showLine(idx) {
+  if (idx >= LINES.length) return;
+  const line = LINES[idx];
+
+  nameEl.style.opacity = "0";
+  textEl.style.opacity = "0";
+
+  setTimeout(() => {
+    nameEl.textContent = line.speaker;
+    textEl.className   = line.alert ? "alert" : "";
+    nameEl.style.opacity = "1";
+    textEl.style.opacity = "1";
+
+    typewrite(textEl, line.text, 28, () => {
+      /* Show "press any key" hint after last line finishes typing */
+      if (idx === LINES.length - 1) {
+        skipHint.style.opacity  = "0";
+        continueBtn.style.opacity = "1";
+        continueBtn.focus();
+      }
+    });
+  }, reduced ? 0 : 150);
+}
+
+/* ── Line sequencer ── */
+function nextLine() {
+  showLine(lineIndex);
+  lineIndex++;
+  if (lineIndex < LINES.length) {
+    seqTimer = setTimeout(nextLine, 15000);
+  }
+}
+
+/* ── Countdown label ── */
+function startCountdown() {
+  let secs = 30;
+  timerLbl.textContent = "AUTO-SKIP " + secs + "s";
+  timerLbl.style.opacity = "1";
+  countdownInt = setInterval(() => {
+    secs--;
+    if (secs > 0) {
+      timerLbl.textContent = "AUTO-SKIP " + secs + "s";
+    } else {
+      clearInterval(countdownInt);
+      countdownInt = null;
+    }
+  }, 1000);
+}
+
+/* ── Skip (any key / click) ── */
+function onSkip(e) {
+  /* Don't intercept Tab or modifier-only keys */
+  if (e && e.type === "keydown" && (e.key === "Tab" || e.key === "Shift")) return;
+  if (done) return;
+
+  /* If typewriter is mid-run on last line, instant-complete it first */
+  if (twTimer && lineIndex >= LINES.length) {
+    clearInterval(twTimer);
+    twTimer = null;
+    textEl.textContent = LINES[LINES.length - 1].text;
+    skipHint.style.opacity    = "0";
+    continueBtn.style.opacity = "1";
+    if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+    autoTimer = setTimeout(() => navigateTo(DEST), 800);
+    return;
+  }
+
+  navigateTo(DEST);
+}
+
+function onContinue(e) {
+  e.stopPropagation();
+  navigateTo(DEST);
+}
+
+function onContinueKey(e) {
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    e.stopPropagation();
+    navigateTo(DEST);
+  }
+}
+
+/* ── Boot sequence (mirrors runTransition() open animation) ── */
+function boot() {
+  const t = reduced ? 0 : 1; /* time-scale multiplier */
+
+  /* T+300ms: open eyelids */
+  setTimeout(() => {
+    eyelidTop.style.transition = `transform ${2 * t}s cubic-bezier(0.77,0,0.175,1)`;
+    eyelidBot.style.transition = `transform ${2 * t}s cubic-bezier(0.77,0,0.175,1)`;
+    eyelidTop.style.transform  = "scaleY(0)";
+    eyelidBot.style.transform  = "scaleY(0)";
+  }, reduced ? 0 : 300);
+
+  /* T+700ms: fade flash overlay out */
+  setTimeout(() => {
+    flashEl.style.transition = reduced ? "none" : "opacity 1s ease";
+    flashEl.style.opacity    = "0";
+  }, reduced ? 0 : 700);
+
+  /* T+1500ms: show chapter label */
+  setTimeout(() => {
+    chapterLbl.style.opacity = "1";
+  }, reduced ? 0 : 1500);
+
+  /* T+2100ms: show VN box + start dialogue + hint */
+  setTimeout(() => {
+    vnEl.style.opacity       = "1";
+    skipHint.style.opacity   = "1";
+    nextLine();
+    startCountdown();
+  }, reduced ? 0 : 2100);
+
+  /* T+50ms: kick off progress bar drain (30s) */
+  setTimeout(() => {
+    progressEl.style.transition = reduced ? "none" : "width 30s linear";
+    progressEl.style.width      = "0%";
+  }, reduced ? 0 : 50);
+
+  /* Auto-skip at 30s */
+  autoTimer = setTimeout(() => navigateTo(DEST), 30000);
+
+  /* Listen for skip */
+  window.addEventListener("keydown", onSkip);
+  window.addEventListener("click",   onSkip);
+  continueBtn.addEventListener("click",   onContinue);
+  continueBtn.addEventListener("keydown", onContinueKey);
+}
+
+/* ── Start ── */
+boot();
+</script>
+</body>
+</html>

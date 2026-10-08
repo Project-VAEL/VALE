@@ -1,0 +1,133 @@
+{
+  "pbtResults": {
+    "1. Write bug condition exploration test": {
+      "status": "passed",
+      "failingExample": "GET cinematic_ch1.html → 404 Not Found\nFile does not exist at C:\\Users\\Aamin\\Desktop\\App\\VALE\\cinematic_ch1.html\n\nCounterexamples (4):\n[1] cinematic_ch1.html exists in project root (200 not 404)\n    ASSERTION FAILED: GET cinematic_ch1.html → 404 Not Found — file does not exist at C:\\Users\\Aamin\\Desktop\\App\\VALE\\cinematic_ch1.html\n[2] Page contains \"CHAPTER 2\"\n    ASSERTION FAILED: Cannot check content — cinematic_ch1.html does not exist (404)\n[3] Page contains \"ARGUS IS WATCHING\"\n    ASSERTION FAILED: Cannot check content — cinematic_ch1.html does not exist (404)\n[4] Page contains a link/reference to \"NODEBREAK.html\" (Continue nav)\n    ASSERTION FAILED: Cannot check content — cinematic_ch1.html does not exist (404)\n\nisBugCondition(lvl=0 completion event) returned true — file is absent, bug path is active.",
+      "lastRunTimestamp": 1791499369357
+    },
+    "2. Write preservation property tests (BEFORE implementing fix)": {
+      "status": "passed",
+      "lastRunTimestamp": 1791499548179
+    },
+    "3.2 Verify bug condition exploration test now passes": {
+      "status": "passed",
+      "lastRunTimestamp": 1791499732850
+    }
+  },
+  "executionHistory": {
+    "1. Write bug condition exploration test": [
+      {
+        "executionId": "fbf90551-4a4f-4d77-ab9c-0eeaa97a9e15",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791499266569
+      },
+      {
+        "executionId": "fbf90551-4a4f-4d77-ab9c-0eeaa97a9e15",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791499278377
+      },
+      {
+        "executionId": "fbf90551-4a4f-4d77-ab9c-0eeaa97a9e15",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791499379701
+      }
+    ],
+    "2. Write preservation property tests (BEFORE implementing fix)": [
+      {
+        "executionId": "fbf90551-4a4f-4d77-ab9c-0eeaa97a9e15",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791499266696
+      },
+      {
+        "executionId": "fbf90551-4a4f-4d77-ab9c-0eeaa97a9e15",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791499383175
+      },
+      {
+        "executionId": "fbf90551-4a4f-4d77-ab9c-0eeaa97a9e15",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791499567405
+      }
+    ],
+    "3.1 Create `cinematic_ch1.html` in the project root": [
+      {
+        "executionId": "fbf90551-4a4f-4d77-ab9c-0eeaa97a9e15",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791499266831
+      },
+      {
+        "executionId": "fbf90551-4a4f-4d77-ab9c-0eeaa97a9e15",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791499571276
+      },
+      {
+        "executionId": "fbf90551-4a4f-4d77-ab9c-0eeaa97a9e15",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791499693241
+      }
+    ],
+    "3.2 Verify bug condition exploration test now passes": [
+      {
+        "executionId": "fbf90551-4a4f-4d77-ab9c-0eeaa97a9e15",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791499266926
+      },
+      {
+        "executionId": "fbf90551-4a4f-4d77-ab9c-0eeaa97a9e15",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791499698658
+      },
+      {
+        "executionId": "fbf90551-4a4f-4d77-ab9c-0eeaa97a9e15",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791499746808
+      }
+    ],
+    "3.3 Verify preservation tests still pass": [
+      {
+        "executionId": "fbf90551-4a4f-4d77-ab9c-0eeaa97a9e15",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791499267026
+      },
+      {
+        "executionId": "fbf90551-4a4f-4d77-ab9c-0eeaa97a9e15",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791499752045
+      },
+      {
+        "executionId": "d64553bc-5b9a-42c9-8712-b759a4d7acfd",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791499991143
+      },
+      {
+        "executionId": "d64553bc-5b9a-42c9-8712-b759a4d7acfd",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791500041230
+      }
+    ],
+    "4. Checkpoint — Ensure all tests pass": [
+      {
+        "executionId": "fbf90551-4a4f-4d77-ab9c-0eeaa97a9e15",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791499267133
+      },
+      {
+        "executionId": "d64553bc-5b9a-42c9-8712-b759a4d7acfd",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791500047641
+      },
+      {
+        "executionId": "d64553bc-5b9a-42c9-8712-b759a4d7acfd",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791500164170
+      }
+    ],
+    "3. Fix — create `cinematic_ch1.html`": [
+      {
+        "executionId": "d64553bc-5b9a-42c9-8712-b759a4d7acfd",
+        "chatSessionId": "sess_fa1a301d-cf2e-49ce-a63b-71bf2ead856b",
+        "timestamp": 1791500041351
+      }
+    ]
+  }
+}
