@@ -103,8 +103,10 @@ body:after{content:"";position:fixed;inset:0;pointer-events:none;background:var(
 #transProgressBar{position:absolute;top:0;left:0;height:2px;width:100%;background:var(--accent);opacity:0.55;z-index:6;transform-origin:left;transition:width 30s linear}
 #transSkipHint{position:absolute;bottom:200px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.35);font-size:11px;letter-spacing:.15em;text-transform:uppercase;z-index:5;opacity:0;transition:opacity 0.6s ease;pointer-events:none;white-space:nowrap}
 #transTimerLabel{position:absolute;top:10px;right:16px;color:rgba(255,255,255,0.25);font-size:10px;letter-spacing:.15em;text-transform:uppercase;z-index:6;opacity:0;transition:opacity 0.5s ease}
+#transContinueBtn{position:absolute;bottom:195px;left:50%;transform:translateX(-50%);background:transparent;border:1px solid var(--accent);color:var(--accent);font:12px/1 "Courier New",ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase;padding:10px 28px;cursor:pointer;opacity:0;transition:opacity 0.5s ease,background 0.2s ease;z-index:8;white-space:nowrap}
+#transContinueBtn:hover,#transContinueBtn:focus{background:rgba(114,255,145,0.12);outline:2px solid var(--accent);outline-offset:3px}
 @media(max-width:600px){#transChapterLabel{font-size:9px;white-space:normal;text-align:center;width:90%}#transText{font-size:13px}#transName{font-size:14px}}
-@media(prefers-reduced-motion:reduce){.trans-eyelid,.trans-eyelid-top,.trans-eyelid-bottom,#transFlashOverlay,#transChapterLabel,#transVnContainer,#transProgressBar,#transSkipHint,#transTimerLabel{transition:none!important}}
+@media(prefers-reduced-motion:reduce){.trans-eyelid,.trans-eyelid-top,.trans-eyelid-bottom,#transFlashOverlay,#transChapterLabel,#transVnContainer,#transProgressBar,#transSkipHint,#transTimerLabel,#transContinueBtn{transition:none!important}}
 </style>
 </head>
 <body>
@@ -344,6 +346,7 @@ body:after{content:"";position:fixed;inset:0;pointer-events:none;background:var(
   </div>
   <div id="transSkipHint">PRESS ANY KEY OR CLICK TO SKIP</div>
   <div id="transTimerLabel"></div>
+  <button id="transContinueBtn" aria-label="Continue to next chapter">CONTINUE →</button>
 </div>
 <script>
 /* ══════════════════════════════════════════════════════════
@@ -444,6 +447,7 @@ function runTransition(fromLevel,onComplete){
   const progressEl=document.getElementById("transProgressBar");
   const hintEl=document.getElementById("transSkipHint");
   const timerEl=document.getElementById("transTimerLabel");
+  const contBtn=document.getElementById("transContinueBtn");
 
   // ── Hard-reset all state ───────────────────────────────
   flashEl.style.transition="none"; flashEl.style.opacity="1";
@@ -456,6 +460,7 @@ function runTransition(fromLevel,onComplete){
   progressEl.style.transition="none"; progressEl.style.width="100%";
   hintEl.style.opacity="0";
   timerEl.style.opacity="0"; timerEl.textContent="";
+  contBtn.style.transition="none"; contBtn.style.opacity="0";
 
   overlay.style.display="block";
   inp.blur(); // prevent keyboard input reaching the terminal behind
@@ -489,7 +494,12 @@ function runTransition(fromLevel,onComplete){
       textEl.className=line.alert?"trans-alert":"";
       nameEl.style.opacity="1"; textEl.style.opacity="1";
       typewrite(textEl,line.text,28,()=>{
-        if(idx===lines.length-1)hintEl.style.opacity="1";
+        if(idx===lines.length-1){
+          hintEl.style.opacity="0";
+          contBtn.style.transition="opacity 0.5s ease,background 0.2s ease";
+          contBtn.style.opacity="1";
+          contBtn.focus();
+        }
       });
     },reduced?0:150);
   }
@@ -524,6 +534,9 @@ function runTransition(fromLevel,onComplete){
     if(countdownInterval){clearInterval(countdownInterval);countdownInterval=null;}
     window.removeEventListener("keydown",onSkip);
     overlay.removeEventListener("click",onSkip);
+    contBtn.removeEventListener("click",onSkip);
+    contBtn.removeEventListener("keydown",onContBtnKey);
+    contBtn.style.opacity="0";
 
     // Fade to black then hide and call onComplete
     flashEl.style.transition=reduced?"none":"opacity 1.1s ease";
@@ -536,14 +549,23 @@ function runTransition(fromLevel,onComplete){
     },reduced?50:1200);
   }
 
+  // ── Continue button key handler ─────────────────────────
+  function onContBtnKey(e){
+    if(e.key==="Enter"||e.key===" "){e.preventDefault();e.stopPropagation();finish();}
+  }
+
   // ── Skip handler ───────────────────────────────────────
-  function onSkip(){
+  function onSkip(e){
+    if(e&&e.type==="keydown"&&(e.key==="Tab"||e.key==="Shift"))return;
     if(done)return;
     // If typewriter is mid-run on last line, instant-complete it first
     if(twTimer&&lineIndex>=lines.length){
       clearInterval(twTimer); twTimer=null;
       textEl.textContent=lines[lines.length-1].text;
-      hintEl.style.opacity="1";
+      hintEl.style.opacity="0";
+      contBtn.style.transition="opacity 0.5s ease,background 0.2s ease";
+      contBtn.style.opacity="1";
+      contBtn.focus();
       if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
       autoTimer=setTimeout(finish,800);
       return;
@@ -592,6 +614,8 @@ function runTransition(fromLevel,onComplete){
   // Listen for skip
   window.addEventListener("keydown",onSkip);
   overlay.addEventListener("click",onSkip);
+  contBtn.addEventListener("click",onSkip);
+  contBtn.addEventListener("keydown",onContBtnKey);
 }
 
 const L=[
