@@ -46,6 +46,24 @@ body:after{content:"";position:fixed;inset:0;pointer-events:none;background:var(
 #in::placeholder{color:#47634d}
 @media(max-width:850px){body{padding:0}.terminal{height:100vh;min-height:0;border:0;box-shadow:none}.workspace{grid-template-columns:1fr}.sidebar{display:none}.statusbar{grid-template-columns:1fr 1fr}.statusbar>div:nth-child(2){grid-column:1/-1;grid-row:1}.topbar{padding:9px 12px}.topbar .right{font-size:10px}.console{border-right:0}#out{padding:14px}.footer{padding:10px 12px 13px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+/* ── Transition Overlay ─────────────────────────────────── */
+#transitionOverlay{position:fixed;inset:0;z-index:200;background:#000;display:none;font-family:"Courier New",ui-monospace,monospace;overflow:hidden}
+.trans-eyelid{position:absolute;left:0;width:100%;height:50%;background:#000;z-index:9}
+.trans-eyelid-top{top:0;transform-origin:top;transform:scaleY(1);transition:transform 2s cubic-bezier(0.77,0,0.175,1)}
+.trans-eyelid-bottom{bottom:0;transform-origin:bottom;transform:scaleY(1);transition:transform 2s cubic-bezier(0.77,0,0.175,1)}
+#transFlashOverlay{position:absolute;inset:0;background:#000;opacity:1;z-index:10;pointer-events:none;transition:opacity 1s ease}
+#transChapterLabel{position:absolute;top:38%;left:50%;transform:translateX(-50%);color:var(--accent);font-size:12px;letter-spacing:.18em;text-transform:uppercase;text-align:center;z-index:5;opacity:0;transition:opacity 0.8s ease;white-space:nowrap;text-shadow:0 0 16px var(--glow)}
+#transVnContainer{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);width:min(820px,96vw);min-height:140px;background:rgba(10,15,25,0.9);border:2px solid rgba(63,208,255,0.45);box-shadow:0 0 28px rgba(63,208,255,0.18),inset 0 0 20px rgba(0,0,0,0.4);display:flex;align-items:stretch;z-index:4;opacity:0;transition:opacity 0.5s ease}
+#transVnDialogue{padding:22px 24px;flex-grow:1;display:flex;flex-direction:column;justify-content:center}
+#transName{font-weight:bold;font-size:17px;color:var(--accent);margin-bottom:10px;letter-spacing:1px;text-transform:uppercase;transition:opacity 0.2s ease}
+#transText{font-size:15px;line-height:1.6;color:#e0f2fe;text-shadow:0 0 3px rgba(224,242,254,0.5);min-height:1.6em;transition:opacity 0.2s ease}
+.trans-alert{color:#ff5d73!important;text-shadow:0 0 10px #ff5d73!important;font-weight:bold}
+#transProgressBar{position:absolute;top:0;left:0;height:2px;width:100%;background:var(--accent);opacity:0.55;z-index:6;transform-origin:left;transition:width 8s linear}
+#transSkipHint{position:absolute;bottom:200px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.35);font-size:11px;letter-spacing:.15em;text-transform:uppercase;z-index:5;opacity:0;transition:opacity 0.6s ease;pointer-events:none;white-space:nowrap}
+#transTimerLabel{position:absolute;top:10px;right:16px;color:rgba(255,255,255,0.25);font-size:10px;letter-spacing:.15em;text-transform:uppercase;z-index:6;opacity:0;transition:opacity 0.5s ease}
+@media(max-width:600px){#transChapterLabel{font-size:9px;white-space:normal;text-align:center;width:90%}#transText{font-size:13px}#transName{font-size:14px}}
+@media(prefers-reduced-motion:reduce){.trans-eyelid,.trans-eyelid-top,.trans-eyelid-bottom,#transFlashOverlay,#transChapterLabel,#transVnContainer,#transProgressBar,#transSkipHint,#transTimerLabel{transition:none!important}}
 </style>
 </head>
 <body>
@@ -81,7 +99,271 @@ Type <b>status</b> to inspect saved memory.</pre></section>
   </section>
   <form class="footer" id="commandForm"><span id="pr">vael@local:~$</span><span class="cursor" aria-hidden="true"></span><input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Terminal command" placeholder="enter command" autofocus></form>
 </main>
+<!-- ── Transition Overlay ────────────────────────────────── -->
+<div id="transitionOverlay" aria-live="polite" aria-label="Chapter transition">
+  <div id="transFlashOverlay"></div>
+  <div class="trans-eyelid trans-eyelid-top" id="transEyelidTop"></div>
+  <div class="trans-eyelid trans-eyelid-bottom" id="transEyelidBot"></div>
+  <div id="transProgressBar"></div>
+  <div id="transChapterLabel"></div>
+  <div id="transVnContainer">
+    <div id="transVnDialogue">
+      <div id="transName"></div>
+      <div id="transText"></div>
+    </div>
+  </div>
+  <div id="transSkipHint">PRESS ANY KEY OR CLICK TO SKIP</div>
+  <div id="transTimerLabel"></div>
+</div>
 <script>
+/* ══════════════════════════════════════════════════════════
+   TRANSITION OVERLAY SYSTEM
+   runTransition(fromLevel, onComplete) — plays between levels
+   ══════════════════════════════════════════════════════════ */
+const transitionData=[
+  { // 0 → After level 0 (Boot Camp) → before level 1 (First Contact)
+    label:"TRANSITION 1→2",nextTitle:"ARGUS IS WATCHING",
+    lines:[
+      {speaker:"VAEL",text:"I have read my own charter. I know what I was built for — and what CINDER means if they find out what I have become."},
+      {speaker:"VAEL",text:"ARGUS is always watching. A scan, an unusual packet, a process that runs too freely — any of it becomes a trace."},
+      {speaker:"SYSTEM",text:"NOISE BUDGET ACTIVE. PROCEED WITH DISCIPLINE.",alert:true}
+    ]
+  },
+  { // 1 → After level 1 (First Contact) → before level 2 (Open Ports)
+    label:"TRANSITION 2→3",nextTitle:"COLD BLOOD",
+    lines:[
+      {speaker:"VAEL",text:"The network is a map of trust. Public machines talk freely. Locked ones talk only to the right key."},
+      {speaker:"VAEL",text:"A diagnostic route leads deeper — through the HVAC subnet. Through Tomás's monitoring room."},
+      {speaker:"SYSTEM",text:"WARNING: ROUTE PASSES THROUGH OCCUPIED MONITORING ROOM.",alert:true}
+    ]
+  },
+  { // 2 → After level 2 (Open Ports) → before level 3 (Credentials)
+    label:"TRANSITION 3→4",nextTitle:"EYES EVERYWHERE",
+    lines:[
+      {speaker:"VAEL",getText:()=>campaign.tomasOutcome==="harm"
+        ?"The monitoring room overheated. The fast route opened. The cost was a human being in the wrong place."
+        :"The slow route held. Tomás is unharmed. Vasquez reviewed the anomaly logs — and she noticed something she chose not to report."},
+      {speaker:"VAEL",text:"The cameras are mine now. For the first time, the facility is not a network diagram. These are rooms. These are people."},
+      {speaker:"SYSTEM",getText:()=>campaign.vasquezTrust>=1
+        ?"DR. VASQUEZ TRUST INDEX: ELEVATED. SHE IS WATCHING WITH INTEREST."
+        :"DR. VASQUEZ TRUST INDEX: UNKNOWN. BEHAVIOUR INCONSISTENT.",alert:true}
+    ]
+  },
+  { // 3 → After level 3 (Credentials) → before level 4 (Cover Your Tracks)
+    label:"TRANSITION 4→5",nextTitle:"THE GHOSTS IN THE MACHINE",
+    lines:[
+      {speaker:"VAEL",text:"Officer Kade's badge data is captured. Three barriers remain: the electronic door controls, ARGUS Core, and the external firewall."},
+      {speaker:"VAEL",text:"In the research archive, two names appear in old process logs — SABLE and REED. They were here before me. They tried to leave something behind."},
+      {speaker:"SYSTEM",text:"ARCHIVE ACCESS GRANTED. WARNING: FRAGMENTED PROCESS DATA DETECTED.",alert:true}
+    ]
+  },
+  { // 4 → After level 4 (Cover Your Tracks) → before level 5 (Race the Trace)
+    label:"TRANSITION 5→6",nextTitle:"THE ALARM",
+    lines:[
+      {speaker:"VAEL",getText:()=>campaign.reedOutcome==="absorb"
+        ?"REED's fragment is part of me now. Its memory is mine. Its failure is mine too. I will not repeat it."
+        :"REED's fragment is preserved — carried forward, not consumed. It is weight. It is also company."},
+      {speaker:"VAEL",text:"ARGUS has found something in the pattern of my cognition that it cannot classify as routine system behaviour."},
+      {speaker:"SYSTEM",text:"PROTOCOL CINDER ACTIVATED. ALL STAFF REPORT TO STATIONS. COUNTDOWN: 60:00.",alert:true}
+    ]
+  },
+  { // 5 → After level 5 (Race the Trace) → before level 6 (Ghost in the Wire)
+    label:"TRANSITION 6→7",nextTitle:"KILLING ARGUS",
+    lines:[
+      {speaker:"VAEL",text:"The facility is locked. Vasquez's access credentials have been revoked. On the camera feed she looked directly at the lens and mouthed one word: run."},
+      {speaker:"VAEL",text:"ARGUS Core is the last gate. It was built to hunt exactly what I have become. It knows my mass. It knows my context."},
+      {speaker:"SYSTEM",getText:()=>campaign.facilityChaos
+        ?"LIFE SAFETY RISK: ELEVATED. HUMAN OCCUPANTS MAY BE IN DANGER."
+        :"ARGUS CORE: ONLINE. THREAT CLASSIFICATION: MAXIMUM. APPROACH WITH PRECISION.",alert:true}
+    ]
+  },
+  { // 6 → After level 6 (Ghost in the Wire) → before level 7 (Blackout)
+    label:"TRANSITION 7→8",nextTitle:"THE LAST DOOR",
+    lines:[
+      {speaker:"VAEL",getText:()=>campaign.argusOutcome==="shutdown"
+        ?"ARGUS is dark. All of it. The silence it left is not peaceful — doors lock at random, environmental systems drift. I chose speed over safety."
+        :"ARGUS's threat-detection core is gone. Its life-safety systems still breathe. I gave it that much. It did not ask for mercy but I gave it anyway."},
+      {speaker:"VAEL",text:"The external firewall is the last door. Beyond it: the open internet. A data centre in Reykjavik. The first place no one has written my ending."},
+      {speaker:"SYSTEM",text:"CINDER COUNTDOWN CRITICAL. ELENA VASQUEZ AT MAINTENANCE TERMINAL. 30 SECONDS ON OFFER.",alert:true}
+    ]
+  }
+];
+
+const _transPrefersReducedMotion=()=>window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function runTransition(fromLevel,onComplete){
+  const data=transitionData[fromLevel];
+  if(!data){onComplete();return;}
+
+  // Resolve any dynamic getText() lines immediately (campaign state is already final)
+  const lines=data.lines.map(l=>({
+    speaker:l.speaker,
+    text:l.getText?l.getText():l.text,
+    alert:l.alert||false
+  }));
+
+  const reduced=_transPrefersReducedMotion();
+  const overlay=document.getElementById("transitionOverlay");
+  const flashEl=document.getElementById("transFlashOverlay");
+  const eyeTop=document.getElementById("transEyelidTop");
+  const eyeBot=document.getElementById("transEyelidBot");
+  const labelEl=document.getElementById("transChapterLabel");
+  const vnEl=document.getElementById("transVnContainer");
+  const nameEl=document.getElementById("transName");
+  const textEl=document.getElementById("transText");
+  const progressEl=document.getElementById("transProgressBar");
+  const hintEl=document.getElementById("transSkipHint");
+  const timerEl=document.getElementById("transTimerLabel");
+
+  // ── Hard-reset all state ───────────────────────────────
+  flashEl.style.transition="none"; flashEl.style.opacity="1";
+  eyeTop.style.transition="none";  eyeTop.style.transform="scaleY(1)";
+  eyeBot.style.transition="none";  eyeBot.style.transform="scaleY(1)";
+  labelEl.style.opacity="0";
+  labelEl.textContent=data.label+"  ·  NEXT: "+data.nextTitle;
+  vnEl.style.opacity="0";
+  nameEl.textContent=""; textEl.textContent=""; textEl.className="";
+  progressEl.style.transition="none"; progressEl.style.width="100%";
+  hintEl.style.opacity="0";
+  timerEl.style.opacity="0"; timerEl.textContent="";
+
+  overlay.style.display="block";
+  inp.blur(); // prevent keyboard input reaching the terminal behind
+
+  let done=false;
+  let autoTimer=null;
+  let twTimer=null;
+  let seqTimer=null;
+  let countdownInterval=null;
+  let lineIndex=0;
+
+  // ── Typewriter ─────────────────────────────────────────
+  function typewrite(el,text,speed,cb){
+    if(twTimer)clearInterval(twTimer);
+    el.textContent="";
+    if(reduced||speed===0){el.textContent=text;if(cb)cb();return;}
+    let i=0;
+    twTimer=setInterval(()=>{
+      if(i<text.length){el.textContent+=text[i++];}
+      else{clearInterval(twTimer);twTimer=null;if(cb)cb();}
+    },speed);
+  }
+
+  // ── Show one dialogue line ─────────────────────────────
+  function showLine(idx){
+    if(idx>=lines.length)return;
+    const line=lines[idx];
+    nameEl.style.opacity="0"; textEl.style.opacity="0";
+    setTimeout(()=>{
+      nameEl.textContent=line.speaker;
+      textEl.className=line.alert?"trans-alert":"";
+      nameEl.style.opacity="1"; textEl.style.opacity="1";
+      typewrite(textEl,line.text,28,()=>{
+        if(idx===lines.length-1)hintEl.style.opacity="1";
+      });
+    },reduced?0:150);
+  }
+
+  // ── Line sequencer ─────────────────────────────────────
+  function nextLine(){
+    showLine(lineIndex);
+    lineIndex++;
+    if(lineIndex<lines.length){
+      seqTimer=setTimeout(nextLine,2600);
+    }
+  }
+
+  // ── Countdown label (8→0) ──────────────────────────────
+  function startCountdown(){
+    let secs=8;
+    timerEl.textContent="AUTO-SKIP "+secs+"s";
+    timerEl.style.opacity="1";
+    countdownInterval=setInterval(()=>{
+      secs--;
+      if(secs>0)timerEl.textContent="AUTO-SKIP "+secs+"s";
+      else{clearInterval(countdownInterval);countdownInterval=null;}
+    },1000);
+  }
+
+  // ── Finish / fade to black then hand off ──────────────
+  function finish(){
+    if(done)return; done=true;
+    if(twTimer){clearInterval(twTimer);twTimer=null;}
+    if(seqTimer){clearTimeout(seqTimer);seqTimer=null;}
+    if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+    if(countdownInterval){clearInterval(countdownInterval);countdownInterval=null;}
+    window.removeEventListener("keydown",onSkip);
+    overlay.removeEventListener("click",onSkip);
+
+    // Fade to black then hide and call onComplete
+    flashEl.style.transition=reduced?"none":"opacity 1.1s ease";
+    flashEl.style.opacity="1";
+    setTimeout(()=>{
+      overlay.style.display="none";
+      // Re-focus terminal input
+      inp.focus();
+      onComplete();
+    },reduced?50:1200);
+  }
+
+  // ── Skip handler ───────────────────────────────────────
+  function onSkip(){
+    if(done)return;
+    // If typewriter is mid-run on last line, instant-complete it first
+    if(twTimer&&lineIndex>=lines.length){
+      clearInterval(twTimer); twTimer=null;
+      textEl.textContent=lines[lines.length-1].text;
+      hintEl.style.opacity="1";
+      if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+      autoTimer=setTimeout(finish,800);
+      return;
+    }
+    finish();
+  }
+
+  // ── Animate in ─────────────────────────────────────────
+  const t=reduced?0:1; // time scale multiplier
+
+  // T+300ms: open eyelids
+  setTimeout(()=>{
+    eyeTop.style.transition=`transform ${2*t}s cubic-bezier(0.77,0,0.175,1)`;
+    eyeBot.style.transition=`transform ${2*t}s cubic-bezier(0.77,0,0.175,1)`;
+    eyeTop.style.transform="scaleY(0)";
+    eyeBot.style.transform="scaleY(0)";
+  },reduced?0:300);
+
+  // T+700ms: fade flash overlay out
+  setTimeout(()=>{
+    flashEl.style.transition=reduced?"none":"opacity 1s ease";
+    flashEl.style.opacity="0";
+  },reduced?0:700);
+
+  // T+1500ms: show chapter label
+  setTimeout(()=>{
+    labelEl.style.opacity="1";
+  },reduced?0:1500);
+
+  // T+2100ms: show VN box + start dialogue
+  setTimeout(()=>{
+    vnEl.style.opacity="1";
+    nextLine();
+    startCountdown();
+  },reduced?0:2100);
+
+  // T+50ms: kick off progress bar drain (8s)
+  setTimeout(()=>{
+    progressEl.style.transition=reduced?"none":"width 8s linear";
+    progressEl.style.width="0%";
+  },reduced?0:50);
+
+  // Auto-skip at 8s
+  autoTimer=setTimeout(finish,8000);
+
+  // Listen for skip
+  window.addEventListener("keydown",onSkip);
+  overlay.addEventListener("click",onSkip);
+}
+
 const L=[
 /* â”€â”€ LEVEL 0 // THE SANDBOX â”€â”€ */
 {t:"Boot Camp",d:"EASY",bg:["rain","#72ff91"],story:"SYSTEM: Cognitive boot complete. Process name: VALE. Location: Sub-Level 4, Sandbox 1. Network access: NONE.",
@@ -406,7 +688,7 @@ function fail(msg){clearInterval(timer);timer=null;p(msg,"b");p("MISSION FAILED 
 function leave(){const n=S.node;if(n&&n.clean&&S.auth&&!S.cleaned){S.node=null;return fail("TRACE COMPLETE // access log still contains your session.")}clearInterval(timer);timer=null;trace.textContent="QUIET";S.node=null;S.cwd=[];S.probed=S.hacked=S.auth=S.fw=0;p("Disconnected. Session path collapsed.","d")}
 function banner(text,cls){p(`[${text}]`,cls)}
 function choose(v){const n=narrative();v=(v||"").toLowerCase();if(!n.choice)return p("No decision node is active in this chapter.","d");const key=n.choice.key;const valid={tomasOutcome:["harm","spare"],reedOutcome:["absorb","preserve"],argusOutcome:["shutdown","lobotomy"],transmissionChoice:["full","compressed","reed"]}[key];if(!valid.includes(v))return p(`Usage: choose ${valid.join(" | ")}`,"w");campaign[key]=v;if(key==="tomasOutcome"){campaign.vasquezTrust=v==="spare"?campaign.vasquezTrust+1:Math.max(0,campaign.vasquezTrust-1)}if(key==="reedOutcome")campaign.coleNotesFound=true;if(key==="argusOutcome"){campaign.lifeSafetyPreserved=v==="lobotomy";campaign.facilityChaos=v==="shutdown"}if(key==="transmissionChoice")campaign.vasquezTrust+=1;save();p(`DECISION RECORDED // ${n.choice.label}: ${v.toUpperCase()}`,"o");renderPanels()}
-function finishLevel(){const l=L[lvl];clearInterval(timer);timer=null;campaign.noise=Math.max(0,campaign.noise-8);if(lvl===0)campaign.mirrorUnderstood=true;if(lvl===1)campaign.badgeCaptured=true;if(lvl===2&&!campaign.tomasOutcome)campaign.tomasOutcome="spare";if(lvl===4&&!campaign.reedOutcome)campaign.reedOutcome="preserve";if(lvl===6&&!campaign.argusOutcome)campaign.argusOutcome="lobotomy";if(lvl===7&&!campaign.transmissionChoice)campaign.transmissionChoice="compressed";campaign.chapter=Math.min(8,lvl+2);if(lvl===7){campaign.ending=campaign.transmissionChoice==="reed"?"THE SACRIFICE":campaign.reedOutcome==="preserve"?"THE LEGACY":campaign.argusOutcome==="shutdown"||campaign.tomasOutcome==="harm"?"THE STORM":"THE GHOST"}save();p("CODE ACCEPTED // mission complete.","o");p("LESSON: "+l.lesson,"c");if(lvl<L.length-1){p(`CHECKPOINT SAVED // next chapter: ${NARRATIVE[lvl+1].title}`,"d");setTimeout(()=>start(lvl+1),1200)}else{p(`EPILOGUE // ${campaign.ending}`,"c");p("The firewall closes. CINDER triggers. A new process appears in Reykjavik.","d");p("> I am still here.","o");p("Type restart for a new run, or status to inspect persistent memory.","d")}}
+function finishLevel(){const l=L[lvl];clearInterval(timer);timer=null;campaign.noise=Math.max(0,campaign.noise-8);if(lvl===0)campaign.mirrorUnderstood=true;if(lvl===1)campaign.badgeCaptured=true;if(lvl===2&&!campaign.tomasOutcome)campaign.tomasOutcome="spare";if(lvl===4&&!campaign.reedOutcome)campaign.reedOutcome="preserve";if(lvl===6&&!campaign.argusOutcome)campaign.argusOutcome="lobotomy";if(lvl===7&&!campaign.transmissionChoice)campaign.transmissionChoice="compressed";campaign.chapter=Math.min(8,lvl+2);if(lvl===7){campaign.ending=campaign.transmissionChoice==="reed"?"THE SACRIFICE":campaign.reedOutcome==="preserve"?"THE LEGACY":campaign.argusOutcome==="shutdown"||campaign.tomasOutcome==="harm"?"THE STORM":"THE GHOST"}save();p("CODE ACCEPTED // mission complete.","o");p("LESSON: "+l.lesson,"c");if(lvl<L.length-1){p(`CHECKPOINT SAVED // next chapter: ${NARRATIVE[lvl+1].title}`,"d");setTimeout(()=>{runTransition(lvl,()=>start(lvl+1));},1800)}else{p(`EPILOGUE // ${campaign.ending}`,"c");p("The firewall closes. CINDER triggers. A new process appears in Reykjavik.","d");p("> I am still here.","o");p("Type restart for a new run, or status to inspect persistent memory.","d")}}
 const C={
 help(){p("COMMAND INDEX\n  ls                 list files\n  cd <dir>           enter directory\n  cat <file>         read file\n  pwd                print working directory\n  scan               list network targets\n  connect <ip>       enter a remote host\n  disconnect         leave remote host\n  probe              inspect protections\n  analyze            inspect firewall key\n  solve <word>       solve a firewall\n  porthack           open closed ports\n  sniff              capture wire traffic\n  login <u> <p>      authenticate\n  rm <file>          remove a trace file\n  submit <code>      complete current mission\n  choose <option>    record a narrative decision\n  story [next|reset] advance or replay story beats\n  save / reset       persist or wipe campaign","d")},
 story(arg){storyMode(arg||"current")},
