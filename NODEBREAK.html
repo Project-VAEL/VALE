@@ -607,11 +607,38 @@ onyx.gap(route<0);onyx.noise(timer&&S.tt?1-left/S.tt:0);
 if(!timer)tb.style.width="0"}
 try{lvl=Math.min(+localStorage.getItem("nb_lvl")||0,L.length-1)}catch(e){}
 function p(s,c){const d=document.createElement("div");if(c)d.className=c;d.textContent=s;out.appendChild(d);out.scrollTop=out.scrollHeight}
+
+// ── Briefing overlay ──
+const brOverlay=document.getElementById("briefing-overlay");
+const brTitle=document.getElementById("br-title");
+const brDiff=document.getElementById("br-diff");
+const brObj=document.getElementById("br-objective");
+const brTips=document.getElementById("br-tips");
+const brStart=document.getElementById("br-start");
+const brSkip=document.getElementById("br-skip");
+
+function showBriefing(i, onDone){
+    const l=L[i];
+    brTitle.textContent="Level "+(i+1)+": "+l.t;
+    brDiff.textContent=l.d;
+    brObj.textContent=l.brief;
+    brTips.textContent=l.tips;
+    brOverlay.style.display="flex";
+    brOverlay.classList.remove("hide");
+    const dismiss=()=>{
+        brOverlay.classList.add("hide");
+        setTimeout(()=>{brOverlay.style.display="none";onDone()},350);
+    };
+    brStart.onclick=dismiss;
+    brSkip.onclick=dismiss;
+}
 function start(i){clearInterval(timer);tr.textContent="";lvl=i;try{localStorage.setItem("nb_lvl",i)}catch(e){}
 const l=L[i];S={node:null,cwd:[],probed:0,fw:0,hacked:0,auth:0,cleaned:0,fs:JSON.parse(JSON.stringify(l.fs)),nodes:JSON.parse(JSON.stringify(l.nodes))};
 lv.textContent=l.d+" · "+l.t;setBg(l.bg);busy=0;timer=null;
 ms.innerHTML='<div class="dots">'+L.map((_,j)=>'<span class="'+(j<i?"done":j==i?"cur":"")+'"></span>').join("")+'</div><div class="t"></div>';ms.lastChild.textContent="Level "+(i+1)+" mission: "+l.brief;out.textContent="";
-p("=== LEVEL "+(i+1)+": "+l.t.toUpperCase()+" ===","c");p("» "+l.story,"d");p("MISSION: "+l.brief);p(l.tips,"w");p("Type help for all commands, hint if you are stuck.","d");prompt_()}
+showBriefing(i,()=>{
+    p("=== LEVEL "+(i+1)+": "+l.t.toUpperCase()+" ===","c");p("» "+l.story,"d");p("MISSION: "+l.brief);p(l.tips,"w");p("Type help for all commands, hint if you are stuck.","d");prompt_();inp.focus();
+});}
 function prompt_(){drawMap();pr.textContent=(S.node?S.node.ip:"local")+":/"+S.cwd.join("/")+" $"}
 function root(){return S.node?S.node.fs:S.fs}
 function dirAt(path){let d=root();for(const k of path){if(typeof d!=="object"||!(k in d))return null;d=d[k]}return d}
