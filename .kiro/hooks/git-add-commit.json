@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Git Add and Commit",
+      "trigger": "UserPromptSubmit",
+      "description": "Runs git add . and git commit when user asks to add and commit changes. Extracts commit message from the prompt.",
+      "action": {
+        "type": "command",
+        "command": "node -e \"\nconst chunks = [];\nprocess.stdin.on('data', d => chunks.push(d));\nprocess.stdin.on('end', () => {\n  const input = JSON.parse(Buffer.concat(chunks).toString());\n  const prompt = (input.userMessage || '').toLowerCase();\n  const addCommitMatch = prompt.match(/(?:add and commit|commit).*?['\\\"](.+?)['\\\"]/i) || prompt.match(/(?:add and commit|commit)\\s+(?:with message\\s+)?['\\\"]?(.+?)['\\\"]?\\s*$/i);\n  const isCommitRequest = /\\b(add and commit|git commit|commit changes|commit everything)\\b/.test(prompt);\n  if (!isCommitRequest) {\n    process.exit(0);\n  }\n  const message = addCommitMatch ? addCommitMatch[1] : 'Update changes';\n  const { execSync } = require('child_process');\n  try {\n    const cwd = input.workspacePath || process.cwd();\n    execSync('git add .', { cwd, stdio: 'inherit' });\n    execSync('git commit -m \\\"' + message.replace(/\\\"/g, '\\\\\\\\\\\"') + '\\\"', { cwd, stdio: 'inherit' });\n    console.log('Changes staged and committed with message: ' + message);\n  } catch (e) {\n    process.stderr.write('Git operation failed: ' + e.message);\n    process.exit(1);\n  }\n});\n\"\n"
+      }
+    }
+  ]
+}

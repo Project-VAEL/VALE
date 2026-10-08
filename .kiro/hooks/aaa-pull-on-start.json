@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Pull Latest Changes on Session Start",
+      "trigger": "SessionStart",
+      "description": "Pulls the latest changes from the remote repository at the start of each session, before a session branch is created",
+      "action": {
+        "type": "command",
+        "command": "powershell -NoProfile -Command \"$result = git pull 2>&1; Write-Host $result; if ($LASTEXITCODE -eq 0) { Write-Host 'Successfully pulled latest changes from remote.' } else { Write-Host 'Warning: git pull failed. You may be working on a stale branch.' }\""
+      }
+    }
+  ]
+}

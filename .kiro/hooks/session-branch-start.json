@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Create Session Branch on Start",
+      "trigger": "SessionStart",
+      "description": "Creates a new git branch named kiro/session-<timestamp> at the start of each Kiro session",
+      "action": {
+        "type": "command",
+        "command": "powershell -NoProfile -Command \"$timestamp = Get-Date -Format 'yyyyMMdd-HHmmss'; $branch = \\\"kiro/session-$timestamp\\\"; git checkout -b $branch 2>&1; if ($LASTEXITCODE -eq 0) { Write-Host \\\"Created and switched to branch: $branch\\\" } else { Write-Host \\\"Failed to create session branch\\\" }\""
+      }
+    }
+  ]
+}

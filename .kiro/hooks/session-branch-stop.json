@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Merge Session Branch on Stop",
+      "trigger": "Stop",
+      "description": "At session end, checks for commits on the session branch, reports conflicts, asks for confirmation, then merges into the base branch and deletes the session branch",
+      "action": {
+        "type": "agent",
+        "prompt": "At the end of this session, perform the following git workflow:\n\n1. **Check for commits**: Run `git log --oneline HEAD ^$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || echo main) 2>/dev/null` or equivalent to check if any commits were made on the current session branch. If the current branch does NOT start with \"kiro/session-\" or there are no new commits compared to the base branch, skip all remaining steps and say nothing.\n\n2. **Detect base branch**: Run `git remote show origin 2>/dev/null | findstr \"HEAD branch\"` to detect the default remote branch (usually `main` or `master`). Fall back to checking if `main` or `master` exists locally.\n\n3. **Check for conflicts**: Run a dry-run merge check: `git merge --no-commit --no-ff <base-branch>` then `git merge --abort`. Report any files that would conflict.\n\n4. **Report and confirm**: Tell the user:\n   - The current session branch name\n   - The base branch it will merge into\n   - Any conflicting files (if any), with a brief description of the conflict\n   - Ask: \"Should I proceed with the merge? I'll resolve conflicts by accepting the incoming (session branch) changes.\"\n\n5. **On confirmation**: \n   - Switch to base branch: `git checkout <base-branch>`\n   - Merge with strategy: `git merge -X theirs kiro/session-<...> -m \"Merge session branch kiro/session-<...> into <base-branch>\"`\n   - If merge succeeds: delete the session branch with `git branch -d kiro/session-<...>` and confirm to the user.\n   - If merge fails: report the error and leave the branch intact for manual resolution.\n\n6. **On denial**: Leave the session branch intact and inform the user they can merge manually later."
+      }
+    }
+  ]
+}
