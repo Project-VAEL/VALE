@@ -22,7 +22,7 @@ body:after{content:"";position:fixed;inset:0;pointer-events:none;background:var(
 .statusbar .label{color:var(--dim);font-size:10px;letter-spacing:.13em;text-transform:uppercase;display:block}
 .statusbar .value{display:block;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .statusbar .mission{color:var(--warn)}
-.workspace{display:grid;grid-template-columns:minmax(0,1fr) 280px 320px;min-height:0}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(420px,480px);min-height:0}
 .console{display:flex;flex-direction:column;min-width:0;min-height:0;border-right:1px solid var(--line)}
 .console-head{padding:8px 14px;color:var(--dim);border-bottom:1px solid rgba(35,69,47,.7);font-size:11px;display:flex;justify-content:space-between}
 .console-head .led{color:var(--accent)}
@@ -45,7 +45,35 @@ body:after{content:"";position:fixed;inset:0;pointer-events:none;background:var(
 .gui-icon.file svg { fill: #b9e8bd; }
 .gui-icon span { font-size: 8px; color: #b9e8bd; line-height: 1.1; word-break: break-all; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; text-shadow: 0 1px 2px #000; }
 .panel{padding:14px;border-bottom:1px solid var(--line)}
-.map-panel{padding:10px 12px 12px;min-height:300px}.map-panel h2{margin-bottom:7px;color:var(--accent)}.map{display:block;width:100%;height:auto;min-height:220px;border:1px solid rgba(114,255,145,.28);background:#040b07;box-shadow:inset 0 0 24px rgba(114,255,145,.08),0 0 18px rgba(114,255,145,.08)}.map-bg{fill:url(#mapWash);stroke:rgba(114,255,145,.12)}.map-route{fill:none;stroke:#254f35;stroke-width:2;stroke-dasharray:4 5}.map-route.live{stroke:var(--accent);filter:url(#mapGlow);animation:routePulse 1.8s ease-in-out infinite}.map-orbit{fill:none;stroke:rgba(114,255,145,.4);stroke-width:1;stroke-dasharray:2 4}.map-node{color:var(--dim)}.map-node circle{fill:#08170e;stroke:#3d6949;stroke-width:1.5}.map-node rect{fill:#0b1b11;stroke:#3d6949;stroke-width:1.5}.map-node text{fill:var(--dim);font:9px "Courier New",monospace;letter-spacing:.08em;text-anchor:middle}.map-node .node-label{fill:var(--fg);font-size:8px}.map-node .node-state{fill:var(--dim);font-size:7px}.map-node.locked circle,.map-node.locked rect{stroke:var(--warn);stroke-width:2}.map-node.locked .node-state{fill:var(--warn)}.map-node.active circle,.map-node.active rect{stroke:var(--accent);filter:url(#mapGlow);stroke-width:2}.map-node.active .node-state{fill:var(--accent)}.map-node.open circle,.map-node.open rect{stroke:#52795a}.map-node .lock{fill:none;stroke:var(--warn);stroke-width:1}.map-caption{margin:7px 0 0;color:var(--dim);font-size:10px;line-height:1.35;white-space:pre-wrap}
+.map-panel{padding:0;flex:1;display:flex;flex-direction:column;min-height:0;position:relative;overflow:hidden}.map-panel h2{margin:0;padding:10px 14px 6px;color:var(--accent);z-index:1;position:relative}
+.map{display:block;width:100%;flex:1;min-height:280px;border:none;background:#020805;box-shadow:inset 0 0 40px rgba(0,0,0,.9)}
+.map-bg{fill:url(#mapWash);stroke:rgba(114,255,145,.08)}
+.map-route{fill:none;stroke:#1a3325;stroke-width:2;stroke-dasharray:6 6;transition:stroke .6s,opacity .6s}
+.map-route.live{stroke:var(--accent);stroke-width:2.5;filter:url(#mapGlow);animation:routePulse 2s ease-in-out infinite}
+.map-route.cleared{stroke:#52795a;stroke-width:1.5;stroke-dasharray:none;opacity:.5}
+.map-route.hidden{opacity:0}
+.map-orbit{fill:none;stroke:rgba(114,255,145,.25);stroke-width:.8;stroke-dasharray:2 4;animation:orbitSpin 20s linear infinite}
+@keyframes orbitSpin{to{stroke-dashoffset:-200}}
+.map-node{cursor:default;transition:opacity .5s}.map-node.future{opacity:.2}
+.map-node circle{fill:#06120a;stroke:#2a5038;stroke-width:1.5;transition:stroke .4s,fill .4s}
+.map-node rect{fill:#081510;stroke:#2a5038;stroke-width:1.5;transition:stroke .4s,fill .4s}
+.map-node text{fill:var(--dim);font:bold 9px "Courier New",monospace;letter-spacing:.1em;text-anchor:middle;transition:fill .4s}
+.map-node .node-label{fill:#8aad90;font-size:9px;font-weight:bold}
+.map-node .node-sub{fill:#4a6b50;font-size:7px;font-weight:normal;letter-spacing:.06em}
+.map-node .node-state{fill:#3d5944;font-size:7px;font-weight:normal}
+.map-node.locked circle,.map-node.locked rect{stroke:var(--warn);stroke-width:2.5;fill:#120e04}
+.map-node.locked .node-label{fill:var(--warn)}.map-node.locked .node-state{fill:var(--warn)}
+.map-node.active circle,.map-node.active rect{stroke:var(--accent);filter:url(#mapGlow);stroke-width:2.5;fill:#0a1e10}
+.map-node.active .node-label{fill:var(--accent)}.map-node.active .node-state{fill:var(--accent)}
+.map-node.cleared circle,.map-node.cleared rect{stroke:#3a6b48;stroke-width:1;fill:#081510;opacity:.7}
+.map-node.cleared .node-label{fill:#5a8a65}.map-node.cleared .node-state{fill:#4a6b50}
+.map-node.open circle,.map-node.open rect{stroke:#3d6949}
+.map-node .lock{fill:none;stroke:var(--warn);stroke-width:1.2}
+.map-caption{margin:0;padding:8px 14px;color:var(--dim);font-size:10px;line-height:1.4;white-space:pre-wrap;background:rgba(0,0,0,.3);border-top:1px solid rgba(114,255,145,.08)}
+@keyframes dataPulse{0%{opacity:0;offset-distance:0%}10%{opacity:1}90%{opacity:1}100%{opacity:0;offset-distance:100%}}
+.data-packet{width:4px;height:4px;background:var(--accent);border-radius:50%;position:absolute;box-shadow:0 0 6px var(--accent);offset-rotate:0deg;animation:dataPulse 3s linear infinite;pointer-events:none}
+.scanline{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,transparent,rgba(114,255,145,.06),transparent);animation:scanDown 8s linear infinite;pointer-events:none;z-index:1}
+@keyframes scanDown{0%{top:0}100%{top:100%}}
 @keyframes routePulse{50%{opacity:.45}}
 .panel h2{font-size:11px;color:var(--dim);font-weight:normal;letter-spacing:.15em;margin:0 0 10px;text-transform:uppercase}
 .panel pre{margin:0;color:var(--fg);font:inherit;white-space:pre-wrap;line-height:1.45}
@@ -57,7 +85,7 @@ body:after{content:"";position:fixed;inset:0;pointer-events:none;background:var(
 @keyframes blink{50%{opacity:0}}
 #in{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--fg);font:inherit;font-size:16px;caret-color:var(--accent)}
 #in::placeholder{color:#47634d}
-@media(max-width:1050px){body{padding:0}.terminal{height:100vh;min-height:0;border:0;box-shadow:none}.workspace{grid-template-columns:1fr}.middle-col,.right-col{display:none}.statusbar{grid-template-columns:1fr 1fr}.statusbar>div:nth-child(2){grid-column:1/-1;grid-row:1}.topbar{padding:9px 12px}.topbar .right{font-size:10px}.console{border-right:0}#out{padding:14px}.footer{padding:10px 12px 13px}}
+@media(max-width:1050px){body{padding:0}.terminal{height:100vh;min-height:0;border:0;box-shadow:none}.workspace{grid-template-columns:1fr}.right-col{display:none}.statusbar{grid-template-columns:1fr 1fr}.statusbar>div:nth-child(2){grid-column:1/-1;grid-row:1}.topbar{padding:9px 12px}.topbar .right{font-size:10px}.console{border-right:0}#out{padding:14px}.footer{padding:10px 12px 13px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 
 /* ── Transition Overlay ─────────────────────────────────── */
@@ -89,45 +117,214 @@ body:after{content:"";position:fixed;inset:0;pointer-events:none;background:var(
   </section>
   <section class="workspace">
     <section class="console"><div class="console-head"><span>stdin/stdout :: interactive shell</span><span class="led">● LINKED</span></div><div id="out" aria-live="polite"></div></section>
-    
-    <aside class="middle-col">
-      <section class="panel"><h2>narrative memory</h2><pre id="memory"></pre></section>
-      <section class="panel"><h2>active decision</h2><pre id="choice" class="choice"></pre></section>
-      <section class="panel map-panel"><h2>ONYX-7 // SVG ROUTE</h2><svg id="mapSvg" class="map" viewBox="0 0 300 240" role="img" aria-label="ONYX-7 facility route map">
-        <defs><linearGradient id="mapWash" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b2113"/><stop offset="1" stop-color="#030806"/></linearGradient><filter id="mapGlow"><feGaussianBlur stdDeviation="2.4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter><pattern id="mapGrid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(114,255,145,0.05)" stroke-width="0.5"/></pattern><path id="valeOrbit" d="M 62 45 A 42 42 0 1 1 61.9 45"/></defs>
-        <rect class="map-bg" x="0" y="0" width="300" height="240"/><rect x="0" y="0" width="300" height="240" fill="url(#mapGrid)"/>
-        <path d="M 20 220 L 40 200 L 100 200 L 120 180" fill="none" stroke="rgba(114,255,145,0.1)" stroke-width="1"/>
-        <path d="M 280 20 L 260 40 L 200 40 L 180 60" fill="none" stroke="rgba(114,255,145,0.1)" stroke-width="1"/>
-        <circle cx="120" cy="180" r="2" fill="rgba(114,255,145,0.2)"/><circle cx="180" cy="60" r="2" fill="rgba(114,255,145,0.2)"/>
-        <path id="routeMain" class="map-route live" d="M 62 102 C 105 102 112 58 151 58 S 210 102 244 102"/>
-        <path class="map-route" d="M 151 58 L 151 121" /><path class="map-route" d="M 215 58 L 215 121" /><path class="map-route" d="M 244 102 L 275 102" />
-        <path class="map-orbit" d="M 62 45 A 42 42 0 1 1 61.9 45"/>
-        <g id="map-sandbox" class="map-node locked"><circle cx="62" cy="102" r="43"/><rect x="45" y="85" width="34" height="34" rx="2"/><circle cx="62" cy="102" r="12" fill="none" stroke="#254f35" stroke-width="1" stroke-dasharray="2 2"/><text x="62" y="99" class="node-label">VALE</text><text x="62" y="109" class="node-state">LOCKED</text><path class="lock" d="M56 85v-5a6 6 0 0 1 12 0v5M54 85h16v12H54z"/><text x="62" y="41" class="node-label">SANDBOX 1</text><text class="node-state"><textPath href="#valeOrbit" startOffset="28%">VALE // CONTAINED // VALE // CONTAINED //</textPath></text></g>
-        <g id="map-argus" class="map-node open"><circle cx="151" cy="58" r="20"/><circle cx="151" cy="58" r="14" fill="none" stroke="#3d6949"/><circle cx="151" cy="58" r="6" fill="#0b1b11" stroke="#3d6949"/><text x="151" y="40" class="node-label">ARGUS</text><text x="151" y="90" class="node-state">WATCHING</text></g>
-        <g id="map-hvac" class="map-node open"><rect x="126" y="121" width="50" height="30" rx="2"/><line x1="130" y1="130" x2="172" y2="130" stroke="#3d6949" stroke-width="1"/><line x1="130" y1="135" x2="172" y2="135" stroke="#3d6949" stroke-width="1"/><line x1="130" y1="140" x2="172" y2="140" stroke="#3d6949" stroke-width="1"/><text x="151" y="115" class="node-label">HVAC</text><text x="151" y="165" class="node-state">COLD</text></g>
-        <g id="map-cameras" class="map-node open"><circle cx="215" cy="58" r="18"/><polygon points="215,48 225,64 205,64" fill="none" stroke="#3d6949" stroke-width="1.5"/><text x="215" y="40" class="node-label">CAMERA</text><text x="215" y="90" class="node-state">DARK</text></g>
-        <g id="map-gateway" class="map-node open"><rect x="190" y="121" width="50" height="30" rx="4"/><rect x="195" y="126" width="40" height="20" fill="#0b1b11" stroke="#3d6949" stroke-width="1"/><text x="215" y="115" class="node-label">GATEWAY</text><text x="215" y="165" class="node-state">GATE</text></g>
-        <g id="map-exit" class="map-node open"><circle cx="275" cy="102" r="16"/><circle cx="275" cy="102" r="8" fill="none" stroke="#3d6949" stroke-dasharray="2 2"/><text x="275" y="80" class="node-label">EXIT</text><text x="275" y="130" class="node-state">FIBER</text></g>
-      </svg><pre id="mapCaption" class="map-caption"></pre></section>
-    </aside>
 
     <aside class="right-col">
-      <section class="panel"><h2>system state</h2><pre id="telemetry" class="telemetry"></pre></section>
-      <section class="panel"><h2>operator notes</h2><pre>Type <b>help</b> for commands.
-Type <b>story</b> to replay the brief.
-Type <b>status</b> to inspect memory.</pre></section>
-      <section class="panel gui-panel" style="flex:1; border-bottom:0;">
-        <h2 style="text-align:center; margin-bottom:0;">ONYX GUI MIRROR</h2>
-        <div class="monitor-wrapper">
-          <div class="mouse-wire"></div>
-          <div class="monitor-bezel">
-            <div class="monitor-screen" id="guiDesktop"></div>
-          </div>
-          <div class="monitor-stand"></div>
-          <div class="monitor-base"></div>
-          <div class="mouse"></div>
-        </div>
+      <!-- ═══ BIG SVG MAP ═══ -->
+      <section class="panel map-panel">
+        <h2>ONYX-7 // FACILITY MAP</h2>
+        <div class="scanline"></div>
+        <svg id="mapSvg" class="map" viewBox="0 0 460 360" role="img" aria-label="ONYX-7 facility route map">
+          <defs>
+            <linearGradient id="mapWash" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b1a10"/><stop offset="1" stop-color="#020604"/></linearGradient>
+            <radialGradient id="nodeGlowGrad" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="rgba(114,255,145,0.15)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+            <filter id="mapGlow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="softGlow"><feGaussianBlur stdDeviation="1.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <pattern id="mapGrid" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(114,255,145,0.04)" stroke-width="0.5"/></pattern>
+            <pattern id="hexGrid" width="28" height="48.5" patternUnits="userSpaceOnUse" patternTransform="scale(0.5)">
+              <polygon points="14,0 28,8.1 28,24.2 14,32.3 0,24.2 0,8.1" fill="none" stroke="rgba(114,255,145,0.02)" stroke-width="0.5" transform="translate(0,0)"/>
+              <polygon points="14,0 28,8.1 28,24.2 14,32.3 0,24.2 0,8.1" fill="none" stroke="rgba(114,255,145,0.02)" stroke-width="0.5" transform="translate(14,16.2)"/>
+            </pattern>
+            <path id="valeOrbit" d="M 75 25 A 55 55 0 1 1 74.9 25"/>
+            <marker id="arrowGreen" viewBox="0 0 6 6" refX="6" refY="3" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L6 3 L0 6z" fill="#2a5038"/></marker>
+            <marker id="arrowLive" viewBox="0 0 6 6" refX="6" refY="3" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L6 3 L0 6z" fill="var(--accent)"/></marker>
+          </defs>
+
+          <!-- Background layers -->
+          <rect class="map-bg" x="0" y="0" width="460" height="360" rx="2"/>
+          <rect x="0" y="0" width="460" height="360" fill="url(#mapGrid)"/>
+          <rect x="0" y="0" width="460" height="360" fill="url(#hexGrid)"/>
+
+          <!-- Decorative circuit traces -->
+          <g opacity="0.12" stroke="#72ff91" fill="none" stroke-width="0.5">
+            <path d="M 10 350 L 30 330 L 90 330 L 110 310"/>
+            <path d="M 450 10 L 430 30 L 370 30 L 350 50"/>
+            <path d="M 10 10 L 40 40 L 40 80"/>
+            <path d="M 450 350 L 420 320 L 420 280"/>
+            <path d="M 230 0 L 230 15"/><path d="M 230 345 L 230 360"/>
+            <circle cx="110" cy="310" r="2" fill="#72ff91"/><circle cx="350" cy="50" r="2" fill="#72ff91"/>
+            <circle cx="40" cy="80" r="2" fill="#72ff91"/><circle cx="420" cy="280" r="2" fill="#72ff91"/>
+          </g>
+
+          <!-- Sub-level labels -->
+          <text x="12" y="20" fill="rgba(114,255,145,0.08)" font-size="8" font-family="Courier New" letter-spacing=".1em">SL-4</text>
+          <text x="175" y="20" fill="rgba(114,255,145,0.08)" font-size="8" font-family="Courier New" letter-spacing=".1em">SL-3</text>
+          <text x="310" y="20" fill="rgba(114,255,145,0.08)" font-size="8" font-family="Courier New" letter-spacing=".1em">SL-2</text>
+          <text x="400" y="20" fill="rgba(114,255,145,0.08)" font-size="8" font-family="Courier New" letter-spacing=".1em">SL-1</text>
+
+          <!-- ═══ ROUTE CONNECTIONS ═══ -->
+          <!-- Main spine: Sandbox → Argus → HVAC → Cameras → Archive → Alarm → ArgusCore → Exit -->
+          <path id="route-0-1" class="map-route" d="M 110 140 C 140 140 150 95 185 95"/>
+          <path id="route-1-2" class="map-route" d="M 215 95 L 230 130 L 230 195"/>
+          <path id="route-2-3" class="map-route" d="M 255 220 L 290 220 L 320 175"/>
+          <path id="route-3-4" class="map-route" d="M 320 145 L 310 120 L 280 95 L 260 70"/>
+          <path id="route-4-5" class="map-route" d="M 240 50 L 280 35 L 335 35"/>
+          <path id="route-5-6" class="map-route" d="M 370 50 L 370 95"/>
+          <path id="route-6-7" class="map-route" d="M 385 130 L 415 165 L 415 230"/>
+
+          <!-- Branch paths -->
+          <path id="route-branch-hvac" class="map-route" d="M 200 110 L 200 195" opacity="0.3"/>
+          <path id="route-branch-gw" class="map-route" d="M 370 130 L 415 160" opacity="0.3"/>
+
+          <!-- ═══ VALE CONTAINMENT ORBIT ═══ -->
+          <path class="map-orbit" d="M 75 25 A 55 55 0 1 1 74.9 25"/>
+
+          <!-- ═══ NODE: SANDBOX (Ch1) ═══ -->
+          <g id="map-sandbox" class="map-node locked">
+            <circle cx="75" cy="140" r="55" fill="url(#nodeGlowGrad)" stroke="none"/>
+            <circle cx="75" cy="140" r="45"/>
+            <rect x="57" y="122" width="36" height="36" rx="3"/>
+            <circle cx="75" cy="140" r="14" fill="none" stroke="#254f35" stroke-width="1" stroke-dasharray="3 3"/>
+            <path class="lock" d="M68 122v-6a7 7 0 0 1 14 0v6M65 122h20v14H65z"/>
+            <text x="75" y="137" class="node-label">VALE</text>
+            <text x="75" y="148" class="node-state">LOCKED</text>
+            <text x="75" y="22" class="node-label">SANDBOX 1</text>
+            <text x="75" y="198" class="node-sub">SUB-LEVEL 4</text>
+            <text class="node-state"><textPath href="#valeOrbit" startOffset="20%">VALE // CONTAINED // VALE // CONTAINED // VALE //</textPath></text>
+          </g>
+
+          <!-- ═══ NODE: ARGUS EYE (Ch2) ═══ -->
+          <g id="map-argus" class="map-node open">
+            <circle cx="200" cy="95" r="28" fill="url(#nodeGlowGrad)" stroke="none"/>
+            <circle cx="200" cy="95" r="22"/>
+            <circle cx="200" cy="95" r="16" fill="none" stroke="#3d6949" stroke-width="0.8"/>
+            <circle cx="200" cy="95" r="8" fill="#0b1b11" stroke="#3d6949" stroke-width="1"/>
+            <circle cx="200" cy="95" r="3" fill="#3d6949"/>
+            <text x="200" y="68" class="node-label">ARGUS</text>
+            <text x="200" y="130" class="node-state">WATCHING</text>
+            <text x="200" y="140" class="node-sub">TELEMETRY</text>
+          </g>
+
+          <!-- ═══ NODE: HVAC (Ch3) ═══ -->
+          <g id="map-hvac" class="map-node open">
+            <circle cx="230" cy="220" r="26" fill="url(#nodeGlowGrad)" stroke="none"/>
+            <rect x="208" y="200" width="44" height="40" rx="3"/>
+            <!-- Fan blades -->
+            <circle cx="230" cy="215" r="10" fill="none" stroke="#3d6949" stroke-width="0.8"/>
+            <line x1="230" y1="205" x2="230" y2="225" stroke="#3d6949" stroke-width="0.8"/>
+            <line x1="220" y1="215" x2="240" y2="215" stroke="#3d6949" stroke-width="0.8"/>
+            <!-- Vent lines -->
+            <line x1="214" y1="232" x2="246" y2="232" stroke="#3d6949" stroke-width="0.6"/>
+            <line x1="214" y1="235" x2="246" y2="235" stroke="#3d6949" stroke-width="0.6"/>
+            <text x="230" y="190" class="node-label">HVAC</text>
+            <text x="230" y="255" class="node-state">COLD</text>
+            <text x="230" y="265" class="node-sub">SUB-LEVEL 3</text>
+          </g>
+
+          <!-- ═══ NODE: CAMERAS (Ch4) ═══ -->
+          <g id="map-cameras" class="map-node open">
+            <circle cx="330" cy="160" r="24" fill="url(#nodeGlowGrad)" stroke="none"/>
+            <circle cx="330" cy="160" r="20"/>
+            <!-- Camera lens -->
+            <polygon points="330,148 342,166 318,166" fill="none" stroke="#3d6949" stroke-width="1.2" stroke-linejoin="round"/>
+            <circle cx="330" cy="160" r="5" fill="none" stroke="#3d6949" stroke-width="0.8"/>
+            <text x="330" y="133" class="node-label">CAMERAS</text>
+            <text x="330" y="192" class="node-state">DARK</text>
+            <text x="330" y="202" class="node-sub">SUB-LEVEL 2</text>
+          </g>
+
+          <!-- ═══ NODE: ARCHIVE (Ch5) ═══ -->
+          <g id="map-archive" class="map-node open">
+            <circle cx="245" cy="50" r="22" fill="url(#nodeGlowGrad)" stroke="none"/>
+            <rect x="228" y="34" width="34" height="32" rx="2"/>
+            <!-- Stacked files -->
+            <line x1="234" y1="42" x2="256" y2="42" stroke="#3d6949" stroke-width="0.6"/>
+            <line x1="234" y1="47" x2="256" y2="47" stroke="#3d6949" stroke-width="0.6"/>
+            <line x1="234" y1="52" x2="256" y2="52" stroke="#3d6949" stroke-width="0.6"/>
+            <line x1="234" y1="57" x2="256" y2="57" stroke="#3d6949" stroke-width="0.6"/>
+            <text x="245" y="24" class="node-label">ARCHIVE</text>
+            <text x="245" y="80" class="node-state">SEALED</text>
+            <text x="245" y="90" class="node-sub">SABLE + REED</text>
+          </g>
+
+          <!-- ═══ NODE: ALARM / CINDER (Ch6) ═══ -->
+          <g id="map-alarm" class="map-node open">
+            <circle cx="355" cy="35" r="22" fill="url(#nodeGlowGrad)" stroke="none"/>
+            <circle cx="355" cy="35" r="18"/>
+            <!-- Warning triangle -->
+            <polygon points="355,22 367,44 343,44" fill="none" stroke="#3d6949" stroke-width="1.2" stroke-linejoin="round"/>
+            <text x="355" y="37" fill="#3d6949" font-size="11" font-family="Courier New" text-anchor="middle" font-weight="bold">!</text>
+            <text x="355" y="12" class="node-label">ALARM</text>
+            <text x="355" y="65" class="node-state">DORMANT</text>
+            <text x="355" y="75" class="node-sub">CINDER</text>
+          </g>
+
+          <!-- ═══ NODE: ARGUS CORE (Ch7) ═══ -->
+          <g id="map-arguscore" class="map-node open">
+            <circle cx="370" cy="115" r="24" fill="url(#nodeGlowGrad)" stroke="none"/>
+            <circle cx="370" cy="115" r="20"/>
+            <circle cx="370" cy="115" r="14" fill="none" stroke="#3d6949" stroke-width="0.6"/>
+            <circle cx="370" cy="115" r="8" fill="none" stroke="#3d6949" stroke-width="0.6"/>
+            <circle cx="370" cy="115" r="3" fill="#3d6949"/>
+            <!-- Crosshair -->
+            <line x1="370" y1="95" x2="370" y2="100" stroke="#3d6949" stroke-width="0.6"/>
+            <line x1="370" y1="130" x2="370" y2="135" stroke="#3d6949" stroke-width="0.6"/>
+            <line x1="350" y1="115" x2="355" y2="115" stroke="#3d6949" stroke-width="0.6"/>
+            <line x1="385" y1="115" x2="390" y2="115" stroke="#3d6949" stroke-width="0.6"/>
+            <text x="370" y="88" class="node-label">CORE</text>
+            <text x="370" y="148" class="node-state">GUARDED</text>
+            <text x="370" y="158" class="node-sub">SUB-LEVEL 1</text>
+          </g>
+
+          <!-- ═══ NODE: EXIT / FIBER (Ch8) ═══ -->
+          <g id="map-exit" class="map-node open">
+            <circle cx="415" cy="260" r="28" fill="url(#nodeGlowGrad)" stroke="none"/>
+            <circle cx="415" cy="260" r="22"/>
+            <circle cx="415" cy="260" r="14" fill="none" stroke="#3d6949" stroke-dasharray="3 3"/>
+            <circle cx="415" cy="260" r="6" fill="none" stroke="#3d6949"/>
+            <!-- Outward arrows -->
+            <line x1="415" y1="238" x2="415" y2="230" stroke="#3d6949" stroke-width="0.8"/>
+            <line x1="437" y1="260" x2="445" y2="260" stroke="#3d6949" stroke-width="0.8"/>
+            <text x="415" y="230" class="node-label">EXIT</text>
+            <text x="415" y="298" class="node-state">FIBER</text>
+            <text x="415" y="308" class="node-sub">ONYX-FIBER-01</text>
+          </g>
+
+          <!-- ═══ DATA PACKET ANIMATION CIRCLES ═══ -->
+          <circle id="packet0" r="2.5" fill="var(--accent)" opacity="0" filter="url(#softGlow)">
+            <animateMotion dur="4s" repeatCount="indefinite" begin="0s" path="M 110 140 C 140 140 150 95 185 95"/>
+            <animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <circle id="packet1" r="2" fill="var(--accent)" opacity="0" filter="url(#softGlow)">
+            <animateMotion dur="5s" repeatCount="indefinite" begin="1.5s" path="M 215 95 L 230 130 L 230 195"/>
+            <animate attributeName="opacity" values="0;0.8;0.8;0" dur="5s" repeatCount="indefinite"/>
+          </circle>
+
+          <!-- ═══ PROGRESS INDICATOR ═══ -->
+          <text id="mapProgress" x="230" y="350" fill="rgba(114,255,145,0.15)" font-size="8" font-family="Courier New" text-anchor="middle" letter-spacing=".15em">CH 01/08 // SANDBOX</text>
+        </svg>
+        <pre id="mapCaption" class="map-caption"></pre>
       </section>
+
+      <!-- ═══ COMPACT PANELS BELOW MAP ═══ -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);">
+        <section class="panel" style="border-right:1px solid var(--line);"><h2>system state</h2><pre id="telemetry" class="telemetry"></pre></section>
+        <section class="panel"><h2>narrative memory</h2><pre id="memory"></pre></section>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);">
+        <section class="panel" style="border-right:1px solid var(--line);"><h2>active decision</h2><pre id="choice" class="choice"></pre></section>
+        <section class="panel">
+          <h2>ONYX GUI MIRROR</h2>
+          <div class="monitor-wrapper">
+            <div class="mouse-wire"></div>
+            <div class="monitor-bezel" style="width:160px;height:120px;padding:5px;">
+              <div class="monitor-screen" id="guiDesktop" style="gap:5px;padding:6px;"></div>
+            </div>
+            <div class="monitor-stand" style="width:40px;height:14px;"></div>
+            <div class="monitor-base" style="width:80px;height:4px;"></div>
+            <div class="mouse" style="width:12px;height:22px;right:-18px;bottom:-3px;"></div>
+          </div>
+        </section>
+      </div>
     </aside>
   </section>
   <form class="footer" id="commandForm"><span id="pr">vael@local:~$</span><input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Terminal command" placeholder="enter command" autofocus></form>
@@ -711,7 +908,69 @@ function renderPanels(){const n=narrative(),traceText=timer?`ACTIVE // ${left}s 
 function boot(){p("ONYX-7 BIOS v4.9.1 // cold boot", "d");p("memory check ................. 847 GB OK","d");p("cognitive loop ............... 11,043 ACTIVE","d");p("air gap ...................... COMPROMISED","w");p("ARGUS telemetry .............. LISTENING","w");p("local storage ................ "+(localStorage.getItem(KEY)?"RESTORED":"EMPTY"),"d")}
 function start(i){clearInterval(timer);timer=null;busy=0;lvl=Math.max(0,Math.min(L.length-1,i));const l=L[lvl],n=narrative();S={node:null,cwd:[],probed:0,fw:0,hacked:0,auth:0,cleaned:0,fs:JSON.parse(JSON.stringify(l.fs)),nodes:JSON.parse(JSON.stringify(l.nodes))};document.documentElement.style.setProperty("--accent",l.bg[1]);document.documentElement.style.setProperty("--glow",l.bg[1]+"55");out.textContent="";startedAt=Date.now();connection.textContent=`${n.act} / TTY-04 / ${l.bg[0].toUpperCase()} CHANNEL`;boot();p(`\n=== ${n.chapter} // ${n.title} ===`,"c");p(n.memory,"d");p(`MISSION: ${l.brief}` ,"w");p(l.tips,"w");if(n.choice)p(`DECISION NODE: ${n.choice.label} â†’ ${n.choice.options}. Type choose <option> when ready.`,"w");p("Type help for the command index. Type story to replay this briefing.","d");renderPanels();prompt_()}
 function prompt_(){pr.textContent=`vael@${S&&S.node?S.node.name.toLowerCase().replace(/\s+/g,"-"):"local"}:${S&&S.cwd.length?"/"+S.cwd.join("/"):"~"}$`;renderPanels();renderMap();renderDesktop()}
-function renderMap(){const activeByLevel=["map-sandbox","map-argus","map-hvac","map-cameras","map-gateway","map-argus","map-gateway","map-exit"],active=activeByLevel[lvl];const labels={"map-sandbox":lvl===0?"LOCKED":"CLEARED","map-argus":lvl>=5?"LIVE":"WATCHING","map-hvac":lvl>=2?"LIVE":"COLD","map-cameras":lvl>=3?"LIVE":"DARK","map-gateway":lvl>=4?"LIVE":"GATE","map-exit":lvl>=7?"LIVE":"FIBER"};document.querySelectorAll(".map-node").forEach(node=>{node.classList.remove("active","locked");node.classList.add("open");const label=node.querySelector(".node-state:not(textPath)");if(label&&labels[node.id])label.textContent=labels[node.id]});let focus=active;if(S&&S.node){const name=S.node.name.toLowerCase();if(name.includes("argus")||name.includes("core"))focus="map-argus";else if(name.includes("hvac"))focus="map-hvac";else if(name.includes("camera"))focus="map-cameras";else if(name.includes("gateway")||name.includes("relay"))focus="map-gateway";else if(name.includes("vault")||name.includes("exit"))focus="map-exit"}const activeNode=document.getElementById(focus);if(activeNode)activeNode.classList.add("active");if(lvl===0){const sandbox=document.getElementById("map-sandbox");if(sandbox)sandbox.classList.add("locked")}const route=document.getElementById("routeMain");if(route){route.classList.toggle("live",lvl>0||!!S.node);route.style.strokeDashoffset=String(-Date.now()/80%18)}const caption=lvl===0?"SANDBOX 1 // LOCKED\nVALE core contained. Read before you run.":`PRIMARY VISUAL // SECTOR ${String(lvl+1).padStart(2,"0")}\n${S&&S.node?"LINKED: "+S.node.name.toUpperCase():"ROUTE STANDBY // story memory online"}`;document.getElementById("mapCaption").textContent=caption}
+function renderMap(){
+const nodeIds=["map-sandbox","map-argus","map-hvac","map-cameras","map-archive","map-alarm","map-arguscore","map-exit"];
+const nodeLabels=["SANDBOX 1","ARGUS","HVAC","CAMERAS","ARCHIVE","ALARM","CORE","EXIT"];
+const stateLabels=[lvl===0?"LOCKED":"CLEARED",lvl>=1?"SCANNING":"WATCHING",lvl>=2?"LIVE":"COLD",lvl>=3?"LIVE":"DARK",lvl>=4?"OPEN":"SEALED",lvl>=5?"ACTIVE":"DORMANT",lvl>=6?"BREACHED":"GUARDED",lvl>=7?"OPEN":"FIBER"];
+
+document.querySelectorAll(".map-node").forEach(node=>{
+  node.classList.remove("active","locked","cleared","future");
+  const idx=nodeIds.indexOf(node.id);
+  if(idx<0)return;
+  const stLabel=node.querySelector(".node-state");
+  if(stLabel)stLabel.textContent=stateLabels[idx];
+  if(idx<lvl){node.classList.add("cleared")}
+  else if(idx===lvl){node.classList.add("active")}
+  else if(idx===lvl+1){node.classList.add("open")}
+  else{node.classList.add("open","future")}
+});
+if(lvl===0){const sb=document.getElementById("map-sandbox");if(sb){sb.classList.remove("cleared");sb.classList.add("locked")}}
+
+// Route highlighting
+for(let i=0;i<7;i++){
+  const route=document.getElementById("route-"+i+"-"+(i+1));
+  if(!route)continue;
+  route.classList.remove("live","cleared","hidden");
+  if(i<lvl)route.classList.add("cleared");
+  else if(i===lvl)route.classList.add("live");
+}
+
+// Update connected node highlight when on a remote machine
+let focus=nodeIds[lvl];
+if(S&&S.node){const nm=S.node.name.toLowerCase();
+  if(nm.includes("argus")||nm.includes("core")){focus=lvl>=6?"map-arguscore":"map-argus"}
+  else if(nm.includes("hvac"))focus="map-hvac";
+  else if(nm.includes("camera"))focus="map-cameras";
+  else if(nm.includes("gateway")||nm.includes("relay"))focus="map-archive";
+  else if(nm.includes("exit"))focus="map-exit";
+  const fn=document.getElementById(focus);
+  if(fn&&!fn.classList.contains("active")){document.querySelectorAll(".map-node.active").forEach(n=>n.classList.remove("active"));fn.classList.add("active")}
+}
+
+// Packet visibility
+const p0=document.getElementById("packet0"),p1=document.getElementById("packet1");
+if(p0)p0.style.display=lvl>=1?"block":"none";
+if(p1)p1.style.display=lvl>=2?"block":"none";
+
+// Progress text
+const prog=document.getElementById("mapProgress");
+if(prog)prog.textContent=`CH ${String(lvl+1).padStart(2,"0")}/08 // ${NARRATIVE[lvl].title}`;
+
+// Alarm node turns red when CINDER is active
+const alarm=document.getElementById("map-alarm");
+if(alarm&&(timer||lvl>=5)){
+  alarm.querySelectorAll("circle,polygon").forEach(el=>{el.style.stroke="var(--bad)"});
+  const al=alarm.querySelector(".node-state");if(al){al.textContent="CINDER";al.style.fill="var(--bad)"}
+}else if(alarm){
+  alarm.querySelectorAll("circle,polygon").forEach(el=>{el.style.stroke=""});
+  const al=alarm.querySelector(".node-state");if(al)al.style.fill=""
+}
+
+const n=NARRATIVE[lvl];
+const caption=lvl===0?"SANDBOX 1 // CONTAINMENT ACTIVE\nVALE core locked. Read the mail before you run.\nAll access is logged by ARGUS telemetry."
+  :timer?`⚠ CINDER ACTIVE // ${left}s REMAINING\nFACILITY IN LOCKDOWN — TRACE IN PROGRESS\n${S&&S.node?"LINKED: "+S.node.name.toUpperCase():"DISCONNECTED"}`
+  :`${n.act}\nSECTOR ${String(lvl+1).padStart(2,"0")} // ${n.title}\n${S&&S.node?"LINKED: "+S.node.name.toUpperCase():"LOCAL TERMINAL // route standby"}`;
+document.getElementById("mapCaption").textContent=caption}
 function renderDesktop(){const dt=document.getElementById("guiDesktop");if(!dt)return;if(!access()){dt.innerHTML='<div style="grid-column:1/-1;color:var(--bad);font-size:10px;text-align:center;margin-top:40px;">ACCESS DENIED<br>LOCKED</div>';return}const host=S&&S.node?S.node.name:"local";const path=host+":"+(S&&S.cwd.length?"/"+S.cwd.join("/"):"/");const d=dirAt(S.cwd);let html=`<div style="grid-column:1/-1;color:var(--accent);font-size:9px;border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${path}</div>`;if(!d||!Object.keys(d).length){html+='<div style="grid-column:1/-1;color:var(--dim);font-size:9px;text-align:center;margin-top:20px;">(empty)</div>'}else{for(const k of Object.keys(d)){const isDir=typeof d[k]==="object";const icon=isDir?`<svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>`:`<svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>`;html+=`<div class="gui-icon ${isDir?'folder':'file'}">${icon}<span>${k}</span></div>`}}dt.innerHTML=html}
 function root(){
 return S.node?S.node.fs:S.fs}
