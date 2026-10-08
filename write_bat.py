@@ -1,1 +1,0 @@
-open("run.bat","w").write(open("run_template.txt").read())
