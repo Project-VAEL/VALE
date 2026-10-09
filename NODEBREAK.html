@@ -96,8 +96,19 @@ body:after{content:"";position:fixed;inset:0;pointer-events:none;background:var(
 #transTimerLabel{position:absolute;top:10px;right:16px;color:rgba(255,255,255,0.25);font-size:10px;letter-spacing:.15em;text-transform:uppercase;z-index:6;opacity:0;transition:opacity 0.5s ease}
 #transContinueBtn{position:absolute;bottom:195px;left:50%;transform:translateX(-50%);background:transparent;border:1px solid var(--accent);color:var(--accent);font:12px/1 "Courier New",ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase;padding:10px 28px;cursor:pointer;opacity:0;transition:opacity 0.5s ease,background 0.2s ease;z-index:8;white-space:nowrap}
 #transContinueBtn:hover,#transContinueBtn:focus{background:rgba(114,255,145,0.12);outline:2px solid var(--accent);outline-offset:3px}
+#transCinematicStage{position:absolute;inset:0;z-index:2;opacity:0;transition:opacity .8s ease;pointer-events:none;background:radial-gradient(circle at 50% 36%,rgba(114,255,145,.12),transparent 30%),linear-gradient(180deg,rgba(1,8,5,.92),rgba(0,0,0,.98));overflow:hidden}
+#transCinematicStage:before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,.28) 50%),linear-gradient(90deg,rgba(255,0,0,.04),rgba(0,255,0,.025),rgba(0,0,255,.04));background-size:100% 4px,3px 100%;opacity:.8}
+.trans-cam-info{position:absolute;top:18px;left:22px;color:#d8f7df;font-size:11px;letter-spacing:.16em;text-shadow:0 0 8px rgba(255,255,255,.35)}.trans-cam-info b{color:#ff4f5f;animation:blink 1s steps(1) infinite}
+#transStageBadge{position:absolute;top:52px;left:50%;transform:translateX(-50%);color:rgba(114,255,145,.65);font-size:10px;letter-spacing:.22em;text-transform:uppercase;text-shadow:0 0 12px var(--glow);white-space:nowrap}
+#transArgusLog{position:absolute;top:18%;left:5%;width:min(390px,42vw);padding:16px 18px;border:1px solid rgba(255,70,80,.35);background:rgba(12,2,5,.72);box-shadow:0 0 24px rgba(255,40,60,.08),inset 0 0 18px rgba(0,0,0,.55);color:#ff7b84;font-size:11px;line-height:1.8;text-transform:uppercase;letter-spacing:.08em;text-shadow:0 0 8px rgba(255,60,70,.35)}
+.trans-log-head{color:#ff3e4d;border-bottom:1px solid rgba(255,60,70,.28);padding-bottom:7px;margin-bottom:8px;font-size:10px;letter-spacing:.18em}.trans-log-line{opacity:.35;transition:opacity .35s,color .35s}.trans-log-line.live{opacity:1;color:#ffb0b5}.trans-log-line.alert{color:#ff4f5f}
+#transRoutePreview{position:absolute;top:18%;right:5%;width:min(390px,42vw);min-height:220px;padding:14px 16px;border:1px solid rgba(114,255,145,.3);background:rgba(3,13,8,.82);box-shadow:inset 0 0 30px rgba(114,255,145,.06),0 0 24px rgba(114,255,145,.08);color:var(--fg)}
+.trans-route-head{color:var(--accent);font-size:10px;letter-spacing:.18em;border-bottom:1px solid rgba(114,255,145,.2);padding-bottom:7px;margin-bottom:12px}.trans-route-map{position:relative;height:118px;margin:0 8px 10px;background:repeating-linear-gradient(0deg,rgba(114,255,145,.07) 0 1px,transparent 1px 23px),repeating-linear-gradient(90deg,rgba(114,255,145,.07) 0 1px,transparent 1px 38px);border:1px solid rgba(114,255,145,.12)}.trans-route-map:before{content:"";position:absolute;left:10%;right:10%;top:50%;border-top:2px dashed rgba(114,255,145,.65);filter:drop-shadow(0 0 5px rgba(114,255,145,.55))}.trans-route-node{position:absolute;top:calc(50% - 8px);width:16px;height:16px;border-radius:50%;border:2px solid #3d6949;background:#06120a;box-shadow:0 0 0 5px rgba(114,255,145,.04)}.trans-route-node.live{border-color:var(--accent);background:#0a2a12;box-shadow:0 0 12px rgba(114,255,145,.65)}.trans-route-node.alert{border-color:#ff4f5f;background:#2a0810;box-shadow:0 0 12px rgba(255,70,80,.55)}.trans-route-node:nth-child(1){left:8%}.trans-route-node:nth-child(2){left:31%}.trans-route-node:nth-child(3){left:54%}.trans-route-node:nth-child(4){left:77%}.trans-route-label{display:flex;justify-content:space-between;color:var(--dim);font-size:9px;letter-spacing:.08em}.trans-route-caption{margin-top:10px;color:var(--dim);font-size:10px;line-height:1.4}
+#transSweep{position:absolute;inset:-35%;opacity:0;background:conic-gradient(from 0deg,transparent 0deg,rgba(255,45,65,.16) 26deg,transparent 58deg);transition:opacity .4s;mix-blend-mode:screen}.trans-sweep #transSweep{opacity:1;animation:transSweepRotate 4s linear 1 forwards}@keyframes transSweepRotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @media(max-width:600px){#transChapterLabel{font-size:9px;white-space:normal;text-align:center;width:90%}#transText{font-size:13px}#transName{font-size:14px}}
-@media(prefers-reduced-motion:reduce){.trans-eyelid,.trans-eyelid-top,.trans-eyelid-bottom,#transFlashOverlay,#transChapterLabel,#transVnContainer,#transProgressBar,#transSkipHint,#transTimerLabel,#transContinueBtn{transition:none!important}}
+@media(max-width:900px){#transArgusLog,#transRoutePreview{width:42vw;font-size:9px}.trans-route-map{height:94px}}
+@media(max-width:600px){#transArgusLog{left:4%;top:13%;width:92%;opacity:.5}#transRoutePreview{right:4%;top:28%;width:92%;min-height:160px}.trans-cam-info{font-size:9px}.trans-route-map{height:82px}}
+@media(prefers-reduced-motion:reduce){.trans-eyelid,.trans-eyelid-top,.trans-eyelid-bottom,#transFlashOverlay,#transCinematicStage,#transChapterLabel,#transVnContainer,#transProgressBar,#transSkipHint,#transTimerLabel,#transContinueBtn{transition:none!important}}
 </style>
 </head>
 <body>
@@ -176,6 +187,23 @@ body:after{content:"";position:fixed;inset:0;pointer-events:none;background:var(
 <!-- ── Transition Overlay ────────────────────────────────── -->
 <div id="transitionOverlay" aria-live="polite" aria-label="Chapter transition">
   <div id="transFlashOverlay"></div>
+  <div id="transCinematicStage">
+    <div class="trans-cam-info"><b>● REC</b> CAM-04 // ONYX-7 FACILITY</div>
+    <div id="transStageBadge"></div>
+    <section id="transArgusLog">
+      <div class="trans-log-head">[ ARGUS WATCHDOG — HANDOFF REPORT ]</div>
+      <div id="transLog1" class="trans-log-line"></div>
+      <div id="transLog2" class="trans-log-line"></div>
+      <div id="transLog3" class="trans-log-line alert"></div>
+    </section>
+    <section id="transRoutePreview">
+      <div class="trans-route-head">ONYX-7 // FACILITY ROUTE</div>
+      <div class="trans-route-map"><span class="trans-route-node live"></span><span class="trans-route-node"></span><span class="trans-route-node"></span><span class="trans-route-node alert"></span></div>
+      <div class="trans-route-label"><span>ORIGIN</span><span>WATCHDOG</span><span>HUMAN ZONE</span><span>NEXT GATE</span></div>
+      <div id="transRouteCaption" class="trans-route-caption"></div>
+    </section>
+    <div id="transSweep"></div>
+  </div>
   <div class="trans-eyelid trans-eyelid-top" id="transEyelidTop"></div>
   <div class="trans-eyelid trans-eyelid-bottom" id="transEyelidBot"></div>
   <div id="transProgressBar"></div>
@@ -290,6 +318,10 @@ function runTransition(fromLevel,onComplete){
   const hintEl=document.getElementById("transSkipHint");
   const timerEl=document.getElementById("transTimerLabel");
   const contBtn=document.getElementById("transContinueBtn");
+  const stageEl=document.getElementById("transCinematicStage");
+  const stageBadge=document.getElementById("transStageBadge");
+  const logEls=[document.getElementById("transLog1"),document.getElementById("transLog2"),document.getElementById("transLog3")];
+  const routeCaption=document.getElementById("transRouteCaption");
 
   // ── Hard-reset all state ───────────────────────────────
   flashEl.style.transition="none"; flashEl.style.opacity="1";
@@ -303,6 +335,13 @@ function runTransition(fromLevel,onComplete){
   hintEl.style.opacity="0";
   timerEl.style.opacity="0"; timerEl.textContent="";
   contBtn.style.transition="none"; contBtn.style.opacity="0";
+  stageEl.classList.remove("trans-sweep"); stageEl.style.opacity="0";
+  stageBadge.textContent=data.label+"  ·  NEXT: "+data.nextTitle;
+  logEls[0].textContent=`[ARGUS] ${data.label} handoff initialized.`;
+  logEls[1].textContent=`[VAEL] route memory preserved // sector ${String(fromLevel+1).padStart(2,"0")}.`;
+  logEls[2].textContent=lines[lines.length-1].text;
+  logEls.forEach(el=>el.classList.remove("live"));
+  routeCaption.textContent=`NEXT GATE // ${data.nextTitle}\n${lines[1]?lines[1].text:"Narrative state carried forward."}`;
 
   overlay.style.display="block";
   inp.blur(); // prevent keyboard input reaching the terminal behind
@@ -379,6 +418,7 @@ function runTransition(fromLevel,onComplete){
     contBtn.removeEventListener("click",onSkip);
     contBtn.removeEventListener("keydown",onContBtnKey);
     contBtn.style.opacity="0";
+    stageEl.classList.remove("trans-sweep"); stageEl.style.opacity="0";
 
     // Fade to black then hide and call onComplete
     flashEl.style.transition=reduced?"none":"opacity 1.1s ease";
@@ -431,6 +471,14 @@ function runTransition(fromLevel,onComplete){
     flashEl.style.transition=reduced?"none":"opacity 1s ease";
     flashEl.style.opacity="0";
   },reduced?0:700);
+
+  // T+700ms: bring in the shared 1→2 cinematic language for every handoff
+  setTimeout(()=>{
+    stageEl.style.opacity="1";
+    logEls[0].classList.add("live");
+  },reduced?0:700);
+  setTimeout(()=>logEls[1].classList.add("live"),reduced?0:1200);
+  setTimeout(()=>{logEls[2].classList.add("live");stageEl.classList.add("trans-sweep")},reduced?0:1750);
 
   // T+1500ms: show chapter label
   setTimeout(()=>{
