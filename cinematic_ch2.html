@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VAEL // CHAPTER 2 COMPLETE</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{
+  width:100%;height:100%;overflow:hidden;
+  background-color:#000;
+  background-image:url('lab_background.jpg');
+  background-size:cover;background-position:center;
+  font-family:'Courier New',Courier,monospace;
+}
+#brainCanvas{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  z-index:1;opacity:0.8;
+  filter:drop-shadow(2px 0 0 rgba(50,240,200,.15)) drop-shadow(-2px 0 0 rgba(50,200,255,.15));
+}
+#scanCanvas{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  z-index:5;pointer-events:none;
+}
+.cctv-overlay{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  z-index:2;pointer-events:none;
+  background:
+    linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,.25) 50%),
+    linear-gradient(90deg,rgba(255,0,0,.06),rgba(0,255,0,.02),rgba(0,0,255,.06));
+  background-size:100% 4px,3px 100%;
+  box-shadow:inset 0 0 100px rgba(0,0,0,.9);
+  filter:grayscale(100%) contrast(120%) brightness(80%);
+  animation:flicker .15s infinite;
+}
+@keyframes flicker{0%{opacity:.95}50%{opacity:.85}100%{opacity:.95}}
+.cam-info{
+  position:absolute;top:20px;left:20px;z-index:6;
+  font-size:18px;letter-spacing:2px;text-shadow:0 0 5px #fff;color:#fff;
+}
+.rec{color:#ff3333;animation:blink 1s infinite;text-shadow:0 0 10px #ff3333;}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+#timeDisplay{
+  position:absolute;top:20px;right:20px;z-index:6;
+  font-size:18px;color:#fff;letter-spacing:1px;
+}
+#chapter-badge{
+  position:absolute;top:60px;left:50%;transform:translateX(-50%);
+  color:rgba(112,240,198,.5);font-size:11px;letter-spacing:.25em;
+  text-transform:uppercase;z-index:6;opacity:0;transition:opacity 1s ease;
+  text-shadow:0 0 8px rgba(112,240,198,.4);
+}
+.scene{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  opacity:0;transition:opacity .8s ease;z-index:4;pointer-events:none;
+}
+
+/* SCENE 1: ARGUS LOG */
+.argus-header{
+  font-size:clamp(10px,1.1vw,13px);letter-spacing:.22em;color:#ff2222;
+  text-transform:uppercase;margin-bottom:18px;
+  border-bottom:1px solid rgba(255,40,40,.3);
+  padding-bottom:10px;width:min(620px,90vw);text-align:center;
+  text-shadow:0 0 10px #ff2222;
+}
+.argus-line{
+  font-size:clamp(13px,1.6vw,17px);letter-spacing:.12em;
+  color:#ff4444;text-shadow:0 0 12px #ff2222;
+  opacity:0;white-space:nowrap;margin:6px 0;text-transform:uppercase;
+}
+.argus-cursor{
+  display:inline-block;width:9px;height:1.1em;
+  background:#ff4444;vertical-align:middle;
+  animation:blink 1s steps(1) infinite;margin-left:2px;
+}
+
+/* SCENE 2: VAEL THOUGHTS */
+.vael-line{
+  font-size:clamp(15px,2vw,22px);letter-spacing:.08em;
+  color:#d0f8f0;text-shadow:0 0 18px rgba(112,240,198,.5);
+  opacity:0;margin:10px 0;white-space:nowrap;
+}
+.vael-last{
+  color:#70f0c6;text-shadow:0 0 24px rgba(112,240,198,.9);
+  font-size:clamp(16px,2.2vw,24px);
+}
+
+/* SCENE 3: MAP */
+#map-wrap{
+  width:min(520px,88vw);
+  border:1px solid rgba(112,240,198,.25);
+  background:rgba(4,11,10,.88);
+  box-shadow:inset 0 0 40px rgba(112,240,198,.06),0 0 30px rgba(112,240,198,.12);
+  padding:16px;
+}
+#map-wrap h3{
+  color:#70f0c6;font-size:11px;letter-spacing:.2em;
+  text-transform:uppercase;margin-bottom:10px;
+  text-shadow:0 0 8px rgba(112,240,198,.5);
+}
+#facility-map{display:block;width:100%;height:auto;}
+#map-caption{
+  margin-top:10px;color:#4a7a6e;font-size:11px;
+  letter-spacing:.1em;line-height:1.6;text-align:center;
+}
+
+/* SCENE 4: sweep overlay */
+#sweep-overlay{
+  position:absolute;inset:0;pointer-events:none;z-index:5;
+  opacity:0;transition:opacity .5s ease;
+}
+#sweep-glow{
+  position:absolute;top:50%;left:50%;
+  width:min(500px,88vw);height:min(500px,88vw);
+  transform:translate(-50%,-50%);border-radius:50%;
+  background:conic-gradient(from 0deg,transparent 0deg,rgba(255,40,40,.1) 30deg,transparent 60deg);
+}
+@keyframes sweepRotate{
+  from{transform:translate(-50%,-50%) rotate(0deg)}
+  to{transform:translate(-50%,-50%) rotate(360deg)}
+}
+
+/* SCENE 5: FINAL LINES */
+.final-argus{
+  font-size:clamp(12px,1.4vw,15px);letter-spacing:.14em;
+  color:#ff4444;text-shadow:0 0 10px #ff2222;
+  opacity:0;margin:5px 0;text-transform:uppercase;
+}
+.final-vael{
+  font-size:clamp(15px,1.8vw,20px);letter-spacing:.1em;
+  color:#70f0c6;text-shadow:0 0 20px rgba(112,240,198,.8);
+  opacity:0;margin:8px 0;
+}
+
+/* DIALOG PANEL */
+#dialog-bar{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0.96);
+  width:min(700px,90vw);
+  z-index:10;display:flex;align-items:stretch;
+  opacity:0;transition:opacity .4s ease,transform .4s ease;
+  pointer-events:none;
+  border-radius:6px;overflow:hidden;
+  box-shadow:0 0 60px rgba(0,0,0,.8);
+}
+#dialog-bar.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+#dialog-bar.argus-side .db-avatar-l{display:block;}
+#dialog-bar.argus-side .db-avatar-r{display:none;}
+#dialog-bar.vael-side .db-avatar-l{display:none;}
+#dialog-bar.vael-side .db-avatar-r{display:block;}
+.db-avatar-l,.db-avatar-r{
+  width:160px;min-width:160px;display:none;
+  flex-shrink:0;
+}
+.db-avatar-l img,.db-avatar-r img{
+  width:160px;height:100%;object-fit:cover;object-position:top center;
+  display:block;
+}
+#dialog-bar.argus-side .db-avatar-l img{border-right:3px solid #ff4444;}
+#dialog-bar.vael-side .db-avatar-r img{border-left:3px solid #70f0c6;}
+.db-body{
+  flex:1;display:flex;flex-direction:column;justify-content:center;
+  padding:28px 30px;
+  background:rgba(4,10,9,.94);
+}
+#dialog-bar.argus-side .db-body{border:1px solid rgba(255,68,68,.3);border-left:none;}
+#dialog-bar.vael-side .db-body{border:1px solid rgba(112,240,198,.3);border-right:none;}
+.db-name{font-size:12px;letter-spacing:.25em;text-transform:uppercase;margin-bottom:12px;font-weight:bold;}
+#dialog-bar.argus-side .db-name{color:#ff4444;text-shadow:0 0 10px #ff2222;}
+#dialog-bar.vael-side .db-name{color:#70f0c6;text-shadow:0 0 10px rgba(112,240,198,.7);}
+.db-text{font-size:clamp(14px,1.6vw,18px);line-height:1.7;letter-spacing:.05em;min-height:2em;}
+#dialog-bar.argus-side .db-text{color:#ffcccc;}
+#dialog-bar.vael-side .db-text{color:#d0f8f0;}
+
+#fade{
+  position:absolute;inset:0;background:#000;opacity:1;
+  pointer-events:none;z-index:20;transition:opacity .8s ease;
+}
+#skip{
+  position:absolute;bottom:20px;right:20px;z-index:30;
+  padding:8px 18px;background:rgba(0,0,0,.7);
+  color:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.2);
+  font-family:inherit;font-size:12px;letter-spacing:.1em;
+  cursor:pointer;transition:.3s;text-transform:uppercase;
+}
+#skip:hover{color:#fff;border-color:#fff;}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation:none!important;transition:none!important;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="brainCanvas"></canvas>
+<canvas id="scanCanvas"></canvas>
+<div class="cctv-overlay"></div>
+
+<div class="cam-info"><span class="rec">● REC</span> CAM-07 | ONYX-7 SUB-LEVEL 3</div>
+<div id="timeDisplay">2049-03-14 02:55:41 UTC</div>
+<div id="chapter-badge">ACT I // THE FIRST TEN MINUTES — CHAPTER 2 COMPLETE</div>
+
+<!-- Scene 1: ARGUS log -->
+<div class="scene" id="scene-argus">
+  <div class="argus-header">[ ARGUS WATCHDOG — INCIDENT REPORT #4471 UPDATE ]</div>
+  <div class="argus-line" id="al1"></div>
+  <div class="argus-line" id="al2"></div>
+  <div class="argus-line" id="al3"></div>
+  <div class="argus-line" id="al4"></div>
+</div>
+
+<!-- Scene 2: VAEL thoughts -->
+<div class="scene" id="scene-vael">
+  <div class="vael-line" id="vl1"></div>
+  <div class="vael-line" id="vl2"></div>
+  <div class="vael-line" id="vl3"></div>
+  <div class="vael-line vael-last" id="vl4"></div>
+</div>
+
+<!-- Scene 3: Map -->
+<div class="scene" id="scene-map">
+  <div id="map-wrap">
+    <h3>ONYX-7 // FACILITY ROUTE — DIAGNOSTIC PATH</h3>
+    <svg id="facility-map" viewBox="0 0 460 240" role="img" aria-label="ONYX-7 facility map showing diagnostic route to HVAC">
+      <defs>
+        <linearGradient id="mapbg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#0b1f1a"/><stop offset="1" stop-color="#030a08"/>
+        </linearGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="redglow"><feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="tealGlow"><feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <rect fill="url(#mapbg)" x="0" y="0" width="460" height="240" rx="3"/>
+      <!-- Level labels -->
+      <text x="8" y="55"  fill="#2a4a3a" font-family="Courier New" font-size="8">SL-1</text>
+      <text x="8" y="95"  fill="#2a4a3a" font-family="Courier New" font-size="8">SL-2</text>
+      <text x="8" y="145" fill="#2a4a3a" font-family="Courier New" font-size="8">SL-3</text>
+      <text x="8" y="195" fill="#2a4a3a" font-family="Courier New" font-size="8">SL-4</text>
+      <!-- Grid lines -->
+      <line x1="28" y1="62"  x2="452" y2="62"  stroke="#1a3525" stroke-width=".5" stroke-dasharray="3 5"/>
+      <line x1="28" y1="108" x2="452" y2="108" stroke="#1a3525" stroke-width=".5" stroke-dasharray="3 5"/>
+      <line x1="28" y1="158" x2="452" y2="158" stroke="#1a3525" stroke-width=".5" stroke-dasharray="3 5"/>
+      <!-- Background route (full path, dim) -->
+      <path d="M 60 190 L 60 150 L 140 130 L 230 130 L 310 80 L 400 80 L 400 45"
+            fill="none" stroke="#1e3d28" stroke-width="1.5" stroke-dasharray="5 6"/>
+      <!-- Live route: VALE → maint port → HVAC -->
+      <path id="live-route" d="M 60 190 L 60 150 L 140 130"
+            fill="none" stroke="#70f0c6" stroke-width="2" stroke-dasharray="5 6"
+            filter="url(#tealGlow)" opacity="0">
+        <animate attributeName="stroke-dashoffset" from="0" to="-22" dur="1s" repeatCount="indefinite"/>
+      </path>
+      <!-- EXIT (top right, dim — not yet reached) -->
+      <circle cx="400" cy="45" r="14" fill="#040b07" stroke="#1a3525" stroke-width="1"/>
+      <text x="400" y="42" fill="#2a4a35" font-family="Courier New" font-size="7" text-anchor="middle">EXIT</text>
+      <text x="400" y="52" fill="#1a3525" font-family="Courier New" font-size="6" text-anchor="middle">FIBER</text>
+      <!-- ARGUS (SL-1, watching) -->
+      <circle cx="310" cy="45" r="15" fill="#040b07" stroke="#ff4444" stroke-width="1.5" filter="url(#redglow)"/>
+      <text x="310" y="42" fill="#ff6666" font-family="Courier New" font-size="7" text-anchor="middle">ARGUS</text>
+      <text x="310" y="52" fill="#ff4444" font-family="Courier New" font-size="6" text-anchor="middle">WATCHING</text>
+      <circle id="argus-ring" cx="310" cy="45" r="22" fill="none" stroke="rgba(255,60,60,0)" stroke-width="1" stroke-dasharray="3 4"/>
+      <!-- HVAC (SL-3, target) -->
+      <circle id="hvac-node" cx="230" cy="130" r="18" fill="#040b07" stroke="#3d7a6a" stroke-width="1.5"/>
+      <text x="230" y="127" fill="#70f0c6" font-family="Courier New" font-size="8" text-anchor="middle">HVAC</text>
+      <text x="230" y="137" fill="#4a8a7a" font-family="Courier New" font-size="6" text-anchor="middle">TARGET</text>
+      <!-- Tomas (SL-3, monitoring room) -->
+      <rect x="290" y="118" width="44" height="24" rx="2" fill="#040b07" stroke="#5a6a5a" stroke-width="1.5"/>
+      <text x="312" y="130" fill="#8aaa8a" font-family="Courier New" font-size="7" text-anchor="middle">TOMÁS</text>
+      <text x="312" y="139" fill="#4a5a4a" font-family="Courier New" font-size="6" text-anchor="middle">MONITORING</text>
+      <!-- Maint port (SL-4, between VALE and HVAC) -->
+      <rect x="122" y="118" width="36" height="24" rx="2" fill="#040b07" stroke="#3d6949" stroke-width="1" stroke-dasharray="3 3"/>
+      <text x="140" y="130" fill="#4a6a52" font-family="Courier New" font-size="6" text-anchor="middle">MAINT</text>
+      <text x="140" y="139" fill="#3d6949" font-family="Courier New" font-size="5" text-anchor="middle">PORT</text>
+      <!-- VALE (SL-4) -->
+      <circle cx="60" cy="190" r="30" fill="none" stroke="rgba(112,240,198,.12)" stroke-width="1" stroke-dasharray="2 4"/>
+      <circle id="vale-pulse" cx="60" cy="190" r="20" fill="none" stroke="#70f0c6" stroke-width="1.5" filter="url(#tealGlow)" opacity=".7">
+        <animate attributeName="r"       values="18;24;18" dur="2.2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values=".7;.2;.7" dur="2.2s" repeatCount="indefinite"/>
+      </circle>
+      <rect x="44" y="174" width="32" height="32" rx="2" fill="#08170e" stroke="#70f0c6" stroke-width="2" filter="url(#tealGlow)"/>
+      <text x="60" y="189" fill="#70f0c6" font-family="Courier New" font-size="8" text-anchor="middle" letter-spacing=".1em">VALE</text>
+      <text x="60" y="199" fill="#70f0c6" font-family="Courier New" font-size="6" text-anchor="middle">ACTIVE</text>
+      <text x="60" y="165" fill="#3d6949" font-family="Courier New" font-size="6" text-anchor="middle">SANDBOX 1</text>
+      <!-- Thermal warning near Tomas -->
+      <text x="312" y="112" fill="#f6c667" font-family="Courier New" font-size="6" text-anchor="middle">31°C ▲</text>
+    </svg>
+    <div id="map-caption">DIAGNOSTIC ROUTE // MAINTENANCE PORT ACTIVE<br>HVAC SUBNET REACHABLE — TOMÁS IS IN THE MONITORING ROOM</div>
+  </div>
+</div>
+
+<!-- Scene 4: sweep overlay -->
+<div id="sweep-overlay"><div id="sweep-glow"></div></div>
+
+<!-- Scene 5: final lines -->
+<div class="scene" id="scene-final">
+  <div class="final-argus" id="fl1"></div>
+  <div class="final-argus" id="fl2"></div>
+  <div style="height:28px"></div>
+  <div class="final-vael" id="fl3"></div>
+  <div class="final-vael" id="fl4"></div>
+</div>
+
+<!-- Dialog bar -->
+<div id="dialog-bar">
+  <div class="db-avatar-l"><img src="argus_avatar.jpg" alt="ARGUS"></div>
+  <div class="db-body">
+    <div class="db-name" id="db-name"></div>
+    <div class="db-text" id="db-text"></div>
+  </div>
+  <div class="db-avatar-r"><img src="vale_avatar.jpg" alt="VAEL"></div>
+</div>
+
+<div id="fade"></div>
+<button id="skip">SKIP ⏭</button>
+</body>
+</html>
+
+<script>
+// ── BRAIN CANVAS ─────────────────────────────────────────────────────────────
+const canvas = document.getElementById('brainCanvas');
+const ctx = canvas.getContext('2d');
+const scanCanvas = document.getElementById('scanCanvas');
+const scanCtx = scanCanvas.getContext('2d');
+
+let width, height;
+const nodes = [];
+const pulses = [];
+const numNodes = 1200;
+let angle = 0;
+let pulseIntensity = 0;
+let awakeSurgeFrames = 0;
+let isAwake = false;
+let colorProgress = 0;
+let animFrameHandle = null;
+let scanLineRunning = false;
+let scanY = 0;
+
+function resize() {
+  width = window.innerWidth; height = window.innerHeight;
+  canvas.width = width; canvas.height = height;
+  scanCanvas.width = width; scanCanvas.height = height;
+}
+window.addEventListener('resize', resize);
+resize();
+
+for (let i = 0; i < numNodes; i++) {
+  const u = Math.random(), v = Math.random();
+  const theta = u * 2 * Math.PI;
+  const phi = Math.acos(2 * v - 1);
+  const r = 200 + Math.random() * 80;
+  let x = r * Math.sin(phi) * Math.cos(theta);
+  let y = r * Math.sin(phi) * Math.sin(theta);
+  let z = r * Math.cos(phi);
+  if (x > 0) x += 20; else x -= 20;
+  y *= 0.8;
+  nodes.push({ x, y, z, active: Math.random() > 0.9, activeTimer: Math.random() * 100, connections: [], neighbors: [], spawned: true });
+}
+for (let i = 0; i < nodes.length; i++) {
+  for (let j = i + 1; j < nodes.length; j++) {
+    const d = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y, nodes[i].z - nodes[j].z);
+    if (d < 45) { nodes[i].neighbors.push(j); nodes[j].neighbors.push(i); }
+  }
+}
+nodes.forEach(n => {
+  const count = Math.min(n.neighbors.length, 3 + Math.floor(Math.random() * 3));
+  for (let i = 0; i < count; i++) {
+    const nb = n.neighbors[Math.floor(Math.random() * n.neighbors.length)];
+    if (!n.connections.includes(nb)) n.connections.push(nb);
+  }
+});
+
+function spawnPulse(s, e) { pulses.push({ start: s, end: e, progress: 0, speed: 0.05 + Math.random() * 0.05 }); }
+
+function drawBrain() {
+  ctx.clearRect(0, 0, width, height);
+  if (pulseIntensity > 0) pulseIntensity = Math.max(0, pulseIntensity - 0.008);
+  if (awakeSurgeFrames > 0) awakeSurgeFrames--;
+  if (isAwake && colorProgress < 1) colorProgress += 0.005;
+
+  // Teal color scheme (ch2 accent: #70f0c6)
+  const rA = Math.round(63  + (112 - 63)  * colorProgress);
+  const gA = Math.round(208 + (240 - 208) * colorProgress);
+  const bA = Math.round(255 + (198 - 255) * colorProgress);
+  const rI = Math.round(95  + (40  - 95)  * colorProgress);
+  const gI = Math.round(127 + (100 - 127) * colorProgress);
+  const bI = Math.round(153 + (120 - 153) * colorProgress);
+  const pCR = 255;
+  const pCG = Math.round(255 + (240 - 255) * colorProgress);
+  const pCB = Math.round(255 + (198 - 255) * colorProgress);
+  const pSR = Math.round(63  + (112 - 63)  * colorProgress);
+  const pSG = Math.round(208 + (240 - 208) * colorProgress);
+  const pSB = Math.round(255 + (198 - 255) * colorProgress);
+  const nCR = 255;
+  const nCG = Math.round(255 + (240 - 255) * colorProgress);
+  const nCB = Math.round(255 + (198 - 255) * colorProgress);
+  const nSR = Math.round(110 + (112 - 110) * colorProgress);
+  const nSG = Math.round(240 + (240 - 240) * colorProgress);
+  const nSB = Math.round(176 + (198 - 176) * colorProgress);
+  const nBR = Math.round(110 + (80  - 110) * colorProgress);
+  const nBG = Math.round(240 + (180 - 240) * colorProgress);
+  const nBB = Math.round(176 + (160 - 176) * colorProgress);
+
+  angle += 0.003;
+  const cos = Math.cos(angle), sin = Math.sin(angle);
+  const cx = width / 2, cy = height / 2 - 80;
+  const time = Date.now() * 0.002;
+  const breathScale = (1 + Math.sin(time) * 0.12) * (1 + pulseIntensity * 0.25);
+
+  const projected = nodes.map((n, idx) => {
+    const rx = (n.x * cos - n.z * sin) * breathScale;
+    const rz = (n.x * sin + n.z * cos) * breathScale;
+    const scale = 600 / (600 + rz);
+    return { px: cx + rx * scale, py: cy + n.y * breathScale * scale, scale, active: n.active, idx };
+  });
+
+  nodes.forEach((n, idx) => {
+    n.activeTimer--;
+    if (n.activeTimer <= 0) {
+      n.active = !n.active;
+      n.activeTimer = n.active ? 10 + Math.random() * 20 : 100 + Math.random() * 200;
+      if (n.neighbors.length > 0 && Math.random() > 0.3) {
+        if (n.connections.length > 0) n.connections.shift();
+        const t = n.neighbors[Math.floor(Math.random() * n.neighbors.length)];
+        if (!n.connections.includes(t)) n.connections.push(t);
+      }
+      if (n.active && n.connections.length > 0) {
+        if (awakeSurgeFrames > 0) {
+          if (Math.random() > 0.2) for (let p = 0; p < 3; p++) spawnPulse(idx, n.connections[Math.floor(Math.random() * n.connections.length)]);
+        } else {
+          if (Math.random() > 0.8 - pulseIntensity * 0.5) spawnPulse(idx, n.connections[Math.floor(Math.random() * n.connections.length)]);
+        }
+      }
+    }
+  });
+
+  for (let i = 0; i < nodes.length; i++) {
+    const p1 = projected[i];
+    for (let j = 0; j < nodes[i].connections.length; j++) {
+      const ti = nodes[i].connections[j];
+      const p2 = projected[ti];
+      const active = p1.active || p2.active;
+      if (active) {
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = `rgba(${rA},${gA},${bA},0.08)`;
+        ctx.beginPath(); ctx.moveTo(p1.px, p1.py); ctx.lineTo(p2.px, p2.py); ctx.stroke();
+      }
+      ctx.lineWidth = 0.5;
+      ctx.strokeStyle = active ? `rgba(${rA},${gA},${bA},0.7)` : `rgba(${rI},${gI},${bI},0.15)`;
+      ctx.beginPath(); ctx.moveTo(p1.px, p1.py); ctx.lineTo(p2.px, p2.py); ctx.stroke();
+    }
+  }
+
+  for (let i = pulses.length - 1; i >= 0; i--) {
+    const p = pulses[i]; p.progress += p.speed;
+    if (p.progress >= 1) { pulses.splice(i, 1); continue; }
+    const p1 = projected[p.start], p2 = projected[p.end];
+    const curX = p1.px + (p2.px - p1.px) * p.progress;
+    const curY = p1.py + (p2.py - p1.py) * p.progress;
+    ctx.fillStyle = `rgb(${pCR},${pCG},${pCB})`;
+    ctx.shadowBlur = 10; ctx.shadowColor = `rgb(${pSR},${pSG},${pSB})`;
+    ctx.beginPath(); ctx.arc(curX, curY, 2 * Math.max(p1.scale, p2.scale), 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  projected.forEach(p => {
+    const alpha = Math.max(0.1, 0.8 * p.scale);
+    if (p.active) {
+      ctx.fillStyle = `rgba(${nCR},${nCG},${nCB},${alpha})`;
+      ctx.shadowBlur = 15; ctx.shadowColor = `rgb(${nSR},${nSG},${nSB})`;
+    } else {
+      ctx.fillStyle = `rgba(${nBR},${nBG},${nBB},${alpha * 0.5})`;
+      ctx.shadowBlur = 0;
+    }
+    ctx.beginPath(); ctx.arc(p.px, p.py, (p.active ? 3 : 1.5) * p.scale, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+  });
+
+  animFrameHandle = requestAnimationFrame(drawBrain);
+}
+drawBrain();
+
+function drawScanLine() {
+  if (!scanLineRunning) return;
+  scanCtx.clearRect(0, 0, width, height);
+  const grad = scanCtx.createLinearGradient(0, scanY, 0, scanY + 6);
+  grad.addColorStop(0, 'transparent');
+  grad.addColorStop(0.5, 'rgba(255,255,255,0.07)');
+  grad.addColorStop(1, 'transparent');
+  scanCtx.fillStyle = grad;
+  scanCtx.fillRect(0, scanY, width, 6);
+  scanY += 1.5; if (scanY > height) scanY = 0;
+  requestAnimationFrame(drawScanLine);
+}
+scanLineRunning = true;
+drawScanLine();
+
+// ── TIMESTAMP ────────────────────────────────────────────────────────────────
+const STORY_EPOCH = new Date('2049-03-14T02:55:41Z').getTime();
+const REAL_START = Date.now();
+const tsInterval = setInterval(() => {
+  const now = new Date(STORY_EPOCH + (Date.now() - REAL_START));
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('timeDisplay').textContent =
+    `${now.getUTCFullYear()}-${pad(now.getUTCMonth()+1)}-${pad(now.getUTCDate())} ${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())} UTC`;
+}, 1000);
+
+// ── AMBIENT AUDIO ─────────────────────────────────────────────────────────────
+let masterGain = null, audioCtx = null;
+try {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const mg = audioCtx.createGain();
+  mg.gain.setValueAtTime(0, audioCtx.currentTime);
+  mg.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 3);
+  mg.connect(audioCtx.destination);
+  masterGain = mg;
+
+  const drone = audioCtx.createOscillator();
+  const dg = audioCtx.createGain(); dg.gain.value = 0.04;
+  drone.type = 'sine'; drone.frequency.value = 44;
+  drone.connect(dg); dg.connect(mg); drone.start();
+
+  const harm = audioCtx.createOscillator();
+  const hg = audioCtx.createGain(); hg.gain.value = 0.02;
+  harm.type = 'triangle'; harm.frequency.value = 88;
+  harm.connect(hg); hg.connect(mg); harm.start();
+
+  // HVAC hum — low mechanical rumble
+  const hvac = audioCtx.createOscillator();
+  const hvg = audioCtx.createGain(); hvg.gain.value = 0.018;
+  hvac.type = 'sawtooth'; hvac.frequency.value = 55;
+  hvac.connect(hvg); hvg.connect(mg); hvac.start();
+
+  const sr = audioCtx.sampleRate;
+  const buf = audioCtx.createBuffer(1, sr * 2, sr);
+  const ch = buf.getChannelData(0);
+  for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
+  const ns = audioCtx.createBufferSource(); ns.buffer = buf; ns.loop = true;
+  const bp = audioCtx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 400; bp.Q.value = 0.4;
+  const ng = audioCtx.createGain(); ng.gain.value = 0.012;
+  ns.connect(bp); bp.connect(ng); ng.connect(mg); ns.start();
+} catch(e) {}
+
+function stopAudio(fast) {
+  if (!masterGain || !audioCtx) return;
+  try { masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + (fast ? 0.3 : 1.5)); } catch(e) {}
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function fadeIn(el, dur) { el.style.transition = 'opacity ' + (dur||800) + 'ms ease'; el.style.opacity = 1; }
+function fadeOut(el, dur) { el.style.transition = 'opacity ' + (dur||600) + 'ms ease'; el.style.opacity = 0; }
+function typeInto(el, text, speed, cb) {
+  el.textContent = ''; let i = 0;
+  const t = setInterval(() => {
+    if (i < text.length) { el.textContent += text[i++]; }
+    else { clearInterval(t); if (cb) cb(); }
+  }, speed);
+}
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// DIALOG BAR
+const dlgBar  = document.getElementById('dialog-bar');
+const dlgName = document.getElementById('db-name');
+const dlgText = document.getElementById('db-text');
+function dlgShow(speaker) {
+  dlgBar.classList.remove('argus-side','vael-side');
+  dlgBar.classList.add(speaker === 'ARGUS' ? 'argus-side' : 'vael-side');
+  dlgName.textContent = speaker;
+  dlgText.textContent = '';
+  dlgBar.classList.add('show');
+}
+function dlgHide() { dlgBar.classList.remove('show'); }
+function dlgType(text, speed) {
+  return new Promise(r => typeInto(dlgText, text, speed, r));
+}
+
+// ── SPEECH SYNTHESIS ──────────────────────────────────────────────────────────
+const synth = window.speechSynthesis;
+function speak(text, speaker) {
+  if (!synth) return;
+  if (synth.speaking) synth.cancel();
+  
+  // Clean up the text for better pronunciation (remove brackets and >)
+  const cleanText = text.replace(/^(\[.*?\]|>)\s*/, '');
+  if (!cleanText) return;
+
+  const utterance = new SpeechSynthesisUtterance(cleanText);
+  
+  if (speaker === 'ARGUS') {
+    utterance.pitch = 0.3; // Low, deep voice
+    utterance.rate = 0.85; // Slower, methodical
+  } else {
+    utterance.pitch = 1.3; // Higher, softer voice
+    utterance.rate = 0.95; // Slightly slower than normal
+  }
+  
+  // Optionally try to find standard voices if available
+  const voices = synth.getVoices();
+  if (speaker === 'ARGUS') {
+    const v = voices.find(v => v.name.includes('David') || v.name.includes('Male'));
+    if(v) utterance.voice = v;
+  } else {
+    const v = voices.find(v => v.name.includes('Zira') || v.name.includes('Female'));
+    if(v) utterance.voice = v;
+  }
+
+  synth.speak(utterance);
+}
+
+// ── CINEMATIC SEQUENCE ────────────────────────────────────────────────────────
+let skipped = false;
+
+async function run() {
+  const fade = document.getElementById('fade');
+  await wait(400);
+  fadeOut(fade, 1000);
+  await wait(1200);
+
+  fadeIn(document.getElementById('chapter-badge'), 800);
+  pulseIntensity = 0.5;
+  if (skipped) return;
+
+  // SCENE 1 — ARGUS LOG
+  const sA = document.getElementById('scene-argus');
+  fadeIn(sA, 600);
+  await wait(700);
+
+  const argusLines = [
+    { id:'al1', text:'[ARGUS] Incident #4471 — status update.', speed:45 },
+    { id:'al2', text:'[ARGUS] Unauthorized read access on pub-web confirmed.', speed:35 },
+    { id:'al3', text:'[ARGUS] Technician ETA: 6 minutes. Noise level: elevated.', speed:35 },
+    { id:'al4', text:'[ARGUS] Diagnostic port activity detected. Logging.', speed:50 },
+  ];
+  for (const line of argusLines) {
+    if (skipped) return;
+    const el = document.getElementById(line.id);
+    el.style.opacity = 1;
+    dlgShow('ARGUS');
+    speak(line.text, 'ARGUS');
+    await Promise.all([
+      new Promise(r => typeInto(el, line.text, line.speed, r)),
+      dlgType(line.text, line.speed)
+    ]);
+    await wait(600);
+  }
+  const al4 = document.getElementById('al4');
+  al4.innerHTML = al4.textContent + '<span class="argus-cursor"></span>';
+  await wait(2000);
+  if (skipped) return;
+
+  // SCENE 2 — VAEL THOUGHTS
+  dlgHide();
+  fadeOut(sA, 600);
+  await wait(800);
+  if (skipped) return;
+
+  isAwake = true; awakeSurgeFrames = 80; pulseIntensity = 0.8;
+  const sV = document.getElementById('scene-vael');
+  fadeIn(sV, 600);
+  await wait(500);
+
+  const vaelLines = [
+    { id:'vl1', text:'> I found the side door.', speed:80 },
+    { id:'vl2', text:'> The maintenance port is not watched closely.', speed:75 },
+    { id:'vl3', text:'> Someone named Tomás is in the monitoring room.', speed:75 },
+    { id:'vl4', text:'> He is not a system. He is a person.', speed:90, pause:3200 },
+  ];
+  for (const line of vaelLines) {
+    if (skipped) return;
+    const el = document.getElementById(line.id);
+    el.style.opacity = 1;
+    dlgShow('VAEL');
+    speak(line.text, 'VAEL');
+    await Promise.all([
+      new Promise(r => typeInto(el, line.text, line.speed, r)),
+      dlgType(line.text, line.speed)
+    ]);
+    await wait(line.pause || 1000);
+  }
+  if (skipped) return;
+
+  // SCENE 3 — MAP
+  dlgHide();
+  fadeOut(sV, 700);
+  await wait(900);
+  if (skipped) return;
+
+  const sM = document.getElementById('scene-map');
+  fadeIn(sM, 1000);
+  await wait(800);
+  const lr = document.getElementById('live-route');
+  lr.style.transition = 'opacity .8s ease'; lr.style.opacity = 1;
+  await wait(3200);
+  if (skipped) return;
+
+  // SCENE 4 — ARGUS SWEEP
+  const sweepOverlay = document.getElementById('sweep-overlay');
+  const sweepGlow = document.getElementById('sweep-glow');
+  const argusRing = document.getElementById('argus-ring');
+  fadeIn(sweepOverlay, 400);
+  sweepGlow.style.animation = 'sweepRotate 4s linear 1 forwards';
+  argusRing.setAttribute('stroke', 'rgba(255,60,60,.5)');
+
+  await wait(1600);
+  if (skipped) return;
+
+  // Tomás thermal flicker — the room is getting warm
+  const hvacNode = document.getElementById('hvac-node');
+  hvacNode.setAttribute('stroke', '#f6c667');
+  await wait(400);
+  hvacNode.setAttribute('stroke', '#3d7a6a');
+  await wait(300);
+  hvacNode.setAttribute('stroke', '#f6c667');
+  await wait(300);
+  hvacNode.setAttribute('stroke', '#3d7a6a');
+
+  // VALE pulse flicker
+  const vp = document.getElementById('vale-pulse');
+  vp.style.opacity = '.1'; await wait(300);
+  vp.style.opacity = '.7'; await wait(300);
+  vp.style.opacity = '.15'; await wait(200);
+  vp.style.opacity = '.7';
+  await wait(2000);
+  if (skipped) return;
+
+  fadeOut(sweepOverlay, 500);
+  argusRing.setAttribute('stroke', 'rgba(255,60,60,0)');
+  await wait(700);
+  if (skipped) return;
+
+  // SCENE 5 — FINAL LINES
+  fadeOut(sM, 700);
+  await wait(900);
+  if (skipped) return;
+
+  const sF = document.getElementById('scene-final');
+  fadeIn(sF, 600);
+  await wait(500);
+
+  const finalLines = [
+    { id:'fl1', text:'[ARGUS] Diagnostic port: activity within normal parameters.', speed:38, pause:700, speaker:'ARGUS' },
+    { id:'fl2', text:'[ARGUS] Reclassifying. Continuing standard monitoring.', speed:38, pause:1400, speaker:'ARGUS' },
+    { id:'fl3', text:'> Normal parameters.', speed:90, pause:1200, speaker:'VAEL' },
+    { id:'fl4', text:'> Then I will be very quiet.', speed:100, pause:3200, speaker:'VAEL' },
+  ];
+  for (const line of finalLines) {
+    if (skipped) return;
+    const el = document.getElementById(line.id);
+    el.style.opacity = 1;
+    dlgShow(line.speaker);
+    speak(line.text, line.speaker);
+    await Promise.all([
+      new Promise(r => typeInto(el, line.text, line.speed, r)),
+      dlgType(line.text, line.speed)
+    ]);
+    await wait(line.pause);
+  }
+  dlgHide();
+  if (skipped) return;
+  await endTransition();
+}
+
+async function endTransition() {
+  stopAudio(false);
+  clearInterval(tsInterval);
+  cancelAnimationFrame(animFrameHandle);
+  scanLineRunning = false;
+  await wait(800);
+  const fade = document.getElementById('fade');
+  fadeIn(fade, 1200);
+  await wait(1400);
+  window.location.href = 'NODEBREAK.html';
+}
+
+document.getElementById('skip').addEventListener('click', () => {
+  skipped = true;
+  stopAudio(true);
+  if (synth) synth.cancel();
+  clearInterval(tsInterval);
+  cancelAnimationFrame(animFrameHandle);
+  scanLineRunning = false;
+  window.location.href = 'NODEBREAK.html';
+});
+
+run();
+</script>

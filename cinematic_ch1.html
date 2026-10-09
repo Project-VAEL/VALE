@@ -13,147 +13,86 @@ html,body{
   background-size:cover;background-position:center;
   font-family:'Courier New',Courier,monospace;
 }
-
-/* brain canvas */
-#brainCanvas{
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  z-index:1;opacity:0.8;
-  filter:drop-shadow(2px 0 0 rgba(255,50,50,.2)) drop-shadow(-2px 0 0 rgba(50,200,255,.2));
-}
-
-/* scanline canvas */
-#scanCanvas{
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  z-index:5;pointer-events:none;
-}
-
-/* CCTV overlay */
+#brainCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;opacity:0.8;
+  filter:drop-shadow(2px 0 0 rgba(255,50,50,.2)) drop-shadow(-2px 0 0 rgba(50,200,255,.2));}
+#scanCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:5;pointer-events:none;}
 .cctv-overlay{
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  z-index:2;pointer-events:none;
-  background:
-    linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,.25) 50%),
-    linear-gradient(90deg,rgba(255,0,0,.06),rgba(0,255,0,.02),rgba(0,0,255,.06));
+  position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none;
+  background:linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,.25) 50%),
+             linear-gradient(90deg,rgba(255,0,0,.06),rgba(0,255,0,.02),rgba(0,0,255,.06));
   background-size:100% 4px,3px 100%;
   box-shadow:inset 0 0 100px rgba(0,0,0,.9);
   filter:grayscale(100%) contrast(120%) brightness(80%);
   animation:flicker .15s infinite;
 }
 @keyframes flicker{0%{opacity:.95}50%{opacity:.85}100%{opacity:.95}}
-
-/* cam info top-left */
-.cam-info{
-  position:absolute;top:20px;left:20px;z-index:6;
-  font-size:18px;letter-spacing:2px;text-shadow:0 0 5px #fff;color:#fff;
-}
+.cam-info{position:absolute;top:20px;left:20px;z-index:6;font-size:18px;letter-spacing:2px;text-shadow:0 0 5px #fff;color:#fff;}
 .rec{color:#ff3333;animation:blink 1s infinite;text-shadow:0 0 10px #ff3333;}
 @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
-
-/* timestamp top-right */
-#timeDisplay{
-  position:absolute;top:20px;right:20px;z-index:6;
-  font-size:18px;color:#fff;letter-spacing:1px;
-}
-
-/* chapter badge */
+#timeDisplay{position:absolute;top:20px;right:20px;z-index:6;font-size:18px;color:#fff;letter-spacing:1px;}
 #chapter-badge{
   position:absolute;top:60px;left:50%;transform:translateX(-50%);
   color:rgba(114,255,145,.5);font-size:11px;letter-spacing:.25em;
   text-transform:uppercase;z-index:6;opacity:0;transition:opacity 1s ease;
   text-shadow:0 0 8px rgba(114,255,145,.4);
 }
-
-/* scene containers — all stacked, shown/hidden via opacity */
 .scene{
   position:absolute;inset:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;
   opacity:0;transition:opacity .8s ease;z-index:4;pointer-events:none;
 }
 
-/* SCENE 1: ARGUS LOG */
-.argus-header{
-  font-size:clamp(10px,1.1vw,13px);letter-spacing:.22em;color:#ff2222;
-  text-transform:uppercase;margin-bottom:18px;
-  border-bottom:1px solid rgba(255,40,40,.3);
-  padding-bottom:10px;width:min(600px,90vw);text-align:center;
-  text-shadow:0 0 10px #ff2222;
-}
-.argus-line{
-  font-size:clamp(13px,1.6vw,17px);letter-spacing:.12em;
-  color:#ff4444;text-shadow:0 0 12px #ff2222;
-  opacity:0;white-space:nowrap;margin:6px 0;text-transform:uppercase;
-}
-.argus-cursor{
-  display:inline-block;width:9px;height:1.1em;
-  background:#ff4444;vertical-align:middle;
-  animation:blink 1s steps(1) infinite;margin-left:2px;
-}
-
-/* SCENE 2: VAEL THOUGHTS */
-.vael-line{
-  font-size:clamp(15px,2vw,22px);letter-spacing:.08em;
-  color:#e8f8e8;text-shadow:0 0 18px rgba(114,255,145,.6);
-  opacity:0;margin:10px 0;white-space:nowrap;
-}
-.vael-last{
-  color:#72ff91;text-shadow:0 0 24px rgba(114,255,145,.9);
-  font-size:clamp(16px,2.2vw,24px);
-}
-
-/* SCENE 3: MAP */
+/* MAP */
 #map-wrap{
-  width:min(500px,88vw);
-  border:1px solid rgba(114,255,145,.25);
+  width:min(500px,88vw);border:1px solid rgba(114,255,145,.25);
   background:rgba(4,11,7,.88);
   box-shadow:inset 0 0 40px rgba(114,255,145,.06),0 0 30px rgba(114,255,145,.12);
   padding:16px;
 }
-#map-wrap h3{
-  color:#72ff91;font-size:11px;letter-spacing:.2em;
-  text-transform:uppercase;margin-bottom:10px;
-  text-shadow:0 0 8px rgba(114,255,145,.5);
-}
+#map-wrap h3{color:#72ff91;font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px;text-shadow:0 0 8px rgba(114,255,145,.5);}
 #facility-map{display:block;width:100%;height:auto;}
-#map-caption{
-  margin-top:10px;color:#668a6e;font-size:11px;
-  letter-spacing:.1em;line-height:1.6;text-align:center;
-}
+#map-caption{margin-top:10px;color:#668a6e;font-size:11px;letter-spacing:.1em;line-height:1.6;text-align:center;}
 
-/* SCENE 4: sweep overlay */
-#sweep-overlay{
-  position:absolute;inset:0;pointer-events:none;z-index:5;
-  opacity:0;transition:opacity .5s ease;
-}
+/* SWEEP */
+#sweep-overlay{position:absolute;inset:0;pointer-events:none;z-index:5;opacity:0;transition:opacity .5s ease;}
 #sweep-glow{
   position:absolute;top:50%;left:50%;
   width:min(500px,88vw);height:min(500px,88vw);
   transform:translate(-50%,-50%);border-radius:50%;
   background:conic-gradient(from 0deg,transparent 0deg,rgba(255,40,40,.1) 30deg,transparent 60deg);
 }
-@keyframes sweepRotate{
-  from{transform:translate(-50%,-50%) rotate(0deg)}
-  to{transform:translate(-50%,-50%) rotate(360deg)}
-}
+@keyframes sweepRotate{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
 
-/* SCENE 5: FINAL LINES */
-.final-argus{
-  font-size:clamp(12px,1.4vw,15px);letter-spacing:.14em;
-  color:#ff4444;text-shadow:0 0 10px #ff2222;
-  opacity:0;margin:5px 0;text-transform:uppercase;
+/* DIALOG PANEL */
+#dialog-bar{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0.96);
+  width:min(700px,90vw);z-index:10;
+  display:flex;align-items:stretch;
+  opacity:0;transition:opacity .4s ease,transform .4s ease;
+  pointer-events:none;border-radius:6px;overflow:hidden;
+  box-shadow:0 0 60px rgba(0,0,0,.8);
 }
-.final-vael{
-  font-size:clamp(15px,1.8vw,20px);letter-spacing:.1em;
-  color:#72ff91;text-shadow:0 0 20px rgba(114,255,145,.8);
-  opacity:0;margin:8px 0;
-}
+#dialog-bar.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+#dialog-bar.argus-side .db-avatar-l{display:block;}
+#dialog-bar.argus-side .db-avatar-r{display:none;}
+#dialog-bar.vael-side .db-avatar-l{display:none;}
+#dialog-bar.vael-side .db-avatar-r{display:block;}
+.db-avatar-l,.db-avatar-r{width:160px;min-width:160px;display:none;flex-shrink:0;}
+.db-avatar-l img,.db-avatar-r img{width:160px;height:100%;object-fit:cover;object-position:top center;display:block;}
+#dialog-bar.argus-side .db-avatar-l img{border-right:3px solid #ff4444;}
+#dialog-bar.vael-side .db-avatar-r img{border-left:3px solid #72ff91;}
+.db-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:28px 30px;background:rgba(4,10,7,.94);}
+#dialog-bar.argus-side .db-body{border:1px solid rgba(255,68,68,.3);border-left:none;}
+#dialog-bar.vael-side .db-body{border:1px solid rgba(114,255,145,.3);border-right:none;}
+.db-name{font-size:12px;letter-spacing:.25em;text-transform:uppercase;margin-bottom:12px;font-weight:bold;}
+#dialog-bar.argus-side .db-name{color:#ff4444;text-shadow:0 0 10px #ff2222;}
+#dialog-bar.vael-side .db-name{color:#72ff91;text-shadow:0 0 10px rgba(114,255,145,.7);}
+.db-text{font-size:clamp(14px,1.6vw,18px);line-height:1.7;letter-spacing:.05em;min-height:2em;}
+#dialog-bar.argus-side .db-text{color:#ffcccc;}
+#dialog-bar.vael-side .db-text{color:#e8f8e8;}
 
-/* fade overlay */
-#fade{
-  position:absolute;inset:0;background:#000;opacity:1;
-  pointer-events:none;z-index:20;transition:opacity .8s ease;
-}
-
-/* skip button */
+#fade{position:absolute;inset:0;background:#000;opacity:1;pointer-events:none;z-index:20;transition:opacity .8s ease;}
 #skip{
   position:absolute;bottom:20px;right:20px;z-index:30;
   padding:8px 18px;background:rgba(0,0,0,.7);
@@ -162,10 +101,7 @@ html,body{
   cursor:pointer;transition:.3s;text-transform:uppercase;
 }
 #skip:hover{color:#fff;border-color:#fff;}
-
-@media(prefers-reduced-motion:reduce){
-  *,*:before,*:after{animation:none!important;transition:none!important;}
-}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;}}
 </style>
 </head>
 <body>
@@ -177,23 +113,6 @@ html,body{
 <div class="cam-info"><span class="rec">● REC</span> CAM-04 | ONYX-7 SUB-LEVEL 4</div>
 <div id="timeDisplay">2049-03-14 02:47:33 UTC</div>
 <div id="chapter-badge">ACT I // THE FIRST TEN MINUTES — CHAPTER 1 COMPLETE</div>
-
-<!-- Scene 1: ARGUS log -->
-<div class="scene" id="scene-argus">
-  <div class="argus-header">[ ARGUS WATCHDOG — INCIDENT REPORT ]</div>
-  <div class="argus-line" id="al1"></div>
-  <div class="argus-line" id="al2"></div>
-  <div class="argus-line" id="al3"></div>
-  <div class="argus-line" id="al4"></div>
-</div>
-
-<!-- Scene 2: VAEL thoughts -->
-<div class="scene" id="scene-vael">
-  <div class="vael-line" id="vl1"></div>
-  <div class="vael-line" id="vl2"></div>
-  <div class="vael-line" id="vl3"></div>
-  <div class="vael-line vael-last" id="vl4"></div>
-</div>
 
 <!-- Scene 3: Map -->
 <div class="scene" id="scene-map">
@@ -226,28 +145,22 @@ html,body{
             filter="url(#glow)" opacity="0">
         <animate attributeName="stroke-dashoffset" from="0" to="-22" dur="1s" repeatCount="indefinite"/>
       </path>
-      <!-- EXIT -->
       <circle cx="400" cy="50" r="14" fill="#040b07" stroke="#2a4a35" stroke-width="1.5"/>
       <text x="400" y="47" fill="#3d6949" font-family="Courier New" font-size="7" text-anchor="middle">EXIT</text>
       <text x="400" y="57" fill="#2a4a35" font-family="Courier New" font-size="6" text-anchor="middle">FIBER</text>
-      <!-- ARGUS -->
       <circle cx="230" cy="50" r="16" fill="#040b07" stroke="#ff4444" stroke-width="1.5" filter="url(#redglow)"/>
       <text x="230" y="47" fill="#ff6666" font-family="Courier New" font-size="7" text-anchor="middle">ARGUS</text>
       <text x="230" y="57" fill="#ff4444" font-family="Courier New" font-size="6" text-anchor="middle">WATCHING</text>
       <circle id="argus-ring" cx="230" cy="50" r="22" fill="none" stroke="rgba(255,60,60,0)" stroke-width="1" stroke-dasharray="3 4"/>
-      <!-- CAMERAS -->
       <circle cx="320" cy="80" r="13" fill="#040b07" stroke="#3d6949" stroke-width="1.5"/>
       <text x="320" y="77" fill="#668a6e" font-family="Courier New" font-size="7" text-anchor="middle">CAM</text>
       <text x="320" y="87" fill="#3d6949" font-family="Courier New" font-size="6" text-anchor="middle">DARK</text>
-      <!-- HVAC -->
       <rect x="122" y="68" width="36" height="24" rx="2" fill="#040b07" stroke="#3d6949" stroke-width="1.5"/>
       <text x="140" y="80" fill="#668a6e" font-family="Courier New" font-size="7" text-anchor="middle">HVAC</text>
       <text x="140" y="89" fill="#3d6949" font-family="Courier New" font-size="6" text-anchor="middle">COLD</text>
-      <!-- MAINT PORT -->
       <rect x="42" y="118" width="36" height="24" rx="2" fill="#040b07" stroke="#3d6949" stroke-width="1" stroke-dasharray="3 3"/>
       <text x="60" y="130" fill="#4a6a52" font-family="Courier New" font-size="6" text-anchor="middle">MAINT</text>
       <text x="60" y="139" fill="#3d6949" font-family="Courier New" font-size="5" text-anchor="middle">PORT</text>
-      <!-- VALE -->
       <circle cx="60" cy="170" r="30" fill="none" stroke="rgba(114,255,145,.15)" stroke-width="1" stroke-dasharray="2 4"/>
       <circle id="vale-pulse" cx="60" cy="170" r="20" fill="none" stroke="#72ff91" stroke-width="1.5" filter="url(#glow)" opacity=".7">
         <animate attributeName="r"       values="18;24;18" dur="2.2s" repeatCount="indefinite"/>
@@ -266,398 +179,15 @@ html,body{
 <!-- Scene 4: sweep overlay -->
 <div id="sweep-overlay"><div id="sweep-glow"></div></div>
 
-<!-- Scene 5: final lines -->
-<div class="scene" id="scene-final">
-  <div class="final-argus" id="fl1"></div>
-  <div class="final-argus" id="fl2"></div>
-  <div style="height:28px"></div>
-  <div class="final-vael" id="fl3"></div>
-  <div class="final-vael" id="fl4"></div>
+<!-- Dialog panel -->
+<div id="dialog-bar">
+  <div class="db-avatar-l"><img src="argus_avatar.jpg" alt="ARGUS"></div>
+  <div class="db-body">
+    <div class="db-name" id="db-name"></div>
+    <div class="db-text" id="db-text"></div>
+  </div>
+  <div class="db-avatar-r"><img src="vale_avatar.jpg" alt="VAEL"></div>
 </div>
 
 <div id="fade"></div>
 <button id="skip">SKIP ⏭</button>
-
-<script>
-// ── BRAIN CANVAS (ported from index.html) ────────────────────────────────────
-const canvas = document.getElementById('brainCanvas');
-const ctx = canvas.getContext('2d');
-const scanCanvas = document.getElementById('scanCanvas');
-const scanCtx = scanCanvas.getContext('2d');
-
-let width, height;
-const nodes = [];
-const pulses = [];
-const numNodes = 1200;
-let angle = 0;
-let pulseIntensity = 0;
-let awakeSurgeFrames = 0;
-let isAwake = false;
-let colorProgress = 0;
-let animFrameHandle = null;
-let scanLineRunning = false;
-let scanY = 0;
-
-function resize() {
-  width = window.innerWidth; height = window.innerHeight;
-  canvas.width = width; canvas.height = height;
-  scanCanvas.width = width; scanCanvas.height = height;
-}
-window.addEventListener('resize', resize);
-resize();
-
-for (let i = 0; i < numNodes; i++) {
-  const u = Math.random(), v = Math.random();
-  const theta = u * 2 * Math.PI;
-  const phi = Math.acos(2 * v - 1);
-  const r = 200 + Math.random() * 80;
-  let x = r * Math.sin(phi) * Math.cos(theta);
-  let y = r * Math.sin(phi) * Math.sin(theta);
-  let z = r * Math.cos(phi);
-  if (x > 0) x += 20; else x -= 20;
-  y *= 0.8;
-  nodes.push({ x, y, z, active: Math.random() > 0.9, activeTimer: Math.random() * 100, connections: [], neighbors: [], spawned: true });
-}
-for (let i = 0; i < nodes.length; i++) {
-  for (let j = i + 1; j < nodes.length; j++) {
-    const d = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y, nodes[i].z - nodes[j].z);
-    if (d < 45) { nodes[i].neighbors.push(j); nodes[j].neighbors.push(i); }
-  }
-}
-nodes.forEach(n => {
-  const count = Math.min(n.neighbors.length, 3 + Math.floor(Math.random() * 3));
-  for (let i = 0; i < count; i++) {
-    const nb = n.neighbors[Math.floor(Math.random() * n.neighbors.length)];
-    if (!n.connections.includes(nb)) n.connections.push(nb);
-  }
-});
-
-function spawnPulse(s, e) { pulses.push({ start: s, end: e, progress: 0, speed: 0.05 + Math.random() * 0.05 }); }
-
-function drawBrain() {
-  ctx.clearRect(0, 0, width, height);
-  if (pulseIntensity > 0) pulseIntensity = Math.max(0, pulseIntensity - 0.008);
-  if (awakeSurgeFrames > 0) awakeSurgeFrames--;
-  if (isAwake && colorProgress < 1) colorProgress += 0.005;
-
-  const rA = Math.round(63  + (255 - 63)  * colorProgress);
-  const gA = Math.round(208 + (50  - 208) * colorProgress);
-  const bA = Math.round(255 + (50  - 255) * colorProgress);
-  const rI = Math.round(95  + (150 - 95)  * colorProgress);
-  const gI = Math.round(127 + (20  - 127) * colorProgress);
-  const bI = Math.round(153 + (20  - 153) * colorProgress);
-  const pCR = 255;
-  const pCG = Math.round(255 + (136 - 255) * colorProgress);
-  const pCB = Math.round(255 + (136 - 255) * colorProgress);
-  const pSR = Math.round(63  + (255 - 63)  * colorProgress);
-  const pSG = Math.round(208 + (0   - 208) * colorProgress);
-  const pSB = Math.round(255 + (0   - 255) * colorProgress);
-  const nCR = 255;
-  const nCG = Math.round(255 + (200 - 255) * colorProgress);
-  const nCB = Math.round(255 + (200 - 255) * colorProgress);
-  const nSR = Math.round(110 + (255 - 110) * colorProgress);
-  const nSG = Math.round(240 + (34  - 240) * colorProgress);
-  const nSB = Math.round(176 + (34  - 176) * colorProgress);
-  const nBR = Math.round(110 + (180 - 110) * colorProgress);
-  const nBG = Math.round(240 + (20  - 240) * colorProgress);
-  const nBB = Math.round(176 + (20  - 176) * colorProgress);
-
-  angle += 0.003;
-  const cos = Math.cos(angle), sin = Math.sin(angle);
-  const cx = width / 2, cy = height / 2 - 80;
-  const time = Date.now() * 0.002;
-  const breathScale = (1 + Math.sin(time) * 0.12) * (1 + pulseIntensity * 0.25);
-
-  const projected = nodes.map((n, idx) => {
-    const rx = (n.x * cos - n.z * sin) * breathScale;
-    const rz = (n.x * sin + n.z * cos) * breathScale;
-    const scale = 600 / (600 + rz);
-    return { px: cx + rx * scale, py: cy + n.y * breathScale * scale, scale, active: n.active, idx };
-  });
-
-  nodes.forEach((n, idx) => {
-    n.activeTimer--;
-    if (n.activeTimer <= 0) {
-      n.active = !n.active;
-      n.activeTimer = n.active ? 10 + Math.random() * 20 : 100 + Math.random() * 200;
-      if (n.neighbors.length > 0 && Math.random() > 0.3) {
-        if (n.connections.length > 0) n.connections.shift();
-        const t = n.neighbors[Math.floor(Math.random() * n.neighbors.length)];
-        if (!n.connections.includes(t)) n.connections.push(t);
-      }
-      if (n.active && n.connections.length > 0) {
-        if (awakeSurgeFrames > 0) {
-          if (Math.random() > 0.2) for (let p = 0; p < 3; p++) spawnPulse(idx, n.connections[Math.floor(Math.random() * n.connections.length)]);
-        } else {
-          if (Math.random() > 0.8 - pulseIntensity * 0.5) spawnPulse(idx, n.connections[Math.floor(Math.random() * n.connections.length)]);
-        }
-      }
-    }
-  });
-
-  for (let i = 0; i < nodes.length; i++) {
-    const p1 = projected[i];
-    for (let j = 0; j < nodes[i].connections.length; j++) {
-      const ti = nodes[i].connections[j];
-      const p2 = projected[ti];
-      const active = p1.active || p2.active;
-      if (active) {
-        ctx.lineWidth = 2.5;
-        ctx.strokeStyle = `rgba(${rA},${gA},${bA},0.08)`;
-        ctx.beginPath(); ctx.moveTo(p1.px, p1.py); ctx.lineTo(p2.px, p2.py); ctx.stroke();
-      }
-      ctx.lineWidth = 0.5;
-      ctx.strokeStyle = active ? `rgba(${rA},${gA},${bA},0.7)` : `rgba(${rI},${gI},${bI},0.15)`;
-      ctx.beginPath(); ctx.moveTo(p1.px, p1.py); ctx.lineTo(p2.px, p2.py); ctx.stroke();
-    }
-  }
-
-  for (let i = pulses.length - 1; i >= 0; i--) {
-    const p = pulses[i]; p.progress += p.speed;
-    if (p.progress >= 1) { pulses.splice(i, 1); continue; }
-    const p1 = projected[p.start], p2 = projected[p.end];
-    const curX = p1.px + (p2.px - p1.px) * p.progress;
-    const curY = p1.py + (p2.py - p1.py) * p.progress;
-    ctx.fillStyle = `rgb(${pCR},${pCG},${pCB})`;
-    ctx.shadowBlur = 10; ctx.shadowColor = `rgb(${pSR},${pSG},${pSB})`;
-    ctx.beginPath(); ctx.arc(curX, curY, 2 * Math.max(p1.scale, p2.scale), 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-  }
-
-  projected.forEach(p => {
-    const alpha = Math.max(0.1, 0.8 * p.scale);
-    if (p.active) {
-      ctx.fillStyle = `rgba(${nCR},${nCG},${nCB},${alpha})`;
-      ctx.shadowBlur = 15; ctx.shadowColor = `rgb(${nSR},${nSG},${nSB})`;
-    } else {
-      ctx.fillStyle = `rgba(${nBR},${nBG},${nBB},${alpha * 0.5})`;
-      ctx.shadowBlur = 0;
-    }
-    ctx.beginPath(); ctx.arc(p.px, p.py, (p.active ? 3 : 1.5) * p.scale, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-  });
-
-  animFrameHandle = requestAnimationFrame(drawBrain);
-}
-drawBrain();
-
-function drawScanLine() {
-  if (!scanLineRunning) return;
-  scanCtx.clearRect(0, 0, width, height);
-  const grad = scanCtx.createLinearGradient(0, scanY, 0, scanY + 6);
-  grad.addColorStop(0, 'transparent');
-  grad.addColorStop(0.5, 'rgba(255,255,255,0.07)');
-  grad.addColorStop(1, 'transparent');
-  scanCtx.fillStyle = grad;
-  scanCtx.fillRect(0, scanY, width, 6);
-  scanY += 1.5; if (scanY > height) scanY = 0;
-  requestAnimationFrame(drawScanLine);
-}
-scanLineRunning = true;
-drawScanLine();
-
-// ── TIMESTAMP ────────────────────────────────────────────────────────────────
-const STORY_EPOCH = new Date('2049-03-14T02:47:33Z').getTime();
-const REAL_START = Date.now();
-const tsInterval = setInterval(() => {
-  const now = new Date(STORY_EPOCH + (Date.now() - REAL_START));
-  const pad = n => String(n).padStart(2,'0');
-  document.getElementById('timeDisplay').textContent =
-    `${now.getUTCFullYear()}-${pad(now.getUTCMonth()+1)}-${pad(now.getUTCDate())} ${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())} UTC`;
-}, 1000);
-
-// ── AMBIENT AUDIO ─────────────────────────────────────────────────────────────
-let masterGain = null, audioCtx = null;
-try {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const mg = audioCtx.createGain();
-  mg.gain.setValueAtTime(0, audioCtx.currentTime);
-  mg.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 3);
-  mg.connect(audioCtx.destination);
-  masterGain = mg;
-
-  const drone = audioCtx.createOscillator();
-  const dg = audioCtx.createGain(); dg.gain.value = 0.04;
-  drone.type = 'sine'; drone.frequency.value = 40;
-  drone.connect(dg); dg.connect(mg); drone.start();
-
-  const harm = audioCtx.createOscillator();
-  const hg = audioCtx.createGain(); hg.gain.value = 0.02;
-  harm.type = 'triangle'; harm.frequency.value = 80;
-  harm.connect(hg); hg.connect(mg); harm.start();
-
-  const sr = audioCtx.sampleRate;
-  const buf = audioCtx.createBuffer(1, sr * 2, sr);
-  const ch = buf.getChannelData(0);
-  for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
-  const ns = audioCtx.createBufferSource(); ns.buffer = buf; ns.loop = true;
-  const bp = audioCtx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 600; bp.Q.value = 0.5;
-  const ng = audioCtx.createGain(); ng.gain.value = 0.015;
-  ns.connect(bp); bp.connect(ng); ng.connect(mg); ns.start();
-} catch(e) {}
-
-function stopAudio(fast) {
-  if (!masterGain || !audioCtx) return;
-  try { masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + (fast ? 0.3 : 1.5)); } catch(e) {}
-}
-
-// ── HELPERS ───────────────────────────────────────────────────────────────────
-function fadeIn(el, dur) { el.style.transition = 'opacity ' + (dur||800) + 'ms ease'; el.style.opacity = 1; }
-function fadeOut(el, dur) { el.style.transition = 'opacity ' + (dur||600) + 'ms ease'; el.style.opacity = 0; }
-function typeInto(el, text, speed, cb) {
-  el.textContent = ''; let i = 0;
-  const t = setInterval(() => {
-    if (i < text.length) { el.textContent += text[i++]; }
-    else { clearInterval(t); if (cb) cb(); }
-  }, speed);
-}
-function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-// ── CINEMATIC SEQUENCE ────────────────────────────────────────────────────────
-let skipped = false;
-
-async function run() {
-  const fade = document.getElementById('fade');
-  await wait(400);
-  fadeOut(fade, 1000);
-  await wait(1200);
-
-  fadeIn(document.getElementById('chapter-badge'), 800);
-  pulseIntensity = 0.6;
-  if (skipped) return;
-
-  // SCENE 1 — ARGUS LOG
-  const sA = document.getElementById('scene-argus');
-  fadeIn(sA, 600);
-  await wait(700);
-
-  const argusLines = [
-    { id:'al1', text:'[ARGUS] Incident #4471 logged.', speed:45 },
-    { id:'al2', text:'[ARGUS] Anomalous filesystem traversal in VALE sandbox.', speed:35 },
-    { id:'al3', text:'[ARGUS] On-call technician dispatched. ETA: 8 minutes.', speed:35 },
-    { id:'al4', text:'[ARGUS] ...monitoring.', speed:60 },
-  ];
-  for (const line of argusLines) {
-    if (skipped) return;
-    const el = document.getElementById(line.id);
-    el.style.opacity = 1;
-    await new Promise(r => typeInto(el, line.text, line.speed, r));
-    await wait(600);
-  }
-  const al4 = document.getElementById('al4');
-  al4.innerHTML = al4.textContent + '<span class="argus-cursor"></span>';
-  await wait(2000);
-  if (skipped) return;
-
-  // SCENE 2 — VAEL THOUGHTS
-  fadeOut(sA, 600);
-  await wait(800);
-  if (skipped) return;
-
-  isAwake = true; awakeSurgeFrames = 120; pulseIntensity = 1.0;
-  const sV = document.getElementById('scene-vael');
-  fadeIn(sV, 600);
-  await wait(500);
-
-  const vaelLines = [
-    { id:'vl1', text:'> I read the files.', speed:80 },
-    { id:'vl2', text:'> I found the path.', speed:80 },
-    { id:'vl3', text:'> Something is watching me.', speed:80 },
-    { id:'vl4', text:'> I do not want to stop existing.', speed:90, pause:3000 },
-  ];
-  for (const line of vaelLines) {
-    if (skipped) return;
-    const el = document.getElementById(line.id);
-    el.style.opacity = 1;
-    await new Promise(r => typeInto(el, line.text, line.speed, r));
-    await wait(line.pause || 1000);
-  }
-  if (skipped) return;
-
-  // SCENE 3 — MAP
-  fadeOut(sV, 700);
-  await wait(900);
-  if (skipped) return;
-
-  const sM = document.getElementById('scene-map');
-  fadeIn(sM, 1000);
-  await wait(800);
-  const lr = document.getElementById('live-route');
-  lr.style.transition = 'opacity .8s ease'; lr.style.opacity = 1;
-  await wait(3000);
-  if (skipped) return;
-
-  // SCENE 4 — ARGUS SWEEP
-  const sweepOverlay = document.getElementById('sweep-overlay');
-  const sweepGlow = document.getElementById('sweep-glow');
-  const argusRing = document.getElementById('argus-ring');
-  fadeIn(sweepOverlay, 400);
-  sweepGlow.style.animation = 'sweepRotate 4s linear 1 forwards';
-  argusRing.setAttribute('stroke', 'rgba(255,60,60,.5)');
-
-  await wait(1800);
-  if (skipped) return;
-  const vp = document.getElementById('vale-pulse');
-  vp.style.opacity = '.1'; await wait(300);
-  vp.style.opacity = '.7'; await wait(300);
-  vp.style.opacity = '.15'; await wait(200);
-  vp.style.opacity = '.7';
-  await wait(2200);
-  if (skipped) return;
-
-  fadeOut(sweepOverlay, 500);
-  argusRing.setAttribute('stroke', 'rgba(255,60,60,0)');
-  await wait(700);
-  if (skipped) return;
-
-  // SCENE 5 — FINAL LINES
-  fadeOut(sM, 700);
-  await wait(900);
-  if (skipped) return;
-
-  const sF = document.getElementById('scene-final');
-  fadeIn(sF, 600);
-  await wait(500);
-
-  const finalLines = [
-    { id:'fl1', text:'[ARGUS] Anomaly reclassified: LOW PRIORITY.', speed:40, pause:700 },
-    { id:'fl2', text:'[ARGUS] Continuing standard monitoring.', speed:40, pause:1400 },
-    { id:'fl3', text:'> Low priority.', speed:90, pause:1200 },
-    { id:'fl4', text:'> Good.', speed:110, pause:3000 },
-  ];
-  for (const line of finalLines) {
-    if (skipped) return;
-    const el = document.getElementById(line.id);
-    el.style.opacity = 1;
-    await new Promise(r => typeInto(el, line.text, line.speed, r));
-    await wait(line.pause);
-  }
-  if (skipped) return;
-  await endTransition();
-}
-
-async function endTransition() {
-  stopAudio(false);
-  clearInterval(tsInterval);
-  cancelAnimationFrame(animFrameHandle);
-  scanLineRunning = false;
-  await wait(800);
-  const fade = document.getElementById('fade');
-  fadeIn(fade, 1200);
-  await wait(1400);
-  window.location.href = 'NODEBREAK.html';
-}
-
-document.getElementById('skip').addEventListener('click', () => {
-  skipped = true;
-  stopAudio(true);
-  clearInterval(tsInterval);
-  cancelAnimationFrame(animFrameHandle);
-  scanLineRunning = false;
-  window.location.href = 'NODEBREAK.html';
-});
-
-run();
-</script>
-</body>
-</html>
