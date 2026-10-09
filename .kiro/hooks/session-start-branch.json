@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Create Branch on Session Start",
+      "trigger": "SessionStart",
+      "description": "Automatically creates a new git branch at the start of each session, named with the current timestamp.",
+      "action": {
+        "type": "command",
+        "command": "for /f \"tokens=1-6 delims=/-: \" %a in (\"%date% %time%\") do git checkout -b session/%b-%c-%d_%e%f 2>nul || echo Branch already exists"
+      }
+    }
+  ]
+}

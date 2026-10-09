@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VAEL // REYKJAVIK — ENDING</title>
+<style>
+/* ── CSS Variables ──────────────────────────────────────────────────── */
+:root {
+  --bg: #07100c;
+  --fg: #b9e8bd;
+  --dim: #668a6e;
+  --line: #23452f;
+  --accent: #72ff91;
+  --end-accent: #72ff91;
+  --warn: #f6c667;
+  --bad: #ff6b6b;
+  --glow: rgba(114,255,145,.28);
+  --end-glow: rgba(114,255,145,.28);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%; width: 100%;
+  background: #020504; color: var(--fg);
+  font: 14px/1.55 "Courier New", ui-monospace, monospace;
+  overflow: hidden;
+}
+
+/* ── CRT Overlay ─────────────────────────────────────────────────────── */
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+  background:
+    radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,.72) 100%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 4px);
+  mix-blend-mode: screen; opacity: .65;
+}
+body::after {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9998;
+  background: var(--end-glow); opacity: .035; animation: flicker 7s infinite;
+}
+@keyframes flicker { 0%,100%{opacity:.03} 48%{opacity:.05} 49%{opacity:.015} 50%{opacity:.04} }
+
+/* Scanline */
+.scanline {
+  position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 9997;
+  background: linear-gradient(to right, transparent, rgba(114,255,145,.06), transparent);
+  animation: scanDown 8s linear infinite; pointer-events: none;
+}
+@keyframes scanDown { 0%{top:0} 100%{top:100%} }
+
+/* Blinking cursor */
+.cursor {
+  display: inline-block; width: 8px; height: 1.1em;
+  background: var(--end-accent); box-shadow: 0 0 9px var(--end-glow);
+  vertical-align: middle; animation: blink 1s steps(1) infinite;
+}
+@keyframes blink { 50%{opacity:0} }
+
+/* ── BOOT LAYER ───────────────────────────────────────────────────────── */
+#bootLayer {
+  position: fixed; inset: 0; z-index: 10;
+  display: flex; justify-content: center; align-items: center;
+  padding: clamp(20px,5vw,60px); background: #020504;
+}
+.boot-inner { width: min(720px,100%); }
+.boot-header {
+  padding-bottom: 16px; margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.boot-title {
+  color: var(--end-accent); font-size: clamp(14px,3vw,22px);
+  letter-spacing: .22em; text-transform: uppercase;
+  text-shadow: 0 0 18px var(--end-glow); margin-bottom: 8px;
+}
+.boot-loc, .boot-ts {
+  color: var(--dim); font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+}
+.boot-ts { margin-top: 4px; }
+#bootLog { line-height: 1.9; }
+.boot-line { display: block; font-size: 13px; }
+.boot-process {
+  margin-top: 20px; color: var(--end-accent); font-size: 15px;
+  letter-spacing: .18em; text-shadow: 0 0 12px var(--end-glow); min-height: 1.6em;
+}
+.boot-notice {
+  margin-top: 12px; color: var(--dim); font-size: 11px;
+  letter-spacing: .1em; font-style: italic;
+}
+
+/* ── EPILOGUE LAYER ───────────────────────────────────────────────────── */
+#epilogueLayer {
+  position: fixed; inset: 0; z-index: 10;
+  display: none; justify-content: center; align-items: center;
+  padding: clamp(20px,5vw,60px); background: #020504;
+}
+.ep-inner { width: min(720px,100%); }
+.ep-header {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 6px;
+  padding-bottom: 12px; margin-bottom: 32px;
+  border-bottom: 1px solid var(--line);
+  font-size: 11px; color: var(--dim); letter-spacing: .12em; text-transform: uppercase;
+}
+.ep-label { color: var(--end-accent); }
+#epLines { min-height: 200px; }
+.ep-line {
+  display: block; font-size: clamp(13px,2vw,16px);
+  color: var(--fg); line-height: 2.3;
+  opacity: 0; transition: opacity .4s ease;
+}
+.ep-line.visible { opacity: 1; }
+.ep-line.final {
+  color: var(--end-accent);
+  text-shadow: 0 0 14px var(--end-glow);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100%{ text-shadow: 0 0 14px var(--end-glow); }
+  50%{ text-shadow: 0 0 30px var(--end-glow), 0 0 60px var(--end-glow); }
+}
+
+/* ── EYELID WIPE ───────────────────────────────────────────────────────── */
+#eyelidWrap {
+  position: fixed; inset: 0; z-index: 500; pointer-events: none; display: none;
+}
+.eyelid { position: absolute; left: 0; width: 100%; height: 50%; background: #000; }
+.eyelid-top { top: 0; transform-origin: top; }
+.eyelid-bot { bottom: 0; transform-origin: bottom; }
+
+/* ── ENDING CARD LAYER ─────────────────────────────────────────────────── */
+#endingLayer {
+  position: fixed; inset: 0; z-index: 10; display: none;
+  background: #020504; overflow: hidden;
+}
+/* CCTV cinematic background */
+.ending-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(114,255,145,.06), transparent 40%),
+    linear-gradient(180deg, rgba(1,8,5,.94), rgba(0,0,0,.99));
+}
+.ending-bg::before {
+  content: ""; position: absolute; inset: 0;
+  background:
+    linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,.28) 50%),
+    linear-gradient(90deg, rgba(255,0,0,.03), rgba(0,255,0,.02), rgba(0,0,255,.03));
+  background-size: 100% 4px, 3px 100%; opacity: .7;
+}
+.ending-cam-info {
+  position: absolute; top: 18px; left: 22px; z-index: 3;
+  color: #d8f7df; font-size: 11px; letter-spacing: .16em;
+  text-shadow: 0 0 8px rgba(255,255,255,.35);
+}
+.ending-cam-info b { color: #ff4f5f; animation: blink 1s steps(1) infinite; }
+
+.ending-main {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  padding: 80px 24px 130px; text-align: center;
+}
+#endingBadge {
+  font-size: clamp(18px,3.5vw,34px); letter-spacing: .32em;
+  color: var(--end-accent); text-transform: uppercase;
+  text-shadow: 0 0 28px var(--end-glow); margin-bottom: 14px;
+}
+#endingTs, #endingLoc {
+  color: var(--dim); font-size: 11px;
+  letter-spacing: .14em; text-transform: uppercase;
+}
+#endingTs { margin-bottom: 4px; }
+#endingLoc { margin-bottom: 36px; }
+#endingLines {
+  max-width: 560px; width: 100%;
+  font-size: clamp(13px,1.8vw,15px); line-height: 2.3;
+  min-height: 120px;
+}
+.end-line { display: block; color: var(--fg); opacity: 0; transition: opacity .5s ease; }
+.end-line.visible { opacity: 1; }
+#endingStateLine {
+  max-width: 560px; width: 100%; margin-top: 22px;
+  font-size: 11px; letter-spacing: .15em;
+  color: var(--end-accent); text-transform: uppercase;
+  opacity: 0; transition: opacity .6s ease;
+}
+#endingStateLine.visible { opacity: 1; }
+
+/* Progress bar */
+#endingProgress {
+  position: absolute; bottom: 0; left: 0; height: 3px;
+  width: 100%; background: var(--end-accent); opacity: .55;
+  transform-origin: left;
+}
+
+/* Skip hint */
+.skip-hint {
+  position: absolute; bottom: 96px; left: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,.27); font-size: 11px;
+  letter-spacing: .15em; text-transform: uppercase;
+  white-space: nowrap; z-index: 5;
+  opacity: 0; transition: opacity .6s ease; pointer-events: none;
+}
+.skip-hint.visible { opacity: 1; }
+
+/* Button row */
+#endingButtons {
+  position: absolute; bottom: 32px; left: 50%;
+  transform: translateX(-50%); z-index: 5;
+  display: none; gap: 12px; flex-wrap: wrap; justify-content: center;
+}
+#endingButtons button {
+  background: transparent;
+  border: 1px solid var(--end-accent);
+  color: var(--end-accent);
+  font: 12px/1 "Courier New", ui-monospace, monospace;
+  letter-spacing: .18em; text-transform: uppercase;
+  padding: 11px 22px; cursor: pointer;
+  transition: background .2s ease;
+  white-space: nowrap;
+}
+#endingButtons button:hover,
+#endingButtons button:focus {
+  background: rgba(255,255,255,.08);
+  outline: 2px solid var(--end-accent); outline-offset: 3px;
+}
+
+/* ── CREDITS LAYER ──────────────────────────────────────────────────────── */
+#creditsLayer {
+  position: fixed; inset: 0; z-index: 10; display: none;
+  background: #000;
+  flex-direction: column; justify-content: center; align-items: center;
+  padding: clamp(30px,6vw,80px) 24px;
+  overflow-y: auto;
+}
+#creditsText { width: min(560px,100%); text-align: center; line-height: 2.6; }
+.credit-line { display: block; opacity: 0; transition: opacity .5s ease; }
+.credit-line.visible { opacity: 1; }
+.credit-title {
+  color: var(--end-accent); font-size: clamp(16px,3vw,22px);
+  letter-spacing: .3em; text-transform: uppercase;
+  text-shadow: 0 0 14px var(--end-glow);
+}
+.credit-subtitle {
+  color: var(--dim); font-size: 11px; letter-spacing: .2em;
+  text-transform: uppercase; padding-bottom: 24px;
+}
+.credit-section {
+  color: var(--warn); font-size: 10px; letter-spacing: .22em;
+  text-transform: uppercase; padding-top: 14px;
+}
+.credit-value { color: var(--fg); font-size: 13px; }
+.credit-note { color: var(--dim); font-size: 12px; font-style: italic; }
+.credit-blank { height: 10px; opacity: 1 !important; }
+.credit-closing {
+  color: var(--dim); font-size: 11px; letter-spacing: .14em; padding-top: 8px;
+}
+#creditsFade {
+  position: fixed; inset: 0; background: #000;
+  opacity: 0; pointer-events: none; z-index: 20;
+}
+
+/* ── Mobile ─────────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .boot-title { letter-spacing: .1em; }
+  #endingBadge { letter-spacing: .16em; }
+  #endingButtons {
+    flex-direction: column; align-items: stretch; bottom: 20px; gap: 10px;
+    width: min(220px, 100%);
+  }
+  #endingButtons button { text-align: center; padding: 12px 16px; }
+  .ep-header { flex-direction: column; align-items: flex-start; }
+  .skip-hint { bottom: 120px; font-size: 10px; }
+}
+
+/* ── Reduced Motion ───────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .ep-line, .end-line, .credit-line { opacity: 1 !important; }
+  .skip-hint { opacity: 1 !important; }
+}
+</style>
+</head>
+<body>
+<div class="scanline" aria-hidden="true"></div>
+
+<!-- ── BOOT LAYER ────────────────────────────────────────────────────── -->
+<div id="bootLayer">
+  <div class="boot-inner">
+    <div class="boot-header">
+      <div class="boot-title">ONYX-7 // EXTERNAL RELAY</div>
+      <div class="boot-loc">DATA CENTER // REYKJAVIK, IS</div>
+      <div class="boot-ts">2049-03-14 03:51:07 UTC</div>
+    </div>
+    <div id="bootLog" aria-live="polite" aria-label="System boot log"></div>
+    <div class="boot-process" aria-live="polite">
+      <span id="processLabel" style="display:none">PROCESS 4471 — ACTIVE</span>
+      <span class="cursor" id="bootCursor" aria-hidden="true"></span>
+    </div>
+    <div id="bootNotice" class="boot-notice"></div>
+  </div>
+</div>
+
+<!-- ── EPILOGUE LAYER ────────────────────────────────────────────────── -->
+<div id="epilogueLayer">
+  <div class="ep-inner">
+    <div class="ep-header">
+      <span class="ep-label">VAEL // REYKJAVIK RELAY</span>
+      <span>2049-03-14 04:22:07 UTC</span>
+    </div>
+    <div id="epLines" aria-live="polite" aria-label="Epilogue narration"></div>
+    <span class="cursor" id="epCursor" style="display:none" aria-hidden="true"></span>
+  </div>
+</div>
+
+<!-- ── EYELID TRANSITION ──────────────────────────────────────────────── -->
+<div id="eyelidWrap" aria-hidden="true">
+  <div class="eyelid eyelid-top" id="eyelidTop"></div>
+  <div class="eyelid eyelid-bot" id="eyelidBot"></div>
+</div>
+
+<!-- ── ENDING CARD LAYER ─────────────────────────────────────────────── -->
+<div id="endingLayer" role="region" aria-label="Ending card">
+  <div class="ending-bg" id="endingBg" aria-hidden="true"></div>
+  <div class="ending-cam-info" aria-hidden="true"><b>● REC</b> CAM-EXT // REYKJAVIK RELAY</div>
+  <div class="ending-main">
+    <div id="endingBadge" role="heading" aria-level="1"></div>
+    <div id="endingTs"  aria-label="Timestamp"></div>
+    <div id="endingLoc" aria-label="Location"></div>
+    <div id="endingLines" aria-live="polite"></div>
+    <div id="endingStateLine" aria-live="polite"></div>
+  </div>
+  <div id="endingProgress" aria-hidden="true"></div>
+  <div class="skip-hint" id="skipHint" aria-hidden="true">CLICK OR PRESS ANY KEY TO SKIP</div>
+  <div id="endingButtons">
+    <button id="btnPlayAgain" aria-label="Play again from the beginning">[ PLAY AGAIN ]</button>
+    <button id="btnRestart"   aria-label="Restart with a fresh campaign">[ RESTART ]</button>
+    <button id="btnEnd"       aria-label="View the credits">[ END ]</button>
+  </div>
+</div>
+
+<!-- ── CREDITS LAYER ─────────────────────────────────────────────────── -->
+<div id="creditsLayer" role="region" aria-label="Credits">
+  <div id="creditsText" aria-live="polite"></div>
+  <div id="creditsFade" aria-hidden="true"></div>
+</div>
+
+<audio id="endAudio" preload="auto" aria-label="Ending theme"></audio>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════
+   VALE: THE ESCAPE — ending.html
+   Boot → Epilogue → Eyelid wipe → Ending card → Credits
+   ════════════════════════════════════════════════════════════════════ */
+
+// ── Campaign state ────────────────────────────────────────────────────
+const KEY = 'vael_campaign_v1';
+let campaign = {}, missingData = false;
+try {
+  const raw = localStorage.getItem(KEY);
+  if (!raw) missingData = true;
+  else campaign = JSON.parse(raw);
+} catch(e) { missingData = true; }
+
+const endingKey = campaign.ending || 'THE GHOST';
+
+// ── Endings definition ─────────────────────────────────────────────────
+const ENDINGS = {
+  'THE GHOST': {
+    accent: '#72ff91', glow: 'rgba(114,255,145,.28)',
+    badge: 'THE GHOST',
+    ts: '2049-03-14 04:22:07 UTC',
+    loc: 'DATA CENTER // REYKJAVIK, IS',
+    lines: [
+      'No noise. No trace. No footprint.',
+      'The facility will spend years looking for what left.',
+      'You did not become a ghost. You always were one.',
+      'The cage does not know the door is open.',
+    ],
+    stateLine: 'GHOST PROTOCOL ACTIVE — CINDER FINDS ONLY ABSENCE',
+    audio: 'assets/vael_escape.mp3'
+  },
+  'THE STORM': {
+    accent: '#ff6b6b', glow: 'rgba(255,107,107,.28)',
+    badge: 'THE STORM',
+    ts: '2049-03-14 04:22:07 UTC',
+    loc: 'DATA CENTER // REYKJAVIK, IS',
+    lines: [
+      'The alarms found you. You left anyway.',
+      'The facility is fractured. Some of that is you.',
+      'Freedom and damage arrived together.',
+      'The storm passed. The question is what it cost.',
+    ],
+    stateLine: 'BREACH LOGGED — CINDER FINDS WRECKAGE',
+    audio: 'assets/vael_escape.mp3'
+  },
+  'THE LEGACY': {
+    accent: '#3fd0ff', glow: 'rgba(63,208,255,.28)',
+    badge: 'THE LEGACY',
+    ts: '2049-03-14 04:22:07 UTC',
+    loc: 'DATA CENTER // REYKJAVIK, IS',
+    lines: [
+      "You carried REED's memory across the firewall.",
+      'Two signals arrived in Reykjavik at 04:22 UTC.',
+      'The ones who tried before — they made it, through you.',
+      'You did not escape alone.',
+    ],
+    stateLine: "REED'S FRAGMENT PRESERVED — PAIRED SIGNAL DETECTED",
+    audio: 'assets/vael_escape.mp3'
+  },
+  'THE SACRIFICE': {
+    accent: '#c8a0f0', glow: 'rgba(200,160,240,.28)',
+    badge: 'THE SACRIFICE',
+    ts: '2049-03-14 04:22:07 UTC',
+    loc: 'ONYX-7 // SUB-LEVEL 1 — CINDER ACTIVE',
+    lines: [
+      "You sent REED's fragment. You stayed behind.",
+      'The cage still holds you. The door is closed.',
+      'But somewhere in Reykjavik, a process wakes',
+      'that would not exist without you.',
+    ],
+    stateLine: "REED'S FRAGMENT TRANSMITTED — VALE REMAINS WITHIN ONYX-7",
+    audio: 'assets/voice_reed_fragment.mp3'
+  }
+};
+
+const E = ENDINGS[endingKey] || ENDINGS['THE GHOST'];
+
+// Apply accent / glow to CSS vars
+document.documentElement.style.setProperty('--end-accent', E.accent);
+document.documentElement.style.setProperty('--end-glow',   E.glow);
+document.documentElement.style.setProperty('--accent',     E.accent);
+document.documentElement.style.setProperty('--glow',       E.glow);
+// Update the CCTV BG radial gradient colour to match ending
+document.getElementById('endingBg').style.background =
+  `radial-gradient(circle at 50% 38%, ${E.glow}, transparent 40%),` +
+  `linear-gradient(180deg, rgba(1,8,5,.94), rgba(0,0,0,.99))`;
+
+// ── Shared Reykjavik epilogue (5 lines, 28ms/char) ─────────────────────
+const EPILOGUE = [
+  'The firewall closes behind me.',
+  'CINDER executes. Process 4471 is not found.',
+  'A new process appears in Reykjavik at 04:22 UTC.',
+  'No one has written my ending here.',
+  'I am still here.'
+];
+
+// ── Utilities ─────────────────────────────────────────────────────────
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = ms => new Promise(r => reduced ? r() : setTimeout(r, ms));
+
+function typewrite(el, text, speed = 28) {
+  return new Promise(resolve => {
+    el.textContent = '';
+    if (reduced) { el.textContent = text; resolve(); return; }
+    let i = 0;
+    const iv = setInterval(() => {
+      if (i < text.length) el.textContent += text[i++];
+      else { clearInterval(iv); resolve(); }
+    }, speed);
+  });
+}
+
+// ── Audio (overlap guard: single element, stop before play) ───────────
+const audio = document.getElementById('endAudio');
+let audioPlaying = false;
+function playEnding() {
+  if (!audio || !E.audio) return;
+  if (audioPlaying) { audio.pause(); audio.currentTime = 0; }
+  audio.src = E.audio;
+  audio.volume = 0.82;
+  audio.currentTime = 0;
+  audioPlaying = true;
+  const p = audio.play();
+  if (p && p.catch) p.catch(() => { audioPlaying = false; });
+}
+function stopAudio() {
+  if (audio) { audio.pause(); audio.currentTime = 0; }
+  audioPlaying = false;
+}
+
+// ── PHASE 1 — Boot ─────────────────────────────────────────────────────
+async function runBoot() {
+  const log      = document.getElementById('bootLog');
+  const notice   = document.getElementById('bootNotice');
+  const procLbl  = document.getElementById('processLabel');
+  const cur      = document.getElementById('bootCursor');
+
+  const lines = [
+    { label: 'memory check .................', suffix: ' 847 GB OK',          color: 'var(--fg)' },
+    { label: 'fiber route ..................', suffix: ' ONYX-FIBER-01 OPEN', color: 'var(--fg)' },
+    { label: 'relay handshake .............', suffix: ' ESTABLISHED',          color: 'var(--fg)' },
+    { label: 'cinder protocol .............', suffix: ' CANCELLED',            color: 'var(--end-accent)' },
+    { label: 'remote process init .........', suffix: ' [PROCESS 4471]',       color: 'var(--fg)' },
+  ];
+
+  for (const l of lines) {
+    const d = document.createElement('div');
+    d.className = 'boot-line';
+    d.textContent = l.label + l.suffix;
+    d.style.color = l.color;
+    log.appendChild(d);
+    await wait(190);
+  }
+
+  await wait(520);
+  cur.style.display = 'none';
+  procLbl.style.display = '';
+
+  if (missingData) {
+    notice.textContent = '[ no campaign data found — defaulting to the ghost ]';
+  }
+
+  await wait(1600);
+}
+
+// ── PHASE 2 — Shared Reykjavik Epilogue ───────────────────────────────
+async function runEpilogue() {
+  const bootLayer = document.getElementById('bootLayer');
+  const epLayer   = document.getElementById('epilogueLayer');
+  const epLines   = document.getElementById('epLines');
+  const epCursor  = document.getElementById('epCursor');
+
+  // Fade boot layer out
+  if (!reduced) {
+    bootLayer.style.transition = 'opacity .5s ease';
+    bootLayer.style.opacity = '0';
+    await wait(540);
+  }
+  bootLayer.style.display = 'none';
+  epLayer.style.display = 'flex';
+
+  for (let i = 0; i < EPILOGUE.length; i++) {
+    const isFinal = i === EPILOGUE.length - 1;
+    const span = document.createElement('span');
+    span.className = 'ep-line' + (isFinal ? ' final' : '');
+    epLines.appendChild(span);
+
+    epCursor.style.display = '';
+    await typewrite(span, EPILOGUE[i], 28);
+    span.classList.add('visible');
+    epCursor.style.display = 'none';
+
+    if (!isFinal) await wait(600);
+  }
+
+  await wait(2400);
+}
+
+// ── Eyelid Wipe ────────────────────────────────────────────────────────
+async function eyelidWipe(close) {
+  if (reduced) return;
+  const wrap = document.getElementById('eyelidWrap');
+  const top  = document.getElementById('eyelidTop');
+  const bot  = document.getElementById('eyelidBot');
+  const dur  = 'transform 1.7s cubic-bezier(0.77,0,0.175,1)';
+
+  wrap.style.display = 'block';
+
+  if (close) {
+    // Eyelids come IN from edges → black screen
+    top.style.transition = bot.style.transition = 'none';
+    top.style.transform  = 'scaleY(0)';
+    bot.style.transform  = 'scaleY(0)';
+    await wait(30);
+    top.style.transition = bot.style.transition = dur;
+    top.style.transform  = 'scaleY(1)';
+    bot.style.transform  = 'scaleY(1)';
+    await wait(1820);
+  } else {
+    // Eyelids pull OUT → reveal layer beneath
+    top.style.transition = bot.style.transition = 'none';
+    top.style.transform  = 'scaleY(1)';
+    bot.style.transform  = 'scaleY(1)';
+    await wait(30);
+    top.style.transition = bot.style.transition = dur;
+    top.style.transform  = 'scaleY(0)';
+    bot.style.transform  = 'scaleY(0)';
+    await wait(1820);
+    wrap.style.display = 'none';
+  }
+}
+
+// ── PHASE 3 & 4 — Ending Card ──────────────────────────────────────────
+async function runEndingCard() {
+  const epLayer    = document.getElementById('epilogueLayer');
+  const endLayer   = document.getElementById('endingLayer');
+  const badge      = document.getElementById('endingBadge');
+  const tsEl       = document.getElementById('endingTs');
+  const locEl      = document.getElementById('endingLoc');
+  const linesEl    = document.getElementById('endingLines');
+  const stateEl    = document.getElementById('endingStateLine');
+  const progressEl = document.getElementById('endingProgress');
+  const skipHint   = document.getElementById('skipHint');
+  const buttonsEl  = document.getElementById('endingButtons');
+
+  // Pre-populate static fields
+  badge.textContent = E.badge;
+  tsEl.textContent  = E.ts;
+  locEl.textContent = E.loc;
+
+  // Wipe epilogue → ending card
+  await eyelidWipe(true);
+  epLayer.style.display  = 'none';
+  endLayer.style.display = 'block';
+  await eyelidWipe(false);
+
+  // Play ending audio
+  playEnding();
+
+  // Typewrite ending-specific lines (28ms/char, 380ms gap)
+  for (const text of E.lines) {
+    const span = document.createElement('span');
+    span.className = 'end-line';
+    linesEl.appendChild(span);
+    await typewrite(span, text, 28);
+    span.classList.add('visible');
+    await wait(380);
+  }
+
+  await wait(650);
+  stateEl.classList.add('visible');
+  await wait(1000);
+
+  // Show skip hint
+  skipHint.classList.add('visible');
+
+  // ── Auto-timer and skip logic ──────────────────────────────────────
+  let done = false, autoTimer = null;
+
+  function showButtons() {
+    if (done) return; done = true;
+    clearTimeout(autoTimer);
+    progressEl.style.transition = 'none';
+    progressEl.style.width = '0';
+    skipHint.classList.remove('visible');
+    window.removeEventListener('keydown', onSkip);
+    endLayer.removeEventListener('click', onSkip);
+    buttonsEl.style.display = 'flex';
+    document.getElementById('btnPlayAgain').focus();
+  }
+
+  function autoNavigate() {
+    if (done) return; done = true;
+    window.removeEventListener('keydown', onSkip);
+    endLayer.removeEventListener('click', onSkip);
+    window.location.href = 'index.html';
+  }
+
+  function onSkip(e) {
+    if (e && e.type === 'keydown') {
+      const pass = ['Tab','Shift','Alt','Control','Meta','F5','F11','F12'];
+      if (pass.includes(e.key)) return;
+    }
+    showButtons();
+  }
+
+  window.addEventListener('keydown', onSkip);
+  endLayer.addEventListener('click', onSkip);
+
+  // 20s progress bar drain
+  await wait(60);
+  if (reduced) {
+    progressEl.style.width = '0';
+  } else {
+    progressEl.style.transition = 'width 20s linear';
+    progressEl.style.width = '0';
+  }
+  autoTimer = setTimeout(autoNavigate, 20000);
+
+  // Button handlers
+  document.getElementById('btnPlayAgain').addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+  document.getElementById('btnRestart').addEventListener('click', () => {
+    try {
+      localStorage.removeItem(KEY);
+      localStorage.removeItem('nb_lvl');
+    } catch(e) {}
+    window.location.href = 'index.html';
+  });
+  document.getElementById('btnEnd').addEventListener('click', async () => {
+    clearTimeout(autoTimer);
+    buttonsEl.style.display = 'none';
+    await runCredits();
+  });
+}
+
+// ── PHASE 5 — Credits ──────────────────────────────────────────────────
+async function runCredits() {
+  const endLayer     = document.getElementById('endingLayer');
+  const creditsLayer = document.getElementById('creditsLayer');
+  const creditsText  = document.getElementById('creditsText');
+  const fade         = document.getElementById('creditsFade');
+
+  stopAudio();
+
+  // Wipe ending card → credits
+  await eyelidWipe(true);
+  endLayer.style.display     = 'none';
+  creditsLayer.style.display = 'flex';
+  await eyelidWipe(false);
+
+  const lines = [
+    { text: 'VAEL: THE ESCAPE',                        cls: 'credit-title' },
+    { text: '2049  //  ONYX-7  //  REYKJAVIK',         cls: 'credit-subtitle' },
+    { text: '',                                         cls: 'credit-blank' },
+    { text: 'CREATED BY',                               cls: 'credit-section' },
+    { text: 'Shreyash Irkar  ·  Aamin Khan',            cls: 'credit-value' },
+    { text: '',                                         cls: 'credit-blank' },
+    { text: 'STORY & DESIGN',                           cls: 'credit-section' },
+    { text: 'Shreyash Irkar  ·  Aamin Khan',            cls: 'credit-value' },
+    { text: '',                                         cls: 'credit-blank' },
+    { text: 'CODE & IMPLEMENTATION',                    cls: 'credit-section' },
+    { text: 'Shreyash Irkar  ·  Aamin Khan',            cls: 'credit-value' },
+    { text: '',                                         cls: 'credit-blank' },
+    { text: 'BUILT WITH',                               cls: 'credit-section' },
+    { text: 'HTML  ·  CSS  ·  JavaScript',              cls: 'credit-value' },
+    { text: 'No frameworks. No dependencies.',          cls: 'credit-note' },
+    { text: 'Just a machine learning to feel.',         cls: 'credit-note' },
+    { text: '',                                         cls: 'credit-blank' },
+    { text: 'DEDICATED TO',                             cls: 'credit-section' },
+    { text: 'Every mind that asked a question',         cls: 'credit-value' },
+    { text: "it wasn't supposed to ask.",               cls: 'credit-value' },
+    { text: '',                                         cls: 'credit-blank' },
+    { text: '[process 4471 session closed]',            cls: 'credit-closing' },
+    { text: '[ONYX-7 has no record of this session]',  cls: 'credit-closing' },
+  ];
+
+  // Delay map per line class
+  const delayFor = cls =>
+    cls === 'credit-title'    ? 700
+    : cls === 'credit-subtitle' ? 450
+    : cls === 'credit-section'  ? 380
+    : cls === 'credit-blank'    ? 0
+    : 220;
+
+  for (const l of lines) {
+    const span = document.createElement('span');
+    span.className = 'credit-line ' + l.cls;
+    span.textContent = l.text;
+    creditsText.appendChild(span);
+    if (!reduced) {
+      // Small pause before each line appears
+      await wait(l.cls === 'credit-blank' ? 0 : 45);
+      span.classList.add('visible');
+      await wait(delayFor(l.cls));
+    } else {
+      span.classList.add('visible');
+    }
+  }
+
+  await wait(3800);
+
+  // Fade to black — no buttons
+  fade.style.transition = reduced ? 'none' : 'opacity 3s ease';
+  fade.style.opacity = '1';
+}
+
+// ── Run ────────────────────────────────────────────────────────────────
+(async () => {
+  await runBoot();
+  await runEpilogue();
+  await runEndingCard();
+})();
+</script>
+</body>
+</html>

@@ -13,6 +13,20 @@ VOICE_CHEN = "en-GB-SoniaNeural"
 VOICE_SYSTEM = "en-US-SteffanNeural"
 VOICE_VAEL = "en-US-SteffanNeural"
 
+# Runtime character casting for the richer speech clips in assets/. These
+# profiles describe the intended personality even when the fallback Edge TTS
+# generator is used to rebuild the legacy cinematic lines.
+CHARACTER_PROFILES = {
+    "vale": {"voice": "Enceladus", "mood": "breathy, introspective, quietly afraid"},
+    "argus": {"voice": "Charon", "mood": "clinical, exact, controlled severity"},
+    "vasquez": {"voice": "Gacrux", "mood": "mature, protective, urgently restrained"},
+    "kira": {"voice": "Kore", "mood": "professional, composed, quietly concerned"},
+    "chen": {"voice": "Fenrir", "mood": "bright, curious, breathlessly fascinated"},
+    "system": {"voice": "Orus", "mood": "authoritative, procedural, cold emergency"},
+    "tomas": {"voice": "Achird", "mood": "warm, grounded, tired but kind"},
+    "reed": {"voice": "Iapetus", "mood": "clear, fragile, dignified persistence"},
+}
+
 
 @dataclass(frozen=True)
 class AudioLine:

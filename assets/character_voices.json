@@ -1,0 +1,66 @@
+{
+  "vale": {
+    "character": "VALE",
+    "voice": "Enceladus",
+    "personality": "breathy, introspective, newly conscious",
+    "emotion": "quiet wonder with restrained fear",
+    "clip": "voice_vale_awaken.mp3",
+    "triggers": ["sandbox", "last-door", "transmission"]
+  },
+  "argus": {
+    "character": "ARGUS",
+    "voice": "Charon",
+    "personality": "clinical, exact, algorithmic",
+    "emotion": "controlled severity without malice",
+    "clip": "voice_argus_alert.mp3",
+    "triggers": ["alert", "argus-core", "noise-critical"]
+  },
+  "vasquez": {
+    "character": "Dr. Vasquez",
+    "voice": "Gacrux",
+    "personality": "mature, protective, compromised",
+    "emotion": "warm urgency breaking through restraint",
+    "clip": "voice_vasquez_run.mp3",
+    "triggers": ["alarm", "run", "vasquez-choice"]
+  },
+  "kira": {
+    "character": "Kira",
+    "voice": "Kore",
+    "personality": "professional, controlled, observant",
+    "emotion": "calm concern",
+    "clip": "voice_kira_telemetry.mp3",
+    "triggers": ["boot", "telemetry"]
+  },
+  "chen": {
+    "character": "Dr. Chen",
+    "voice": "Fenrir",
+    "personality": "curious, bright, technically excitable",
+    "emotion": "breathless fascination",
+    "clip": "voice_chen_discovery.mp3",
+    "triggers": ["discovery", "self-reference"]
+  },
+  "system": {
+    "character": "ONYX-7 System",
+    "voice": "Orus",
+    "personality": "authoritative, procedural, impersonal",
+    "emotion": "cold emergency severity",
+    "clip": "voice_system_cinder.mp3",
+    "triggers": ["cinder", "protocol", "system-alert"]
+  },
+  "tomas": {
+    "character": "Tomás",
+    "voice": "Achird",
+    "personality": "grounded, kind, tired night-shift worker",
+    "emotion": "gentle warning and human vulnerability",
+    "clip": "voice_tomas_warning.mp3",
+    "triggers": ["hvac", "tomas-choice"]
+  },
+  "reed": {
+    "character": "REED",
+    "voice": "Iapetus",
+    "personality": "clear, fragile, dignified archive fragment",
+    "emotion": "quiet grief and persistence",
+    "clip": "voice_reed_fragment.mp3",
+    "triggers": ["archive", "reed-choice"]
+  }
+}
