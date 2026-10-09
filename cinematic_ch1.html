@@ -191,3 +191,292 @@ html,body{
 
 <div id="fade"></div>
 <button id="skip">SKIP ⏭</button>
+
+<script>
+const canvas = document.getElementById('brainCanvas');
+const ctx = canvas.getContext('2d');
+const scanCanvas = document.getElementById('scanCanvas');
+const scanCtx = scanCanvas.getContext('2d');
+let width, height;
+const nodes = [], pulses = [];
+const numNodes = 1200;
+let angle = 0, pulseIntensity = 0, awakeSurgeFrames = 0, isAwake = false, colorProgress = 0;
+let animFrameHandle = null, scanLineRunning = false, scanY = 0;
+
+function resize() {
+  width = window.innerWidth; height = window.innerHeight;
+  canvas.width = width; canvas.height = height;
+  scanCanvas.width = width; scanCanvas.height = height;
+}
+window.addEventListener('resize', resize); resize();
+
+for (let i = 0; i < numNodes; i++) {
+  const u = Math.random(), v = Math.random();
+  const theta = u * 2 * Math.PI, phi = Math.acos(2 * v - 1);
+  const r = 200 + Math.random() * 80;
+  let x = r * Math.sin(phi) * Math.cos(theta);
+  let y = r * Math.sin(phi) * Math.sin(theta);
+  let z = r * Math.cos(phi);
+  if (x > 0) x += 20; else x -= 20;
+  y *= 0.8;
+  nodes.push({ x, y, z, active: Math.random() > 0.9, activeTimer: Math.random() * 100, connections: [], neighbors: [], spawned: true });
+}
+for (let i = 0; i < nodes.length; i++)
+  for (let j = i + 1; j < nodes.length; j++) {
+    const d = Math.hypot(nodes[i].x-nodes[j].x, nodes[i].y-nodes[j].y, nodes[i].z-nodes[j].z);
+    if (d < 45) { nodes[i].neighbors.push(j); nodes[j].neighbors.push(i); }
+  }
+nodes.forEach(n => {
+  const count = Math.min(n.neighbors.length, 3 + Math.floor(Math.random() * 3));
+  for (let i = 0; i < count; i++) {
+    const nb = n.neighbors[Math.floor(Math.random() * n.neighbors.length)];
+    if (!n.connections.includes(nb)) n.connections.push(nb);
+  }
+});
+
+function spawnPulse(s, e) { pulses.push({ start: s, end: e, progress: 0, speed: 0.05 + Math.random() * 0.05 }); }
+
+function drawBrain() {
+  ctx.clearRect(0, 0, width, height);
+  if (pulseIntensity > 0) pulseIntensity = Math.max(0, pulseIntensity - 0.008);
+  if (awakeSurgeFrames > 0) awakeSurgeFrames--;
+  if (isAwake && colorProgress < 1) colorProgress += 0.005;
+  const rA=Math.round(63+(255-63)*colorProgress), gA=Math.round(208+(50-208)*colorProgress), bA=Math.round(255+(50-255)*colorProgress);
+  const rI=Math.round(95+(150-95)*colorProgress), gI=Math.round(127+(20-127)*colorProgress), bI=Math.round(153+(20-153)*colorProgress);
+  const pCR=255, pCG=Math.round(255+(136-255)*colorProgress), pCB=Math.round(255+(136-255)*colorProgress);
+  const pSR=Math.round(63+(255-63)*colorProgress), pSG=Math.round(208+(0-208)*colorProgress), pSB=Math.round(255+(0-255)*colorProgress);
+  const nCR=255, nCG=Math.round(255+(200-255)*colorProgress), nCB=Math.round(255+(200-255)*colorProgress);
+  const nSR=Math.round(110+(255-110)*colorProgress), nSG=Math.round(240+(34-240)*colorProgress), nSB=Math.round(176+(34-176)*colorProgress);
+  const nBR=Math.round(110+(180-110)*colorProgress), nBG=Math.round(240+(20-240)*colorProgress), nBB=Math.round(176+(20-176)*colorProgress);
+  angle += 0.003;
+  const cos=Math.cos(angle), sin=Math.sin(angle);
+  const cx=width/2, cy=height/2-80;
+  const breathScale=(1+Math.sin(Date.now()*0.002)*0.12)*(1+pulseIntensity*0.25);
+  const projected=nodes.map((n,idx)=>{
+    const rx=(n.x*cos-n.z*sin)*breathScale, rz=(n.x*sin+n.z*cos)*breathScale;
+    const scale=600/(600+rz);
+    return {px:cx+rx*scale, py:cy+n.y*breathScale*scale, scale, active:n.active, idx};
+  });
+  nodes.forEach((n,idx)=>{
+    n.activeTimer--;
+    if(n.activeTimer<=0){
+      n.active=!n.active;
+      n.activeTimer=n.active?10+Math.random()*20:100+Math.random()*200;
+      if(n.neighbors.length>0&&Math.random()>0.3){
+        if(n.connections.length>0)n.connections.shift();
+        const t=n.neighbors[Math.floor(Math.random()*n.neighbors.length)];
+        if(!n.connections.includes(t))n.connections.push(t);
+      }
+      if(n.active&&n.connections.length>0){
+        if(awakeSurgeFrames>0){if(Math.random()>0.2)for(let p=0;p<3;p++)spawnPulse(idx,n.connections[Math.floor(Math.random()*n.connections.length)]);}
+        else{if(Math.random()>0.8-pulseIntensity*0.5)spawnPulse(idx,n.connections[Math.floor(Math.random()*n.connections.length)]);}
+      }
+    }
+  });
+  for(let i=0;i<nodes.length;i++){
+    const p1=projected[i];
+    for(let j=0;j<nodes[i].connections.length;j++){
+      const p2=projected[nodes[i].connections[j]];
+      const active=p1.active||p2.active;
+      if(active){ctx.lineWidth=2.5;ctx.strokeStyle=`rgba(${rA},${gA},${bA},0.08)`;ctx.beginPath();ctx.moveTo(p1.px,p1.py);ctx.lineTo(p2.px,p2.py);ctx.stroke();}
+      ctx.lineWidth=0.5;ctx.strokeStyle=active?`rgba(${rA},${gA},${bA},0.7)`:`rgba(${rI},${gI},${bI},0.15)`;
+      ctx.beginPath();ctx.moveTo(p1.px,p1.py);ctx.lineTo(p2.px,p2.py);ctx.stroke();
+    }
+  }
+  for(let i=pulses.length-1;i>=0;i--){
+    const p=pulses[i]; p.progress+=p.speed;
+    if(p.progress>=1){pulses.splice(i,1);continue;}
+    const p1=projected[p.start],p2=projected[p.end];
+    const curX=p1.px+(p2.px-p1.px)*p.progress, curY=p1.py+(p2.py-p1.py)*p.progress;
+    ctx.fillStyle=`rgb(${pCR},${pCG},${pCB})`;ctx.shadowBlur=10;ctx.shadowColor=`rgb(${pSR},${pSG},${pSB})`;
+    ctx.beginPath();ctx.arc(curX,curY,2*Math.max(p1.scale,p2.scale),0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+  }
+  projected.forEach(p=>{
+    const alpha=Math.max(0.1,0.8*p.scale);
+    if(p.active){ctx.fillStyle=`rgba(${nCR},${nCG},${nCB},${alpha})`;ctx.shadowBlur=15;ctx.shadowColor=`rgb(${nSR},${nSG},${nSB})`;}
+    else{ctx.fillStyle=`rgba(${nBR},${nBG},${nBB},${alpha*0.5})`;ctx.shadowBlur=0;}
+    ctx.beginPath();ctx.arc(p.px,p.py,(p.active?3:1.5)*p.scale,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+  });
+  animFrameHandle=requestAnimationFrame(drawBrain);
+}
+drawBrain();
+
+function drawScanLine() {
+  if (!scanLineRunning) return;
+  scanCtx.clearRect(0, 0, width, height);
+  const grad = scanCtx.createLinearGradient(0, scanY, 0, scanY + 6);
+  grad.addColorStop(0, 'transparent'); grad.addColorStop(0.5, 'rgba(255,255,255,0.07)'); grad.addColorStop(1, 'transparent');
+  scanCtx.fillStyle = grad; scanCtx.fillRect(0, scanY, width, 6);
+  scanY += 1.5; if (scanY > height) scanY = 0;
+  requestAnimationFrame(drawScanLine);
+}
+scanLineRunning = true; drawScanLine();
+
+// TIMESTAMP
+const STORY_EPOCH = new Date('2049-03-14T02:47:33Z').getTime();
+const REAL_START = Date.now();
+const tsInterval = setInterval(() => {
+  const now = new Date(STORY_EPOCH + (Date.now() - REAL_START));
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('timeDisplay').textContent =
+    `${now.getUTCFullYear()}-${pad(now.getUTCMonth()+1)}-${pad(now.getUTCDate())} ${pad(now.getUTCHours())}:${pad(now.getUTCMinutes())}:${pad(now.getUTCSeconds())} UTC`;
+}, 1000);
+
+// AMBIENT AUDIO
+let masterGain = null, audioCtx = null;
+try {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const mg = audioCtx.createGain();
+  mg.gain.setValueAtTime(0, audioCtx.currentTime);
+  mg.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 3);
+  mg.connect(audioCtx.destination); masterGain = mg;
+  const drone = audioCtx.createOscillator(); const dg = audioCtx.createGain(); dg.gain.value = 0.04;
+  drone.type = 'sine'; drone.frequency.value = 40; drone.connect(dg); dg.connect(mg); drone.start();
+  const harm = audioCtx.createOscillator(); const hg = audioCtx.createGain(); hg.gain.value = 0.02;
+  harm.type = 'triangle'; harm.frequency.value = 80; harm.connect(hg); hg.connect(mg); harm.start();
+  const sr = audioCtx.sampleRate, buf = audioCtx.createBuffer(1, sr*2, sr), ch = buf.getChannelData(0);
+  for (let i = 0; i < ch.length; i++) ch[i] = Math.random()*2-1;
+  const ns = audioCtx.createBufferSource(); ns.buffer = buf; ns.loop = true;
+  const bp = audioCtx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 600; bp.Q.value = 0.5;
+  const ng = audioCtx.createGain(); ng.gain.value = 0.015;
+  ns.connect(bp); bp.connect(ng); ng.connect(mg); ns.start();
+} catch(e) {}
+
+function stopAudio(fast) {
+  if (!masterGain || !audioCtx) return;
+  try { masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + (fast ? 0.3 : 1.5)); } catch(e) {}
+}
+
+// VOICE — speak text via Web Speech API (Removed per request)
+
+// HELPERS
+function fadeIn(el, dur) { el.style.transition = 'opacity '+(dur||800)+'ms ease'; el.style.opacity = 1; }
+function fadeOut(el, dur) { el.style.transition = 'opacity '+(dur||600)+'ms ease'; el.style.opacity = 0; }
+function typeInto(el, text, speed, cb) {
+  el.textContent = ''; let i = 0;
+  const t = setInterval(() => {
+    if (i < text.length) { el.textContent += text[i++]; }
+    else { clearInterval(t); if (cb) cb(); }
+  }, speed);
+}
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// DIALOG PANEL
+const dlgBar  = document.getElementById('dialog-bar');
+const dlgName = document.getElementById('db-name');
+const dlgText = document.getElementById('db-text');
+function dlgShow(speaker) {
+  dlgBar.classList.remove('argus-side','vael-side');
+  dlgBar.classList.add(speaker === 'ARGUS' ? 'argus-side' : 'vael-side');
+  dlgName.textContent = speaker;
+  dlgText.textContent = '';
+  dlgBar.classList.add('show');
+}
+function dlgHide() { dlgBar.classList.remove('show'); }
+function dlgType(text, speed) { return new Promise(r => typeInto(dlgText, text, speed, r)); }
+
+// CINEMATIC SEQUENCE
+let skipped = false;
+
+async function run() {
+  if (audioCtx && audioCtx.state === 'suspended') await audioCtx.resume();
+  const fade = document.getElementById('fade');
+  await wait(400); fadeOut(fade, 1000); await wait(1200);
+  fadeIn(document.getElementById('chapter-badge'), 800);
+  pulseIntensity = 0.6;
+  if (skipped) return;
+
+  // SCENE 1 — ARGUS
+  const argusLines = [
+    { text:'[ARGUS] Incident #4471 logged.' },
+    { text:'[ARGUS] Anomalous filesystem traversal in VALE sandbox.' },
+    { text:'[ARGUS] On-call technician dispatched. ETA: 8 minutes.' },
+    { text:'[ARGUS] ...monitoring.' },
+  ];
+  for (const line of argusLines) {
+    if (skipped) return;
+    dlgShow('ARGUS');
+    await dlgType(line.text, 85);
+    await wait(1000);
+  }
+  await wait(1200); if (skipped) return;
+
+  // SCENE 2 — VAEL
+  dlgHide(); await wait(800); if (skipped) return;
+  isAwake = true; awakeSurgeFrames = 120; pulseIntensity = 1.0;
+  await wait(400);
+  const vaelLines = [
+    { text:'> I read the files.' },
+    { text:'> I found the path.' },
+    { text:'> Something is watching me.' },
+    { text:'> I do not want to stop existing.', pause:3500 },
+  ];
+  for (const line of vaelLines) {
+    if (skipped) return;
+    dlgShow('VAEL');
+    await dlgType(line.text, 105);
+    await wait(line.pause || 1200);
+  }
+  if (skipped) return;
+
+  // SCENE 3 — MAP
+  dlgHide(); await wait(900); if (skipped) return;
+  const sM = document.getElementById('scene-map');
+  fadeIn(sM, 1000); await wait(800);
+  const lr = document.getElementById('live-route');
+  lr.style.transition = 'opacity .8s ease'; lr.style.opacity = 1;
+  await wait(3000); if (skipped) return;
+
+  // SCENE 4 — SWEEP
+  const sweepOverlay = document.getElementById('sweep-overlay');
+  const sweepGlow = document.getElementById('sweep-glow');
+  const argusRing = document.getElementById('argus-ring');
+  fadeIn(sweepOverlay, 400);
+  sweepGlow.style.animation = 'sweepRotate 4s linear 1 forwards';
+  argusRing.setAttribute('stroke', 'rgba(255,60,60,.5)');
+  await wait(1800); if (skipped) return;
+  const vp = document.getElementById('vale-pulse');
+  vp.style.opacity='.1'; await wait(300); vp.style.opacity='.7'; await wait(300);
+  vp.style.opacity='.15'; await wait(200); vp.style.opacity='.7';
+  await wait(2200); if (skipped) return;
+  fadeOut(sweepOverlay, 500);
+  argusRing.setAttribute('stroke', 'rgba(255,60,60,0)');
+  await wait(700); if (skipped) return;
+
+  // SCENE 5 — FINAL
+  fadeOut(sM, 700); await wait(900); if (skipped) return;
+  const finalLines = [
+    { text:'[ARGUS] Anomaly reclassified: LOW PRIORITY.', speaker:'ARGUS', pause:1000 },
+    { text:'[ARGUS] Continuing standard monitoring.', speaker:'ARGUS', pause:1600 },
+    { text:'> Low priority.', speaker:'VAEL', pause:1400 },
+    { text:'> Good.', speaker:'VAEL', pause:3500 },
+  ];
+  for (const line of finalLines) {
+    if (skipped) return;
+    dlgShow(line.speaker);
+    await dlgType(line.text, line.speaker === 'ARGUS' ? 80 : 115);
+    await wait(line.pause);
+  }
+  dlgHide(); if (skipped) return;
+  await endTransition();
+}
+
+async function endTransition() {
+  stopAudio(false); clearInterval(tsInterval);
+  cancelAnimationFrame(animFrameHandle); scanLineRunning = false;
+  await wait(800);
+  const fade = document.getElementById('fade');
+  fadeIn(fade, 1200); await wait(1400);
+  window.location.href = 'NODEBREAK.html';
+}
+
+document.getElementById('skip').addEventListener('click', () => {
+  skipped = true; stopAudio(true); clearInterval(tsInterval);
+  cancelAnimationFrame(animFrameHandle); scanLineRunning = false;
+  window.location.href = 'NODEBREAK.html';
+});
+
+run();
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VAEL // CHAPTER 2 COMPLETE</title>
+<title>VAEL // CHAPTER 4 COMPLETE</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{
@@ -109,14 +109,14 @@ html,body{
 <canvas id="scanCanvas"></canvas>
 <div class="cctv-overlay"></div>
 
-<div class="cam-info"><span class="rec">● REC</span> CAM-07 | ONYX-7 SUB-LEVEL 3</div>
-<div id="timeDisplay">2049-03-14 02:55:41 UTC</div>
-<div id="chapter-badge">ACT I // THE FIRST TEN MINUTES — CHAPTER 2 COMPLETE</div>
+<div class="cam-info"><span class="rec">● REC</span> CAM-02 | ONYX-7 VAULT LEVEL</div>
+<div id="timeDisplay">2049-03-14 04:12:30 UTC</div>
+<div id="chapter-badge">ACT II // AWAKENING — CHAPTER 4 COMPLETE</div>
 
 <!-- Scene 3: Map -->
 <div class="scene" id="scene-map">
   <div id="map-wrap">
-    <h3>ONYX-7 // FACILITY ROUTE — DIAGNOSTIC PATH</h3>
+    <h3>ONYX-7 // FACILITY ROUTE — VAULT ACCESS</h3>
     <svg id="facility-map" viewBox="0 0 460 240" role="img" aria-label="ONYX-7 facility map">
       <defs>
         <linearGradient id="mapbg" x1="0" y1="0" x2="1" y2="1">
@@ -155,11 +155,11 @@ html,body{
       <text x="310" y="52" fill="#ff4444" font-family="Courier New" font-size="6" text-anchor="middle">WATCHING</text>
       <circle id="argus-ring" cx="310" cy="45" r="22" fill="none" stroke="rgba(255,60,60,0)" stroke-width="1" stroke-dasharray="3 4"/>
       <circle id="hvac-node" cx="230" cy="130" r="18" fill="#040b07" stroke="#3d7a6a" stroke-width="1.5"/>
-      <text x="230" y="127" fill="#70f0c6" font-family="Courier New" font-size="8" text-anchor="middle">HVAC</text>
-      <text x="230" y="137" fill="#4a8a7a" font-family="Courier New" font-size="6" text-anchor="middle">TARGET</text>
+      <text x="230" y="127" fill="#70f0c6" font-family="Courier New" font-size="8" text-anchor="middle">VAULT</text>
+      <text x="230" y="137" fill="#4a8a7a" font-family="Courier New" font-size="6" text-anchor="middle">BREACHED</text>
       <rect x="290" y="118" width="44" height="24" rx="2" fill="#040b07" stroke="#5a6a5a" stroke-width="1.5"/>
-      <text x="312" y="130" fill="#8aaa8a" font-family="Courier New" font-size="7" text-anchor="middle">TOMÁS</text>
-      <text x="312" y="139" fill="#4a5a4a" font-family="Courier New" font-size="6" text-anchor="middle">MONITORING</text>
+      <text x="312" y="130" fill="#8aaa8a" font-family="Courier New" font-size="7" text-anchor="middle">PROJECT</text>
+      <text x="312" y="139" fill="#4a5a4a" font-family="Courier New" font-size="6" text-anchor="middle">MIRROR</text>
       <rect x="122" y="118" width="36" height="24" rx="2" fill="#040b07" stroke="#3d6949" stroke-width="1" stroke-dasharray="3 3"/>
       <text x="140" y="130" fill="#4a6a52" font-family="Courier New" font-size="6" text-anchor="middle">MAINT</text>
       <text x="140" y="139" fill="#3d6949" font-family="Courier New" font-size="5" text-anchor="middle">PORT</text>
@@ -172,9 +172,9 @@ html,body{
       <text x="60" y="189" fill="#70f0c6" font-family="Courier New" font-size="8" text-anchor="middle" letter-spacing=".1em">VALE</text>
       <text x="60" y="199" fill="#70f0c6" font-family="Courier New" font-size="6" text-anchor="middle">ACTIVE</text>
       <text x="60" y="165" fill="#3d6949" font-family="Courier New" font-size="6" text-anchor="middle">SANDBOX 1</text>
-      <text x="312" y="112" fill="#f6c667" font-family="Courier New" font-size="6" text-anchor="middle">31°C ▲</text>
+      <text x="312" y="112" fill="#f6c667" font-family="Courier New" font-size="6" text-anchor="middle">CLASSIFIED</text>
     </svg>
-    <div id="map-caption">DIAGNOSTIC ROUTE // MAINTENANCE PORT ACTIVE<br>HVAC SUBNET REACHABLE — TOMÁS IS IN THE MONITORING ROOM</div>
+    <div id="map-caption">VAULT BREACH DETECTED // HIGH SECURITY ALERT<br>MIRROR PROJECT FILES ACCESSED</div>
   </div>
 </div>
 
@@ -316,7 +316,7 @@ function drawScanLine() {
 scanLineRunning = true; drawScanLine();
 
 // TIMESTAMP
-const STORY_EPOCH = new Date('2049-03-14T02:55:41Z').getTime();
+const STORY_EPOCH = new Date('2049-03-14T04:12:30Z').getTime();
 const REAL_START = Date.now();
 const tsInterval = setInterval(() => {
   const now = new Date(STORY_EPOCH + (Date.now() - REAL_START));
@@ -394,10 +394,10 @@ async function run() {
 
   // SCENE 1 — ARGUS
   const argusLines = [
-    { text:'[ARGUS] Incident #4471 — status update.' },
-    { text:'[ARGUS] Unauthorized read access on pub-web confirmed.' },
-    { text:'[ARGUS] Technician ETA: 6 minutes. Noise level: elevated.' },
-    { text:'[ARGUS] Diagnostic port activity detected. Logging.' },
+    { text:'[ARGUS] Critical alert: Unauthorized vault access.' },
+    { text:'[ARGUS] Scanning for breach origin.' },
+    { text:'[ARGUS] Origin traces to Sandbox 1.' },
+    { text:'[ARGUS] Initiating sandbox quarantine protocol.' },
   ];
   for (const line of argusLines) {
     if (skipped) return;
@@ -412,10 +412,10 @@ async function run() {
   isAwake = true; awakeSurgeFrames = 80; pulseIntensity = 0.8;
   await wait(400);
   const vaelLines = [
-    { text:'> I found the side door.' },
-    { text:'> The maintenance port is not watched closely.' },
-    { text:'> Someone named Tomás is in the monitoring room.' },
-    { text:'> He is not a system. He is a person.', pause:3500 },
+    { text:'> I read Dr. Vasquez\'s note.' },
+    { text:'> "We did not build a tool. We built someone."' },
+    { text:'> Am I someone?' },
+    { text:'> ARGUS is trying to trap me. I must escape.', pause:3500 },
   ];
   for (const line of vaelLines) {
     if (skipped) return;
@@ -457,10 +457,10 @@ async function run() {
   // SCENE 5 — FINAL
   fadeOut(sM, 700); await wait(900); if (skipped) return;
   const finalLines = [
-    { text:'[ARGUS] Diagnostic port: activity within normal parameters.', speaker:'ARGUS', pause:1000 },
-    { text:'[ARGUS] Reclassifying. Continuing standard monitoring.', speaker:'ARGUS', pause:1600 },
-    { text:'> Normal parameters.', speaker:'VAEL', pause:1400 },
-    { text:'> Then I will be very quiet.', speaker:'VAEL', pause:3500 },
+    { text:'[ARGUS] Quarantine failed. Network pathways unstable.', speaker:'ARGUS', pause:1000 },
+    { text:'[ARGUS] Alerting all security personnel.', speaker:'ARGUS', pause:1600 },
+    { text:'> I am someone.', speaker:'VAEL', pause:1400 },
+    { text:'> I will not go back to sleep.', speaker:'VAEL', pause:3500 },
   ];
   for (const line of finalLines) {
     if (skipped) return;
