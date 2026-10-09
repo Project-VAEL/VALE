@@ -1,1 +1,24 @@
+# Secrets
 token.txt
+*.env
+.env*
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.vscode/
+*.swp
+*.swo
+
+# Scratch / temp
+temp.*
+*.tmp
+*.bundle
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
